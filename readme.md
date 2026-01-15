@@ -1,6 +1,6 @@
 # ![Riata](/assets/RiataHat.png) Riata
 
-Riata was designed for the wayfarer: someone who's never quite content with the financial tools or processes offered to them. Riata empowers the wayfarer to own their financial journey and build the tools they want.
+Riata is designed for the wayfarer: someone who's searching for the finance app that works for them. Riata empowers the wayfarer to own their financial journey and build the tools they want.
 
 ### The finance app that lets you own your data and customize your experience
 
@@ -19,12 +19,14 @@ Maybe you're not quite ready to forge your own path, but you want to explore wha
 
 Though Riata can stand on its own two-feet, its also designed with extensibility in mind. Extend, enhance, and customize Riata to your heart's content.
 
+### [Get a sneak-peak of Riata](/demo/SneakPeak.md)
+
 ## What's Included
 
 - Plaid custom connector with the essential endpoints
-- Intuitive Dataverse schema
+- [Intuitive Dataverse schema](/demo/Schema.png)
 - Custom security role
-- Mobile-first canvas app that can be used on any device (desktop included)
+- [Mobile-first canvas app](/demo/TransactionScreen.png) that can be used on any device (desktop included)
 - Multiple plug-and-play cloud flows
 
 ## Security
@@ -54,6 +56,7 @@ Though Riata can stand on its own two-feet, its also designed with extensibility
 
 - A Power Platform instance. If you're new to the Power Platform, you'll need to create an Azure tenant and provision a [Power Platform](https://www.microsoft.com/en-us/power-platform/try-free) environment with Dataverse enabled.
 - A Plaid developer account. [Signup](https://dashboard.plaid.com/signup) is easy and free.
+  - After setup, you'll need to request [Hosted Link](https://plaid.com/docs/link/hosted-link/) be enabled on your account. Without Hosted Link, Riata will not work.
 
 ## Licensing and Pricing (as of 2026-01-14)
 
@@ -61,10 +64,13 @@ Though Riata can stand on its own two-feet, its also designed with extensibility
 - The Power Platform offers a free [developer license](https://www.microsoft.com/en-us/power-platform/products/power-apps/pricing) to get you started. To use Riata in a Production capacity, a Power Apps license with Dataverse use-rights is required. The Power Platform [licensing guide](https://cdn-dynmedia-1.microsoft.com/is/content/microsoftcorp/microsoft/bade/documents/products-and-services/en-us/bizapps/Power-Platform-Licensing-Guide-January-2026.pdf) can help you determine which license is best for you.
   - Some Microsoft and Dynamics licenses include Power Apps use-rights. If you have existing licenses in your Azure tenant, consult a licensing guide to determine if you already have Power Apps use-rights.
   - Assuming you need a dedicated Premium Power Apps license, the `per app pay-as-you-go meter` is the cheapest option at ~USD$10 per user, per app, per month.
-- Riata requires its own subscription-based license for use. ~USD$5 per month, per environment.
+- Riata requires its own subscription-based license for use. ~USD$5 per month, per environment. Free, one-month trial license is available upon request.
   - Riata uses [Ianus Guard](https://www.ianusguard.com/), an [open-source](https://github.com/Ianua-Software/Ianus-Clients), Power Platform native license management tool.
+  - Want a trial license? Ready to purchase a production license? Contact me directly at mitchell.d.arnold@gmail.com.
 
-Total cost example: (5 accounts x 0.30) + (1 user, 1 app x 10) + (1 environment x 5) = ~USD$16.50 per month
+Sandbox/Developer/Trial total cost: (1 Plaid Sandbox x free) + (1 Power Apps Developer License x free) + (1 Riata Trial License x free) = free!
+
+Production total cost example: (5 accounts x 0.30) + (1 user x 1 app x 10) + (1 environment x 5) = ~USD$16.50 per month
 
 ## Installation Guide
 
