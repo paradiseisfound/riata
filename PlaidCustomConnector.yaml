@@ -1,0 +1,2395 @@
+swagger: "2.0"
+info:
+  title: Plaid
+  description: This is an abbreviated collection of select Plaid endpoints. https://plaid.com/docs/api/
+  version: "1.0"
+host: '@environmentVariables("mda_PlaidHost")'
+basePath: /
+schemes:
+  - https
+paths:
+  /transactions/sync:
+    post:
+      operationId: TransactionsSync
+      summary: Transactions Sync
+      description: https://plaid.com/docs/api/products/transactions/#transactionssync
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                title: Client Id
+                x-ms-visibility: important
+              secret:
+                type: string
+                title: Secret
+                x-ms-visibility: important
+              access_token:
+                type: string
+                title: Access Token
+                x-ms-visibility: important
+              cursor:
+                type: string
+                title: Cursor
+                x-ms-visibility: important
+              count:
+                type: integer
+                format: int32
+                description: The number of transaction updates to fetch.
+                title: Count
+                x-ms-visibility: advanced
+              options:
+                type: object
+                properties:
+                  include_original_description:
+                    type: boolean
+                    title: Include Original Description
+                    x-ms-visibility: advanced
+                  personal_finance_category_version:
+                    type: string
+                    title: Personal Finance Category Version
+                    x-ms-visibility: advanced
+                  days_requested:
+                    type: integer
+                    format: int32
+                    title: Days Requested
+                    x-ms-visibility: advanced
+                    description: This field only applies to calls for Items where the Transactions product has not already been initialized.
+                  account_id:
+                    type: string
+                    title: Account Id
+                    x-ms-visibility: advanced
+                    description: If provided, the returned updates and cursor will only reflect the specified account's transactions.
+                title: Options
+            required:
+              - access_token
+              - client_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              transactions_update_status:
+                type: string
+                title: Transactions Update Status
+                x-ms-visibility: advanced
+              accounts:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    account_id:
+                      type: string
+                      title: Account Id
+                      x-ms-visibility: advanced
+                    balances:
+                      type: object
+                      properties:
+                        available:
+                          type: number
+                          format: double
+                          title: Available
+                          x-ms-visibility: advanced
+                        current:
+                          type: number
+                          format: double
+                          title: Current
+                          x-ms-visibility: advanced
+                        iso_currency_code:
+                          type: string
+                          title: Iso Currency Code
+                          x-ms-visibility: advanced
+                        limit:
+                          type: number
+                          format: double
+                          title: Limit
+                          x-ms-visibility: advanced
+                        unofficial_currency_code:
+                          type: string
+                          title: Unofficial Currency Code
+                          x-ms-visibility: advanced
+                        last_updated_datetime:
+                          type: string
+                          title: Last Updated Datetime
+                          x-ms-visibility: advanced
+                          format: date-time
+                      title: Balances
+                    mask:
+                      type: string
+                      title: Mask
+                      x-ms-visibility: advanced
+                    name:
+                      type: string
+                      title: Name
+                      x-ms-visibility: advanced
+                    official_name:
+                      type: string
+                      title: Official Name
+                      x-ms-visibility: advanced
+                    type:
+                      type: string
+                      title: Type
+                      x-ms-visibility: advanced
+                    subtype:
+                      type: string
+                      title: Subtype
+                      x-ms-visibility: advanced
+                    verification_status:
+                      type: string
+                      title: Verification Status
+                      x-ms-visibility: advanced
+                      description: Indicates an Item's micro-deposit-based verification or database verification status.
+                    verification_name:
+                      type: string
+                      title: Verification Name
+                      x-ms-visibility: advanced
+                      description: The account holder name that was used for micro-deposit and/or database verification.
+                    verification_insights:
+                      type: object
+                      title: Verification Insights
+                      properties:
+                        name_match_score:
+                          type: string
+                          title: Name Match Score
+                          x-ms-visibility: advanced
+                        network_status:
+                          type: object
+                          title: Network Status
+                          properties:
+                            has_numbers_match:
+                              type: boolean
+                              title: Has Numbers Match
+                              x-ms-visibility: advanced
+                            is_numbers_match_verified:
+                              type: boolean
+                              title: Is Numbers Match Verified
+                              x-ms-visibility: advanced
+                        previous_returns:
+                          type: object
+                          title: Previous Returns
+                          properties:
+                            has_previous_administrative_return:
+                              type: boolean
+                              title: Has Previous Administrative Return
+                              x-ms-visibility: advanced
+                        account_number_format:
+                          type: string
+                          title: Account Number Format
+                          x-ms-visibility: advanced
+                    persistent_account_id:
+                      type: string
+                      title: Persistent Account Id
+                      x-ms-visibility: advanced
+                      description: A unique and persistent identifier for accounts that can be used to trace multiple instances of the same account across different Items for depository accounts.
+                    holder_category:
+                      type: string
+                      title: Holder Category
+                      x-ms-visibility: advanced
+                title: Accounts
+              added:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    account_id:
+                      type: string
+                      title: Account Id
+                      x-ms-visibility: important
+                    amount:
+                      type: number
+                      format: double
+                      title: Amount
+                      x-ms-visibility: important
+                    iso_currency_code:
+                      type: string
+                      title: Iso Currency Code
+                      x-ms-visibility: advanced
+                    unofficial_currency_code:
+                      type: string
+                      title: Unofficial Currency Code
+                      x-ms-visibility: advanced
+                    check_number:
+                      type: string
+                      title: Check Number
+                      x-ms-visibility: advanced
+                    date:
+                      type: string
+                      title: Date
+                      x-ms-visibility: important
+                      format: date
+                      description: For pending transactions, the date that the transaction occurred; for posted transactions, the date that the transaction posted.
+                    location:
+                      type: object
+                      properties:
+                        address:
+                          type: string
+                          title: Address
+                          x-ms-visibility: advanced
+                        city:
+                          type: string
+                          title: City
+                          x-ms-visibility: advanced
+                        region:
+                          type: string
+                          title: Region
+                          x-ms-visibility: advanced
+                        postal_code:
+                          type: string
+                          title: Postal Code
+                          x-ms-visibility: advanced
+                        country:
+                          type: string
+                          title: Country
+                          x-ms-visibility: advanced
+                        lat:
+                          type: number
+                          format: double
+                          title: Lat
+                          x-ms-visibility: advanced
+                        lon:
+                          type: number
+                          format: double
+                          title: Lon
+                          x-ms-visibility: advanced
+                        store_number:
+                          type: string
+                          title: Store Number
+                          x-ms-visibility: advanced
+                      title: Location
+                    merchant_name:
+                      type: string
+                      title: Merchant Name
+                      x-ms-visibility: important
+                    original_description:
+                      type: string
+                      title: Original Description
+                      x-ms-visibility: important
+                    payment_meta:
+                      type: object
+                      properties:
+                        by_order_of:
+                          type: string
+                          title: By Order Of
+                          x-ms-visibility: advanced
+                        payee:
+                          type: string
+                          title: Payee
+                          x-ms-visibility: advanced
+                        payer:
+                          type: string
+                          title: Payer
+                          x-ms-visibility: advanced
+                        payment_method:
+                          type: string
+                          title: Payment Method
+                          x-ms-visibility: advanced
+                        payment_processor:
+                          type: string
+                          title: Payment Processor
+                          x-ms-visibility: advanced
+                        ppd_id:
+                          type: string
+                          title: Ppd Id
+                          x-ms-visibility: advanced
+                        reason:
+                          type: string
+                          title: Reason
+                          x-ms-visibility: advanced
+                        reference_number:
+                          type: string
+                          title: Reference Number
+                          x-ms-visibility: advanced
+                      title: Payment Meta
+                    pending:
+                      type: boolean
+                      title: Pending
+                      x-ms-visibility: important
+                    pending_transaction_id:
+                      type: string
+                      title: Pending Transaction Id
+                      x-ms-visibility: advanced
+                    account_owner:
+                      type: string
+                      title: Account Owner
+                      x-ms-visibility: advanced
+                    transaction_id:
+                      type: string
+                      title: Transaction Id
+                      x-ms-visibility: important
+                    logo_url:
+                      type: string
+                      title: Logo Url
+                      x-ms-visibility: advanced
+                    website:
+                      type: string
+                      title: Website
+                      x-ms-visibility: advanced
+                    authorized_date:
+                      type: string
+                      title: Authorized Date
+                      x-ms-visibility: important
+                      format: date
+                    authorized_datetime:
+                      type: string
+                      title: Authorized Datetime
+                      x-ms-visibility: advanced
+                      format: date-time
+                    datetime:
+                      type: string
+                      title: Datetime
+                      x-ms-visibility: advanced
+                      format: date-time
+                    payment_channel:
+                      type: string
+                      title: Payment Channel
+                      x-ms-visibility: advanced
+                    personal_finance_category:
+                      type: object
+                      properties:
+                        primary:
+                          type: string
+                          title: Primary
+                          x-ms-visibility: advanced
+                        detailed:
+                          type: string
+                          title: Detailed
+                          x-ms-visibility: advanced
+                        confidence_level:
+                          type: string
+                          title: Confidence Level
+                          x-ms-visibility: advanced
+                        version:
+                          type: string
+                          title: Version
+                          x-ms-visibility: advanced
+                      title: Personal Finance Category
+                    transaction_code:
+                      type: string
+                      title: Transaction Code
+                      x-ms-visibility: advanced
+                    personal_finance_category_icon_url:
+                      type: string
+                      title: Personal Finance Category Icon Url
+                      x-ms-visibility: advanced
+                    counterparties:
+                      type: array
+                      title: Counterparties
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            title: Name
+                            x-ms-visibility: advanced
+                          type:
+                            type: string
+                            title: Type
+                            x-ms-visibility: advanced
+                          logo_url:
+                            type: string
+                            title: Logo Url
+                            x-ms-visibility: advanced
+                          website:
+                            type: string
+                            title: Website
+                            x-ms-visibility: advanced
+                          entity_id:
+                            type: string
+                            title: Entity Id
+                            x-ms-visibility: advanced
+                          confidence_level:
+                            type: string
+                            title: Confidence Level
+                            x-ms-visibility: advanced
+                          account_numbers:
+                            type: object
+                            title: Account Numbers
+                            properties:
+                              bacs:
+                                type: object
+                                title: Bacs
+                                properties:
+                                  account:
+                                    type: string
+                                    title: Account
+                                    x-ms-visibility: advanced
+                                  sort_code:
+                                    type: string
+                                    title: Sort Code
+                                    x-ms-visibility: advanced
+                              international:
+                                type: object
+                                title: International
+                                properties:
+                                  iban:
+                                    type: string
+                                    title: Iban
+                                    x-ms-visibility: advanced
+                                  bic:
+                                    type: string
+                                    title: Bic
+                                    x-ms-visibility: advanced
+                    merchant_entity_id:
+                      type: string
+                      title: Merchant Entity Id
+                      x-ms-visibility: advanced
+                title: Added
+              modified:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    account_id:
+                      type: string
+                      title: Account Id
+                      x-ms-visibility: important
+                    amount:
+                      type: number
+                      format: double
+                      title: Amount
+                      x-ms-visibility: important
+                    iso_currency_code:
+                      type: string
+                      title: Iso Currency Code
+                      x-ms-visibility: advanced
+                    unofficial_currency_code:
+                      type: string
+                      title: Unofficial Currency Code
+                      x-ms-visibility: advanced
+                    check_number:
+                      type: string
+                      title: Check Number
+                      x-ms-visibility: advanced
+                    date:
+                      type: string
+                      title: Date
+                      x-ms-visibility: important
+                      format: date
+                      description: For pending transactions, the date that the transaction occurred; for posted transactions, the date that the transaction posted.
+                    location:
+                      type: object
+                      properties:
+                        address:
+                          type: string
+                          title: Address
+                          x-ms-visibility: advanced
+                        city:
+                          type: string
+                          title: City
+                          x-ms-visibility: advanced
+                        region:
+                          type: string
+                          title: Region
+                          x-ms-visibility: advanced
+                        postal_code:
+                          type: string
+                          title: Postal Code
+                          x-ms-visibility: advanced
+                        country:
+                          type: string
+                          title: Country
+                          x-ms-visibility: advanced
+                        lat:
+                          type: number
+                          format: double
+                          title: Lat
+                          x-ms-visibility: advanced
+                        lon:
+                          type: number
+                          format: double
+                          title: Lon
+                          x-ms-visibility: advanced
+                        store_number:
+                          type: string
+                          title: Store Number
+                          x-ms-visibility: advanced
+                      title: Location
+                    merchant_name:
+                      type: string
+                      title: Merchant Name
+                      x-ms-visibility: important
+                    original_description:
+                      type: string
+                      title: Original Description
+                      x-ms-visibility: important
+                    payment_meta:
+                      type: object
+                      properties:
+                        by_order_of:
+                          type: string
+                          title: By Order Of
+                          x-ms-visibility: advanced
+                        payee:
+                          type: string
+                          title: Payee
+                          x-ms-visibility: advanced
+                        payer:
+                          type: string
+                          title: Payer
+                          x-ms-visibility: advanced
+                        payment_method:
+                          type: string
+                          title: Payment Method
+                          x-ms-visibility: advanced
+                        payment_processor:
+                          type: string
+                          title: Payment Processor
+                          x-ms-visibility: advanced
+                        ppd_id:
+                          type: string
+                          title: Ppd Id
+                          x-ms-visibility: advanced
+                        reason:
+                          type: string
+                          title: Reason
+                          x-ms-visibility: advanced
+                        reference_number:
+                          type: string
+                          title: Reference Number
+                          x-ms-visibility: advanced
+                      title: Payment Meta
+                    pending:
+                      type: boolean
+                      title: Pending
+                      x-ms-visibility: important
+                    pending_transaction_id:
+                      type: string
+                      title: Pending Transaction Id
+                      x-ms-visibility: advanced
+                    account_owner:
+                      type: string
+                      title: Account Owner
+                      x-ms-visibility: advanced
+                    transaction_id:
+                      type: string
+                      title: Transaction Id
+                      x-ms-visibility: important
+                    logo_url:
+                      type: string
+                      title: Logo Url
+                      x-ms-visibility: advanced
+                    website:
+                      type: string
+                      title: Website
+                      x-ms-visibility: advanced
+                    authorized_date:
+                      type: string
+                      title: Authorized Date
+                      x-ms-visibility: important
+                      format: date
+                    authorized_datetime:
+                      type: string
+                      title: Authorized Datetime
+                      x-ms-visibility: advanced
+                      format: date-time
+                    datetime:
+                      type: string
+                      title: Datetime
+                      x-ms-visibility: advanced
+                      format: date-time
+                    payment_channel:
+                      type: string
+                      title: Payment Channel
+                      x-ms-visibility: advanced
+                    personal_finance_category:
+                      type: object
+                      properties:
+                        primary:
+                          type: string
+                          title: Primary
+                          x-ms-visibility: advanced
+                        detailed:
+                          type: string
+                          title: Detailed
+                          x-ms-visibility: advanced
+                        confidence_level:
+                          type: string
+                          title: Confidence Level
+                          x-ms-visibility: advanced
+                        version:
+                          type: string
+                          title: Version
+                          x-ms-visibility: advanced
+                      title: Personal Finance Category
+                    transaction_code:
+                      type: string
+                      title: Transaction Code
+                      x-ms-visibility: advanced
+                    personal_finance_category_icon_url:
+                      type: string
+                      title: Personal Finance Category Icon Url
+                      x-ms-visibility: advanced
+                    counterparties:
+                      type: array
+                      title: Counterparties
+                      items:
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                            title: Name
+                            x-ms-visibility: advanced
+                          type:
+                            type: string
+                            title: Type
+                            x-ms-visibility: advanced
+                          logo_url:
+                            type: string
+                            title: Logo Url
+                            x-ms-visibility: advanced
+                          website:
+                            type: string
+                            title: Website
+                            x-ms-visibility: advanced
+                          entity_id:
+                            type: string
+                            title: Entity Id
+                            x-ms-visibility: advanced
+                          confidence_level:
+                            type: string
+                            title: Confidence Level
+                            x-ms-visibility: advanced
+                          account_numbers:
+                            type: object
+                            title: Account Numbers
+                            properties:
+                              bacs:
+                                type: object
+                                title: Bacs
+                                properties:
+                                  account:
+                                    type: string
+                                    title: Account
+                                    x-ms-visibility: advanced
+                                  sort_code:
+                                    type: string
+                                    title: Sort Code
+                                    x-ms-visibility: advanced
+                              international:
+                                type: object
+                                title: International
+                                properties:
+                                  iban:
+                                    type: string
+                                    title: Iban
+                                    x-ms-visibility: advanced
+                                  bic:
+                                    type: string
+                                    title: Bic
+                                    x-ms-visibility: advanced
+                    merchant_entity_id:
+                      type: string
+                      title: Merchant Entity Id
+                      x-ms-visibility: advanced
+                title: Modified
+              removed:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    account_id:
+                      type: string
+                      title: Account Id
+                      x-ms-visibility: advanced
+                    transaction_id:
+                      type: string
+                      title: Transaction Id
+                      x-ms-visibility: advanced
+                title: Removed
+              next_cursor:
+                type: string
+                title: Next Cursor
+                x-ms-visibility: advanced
+              has_more:
+                type: boolean
+                title: Has More
+                x-ms-visibility: advanced
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /institutions/get_by_id:
+    post:
+      operationId: GetInstitutionById
+      summary: Get Institution By ID
+      description: https://plaid.com/docs/api/institutions/#institutionsget_by_id
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              institution_id:
+                type: string
+                title: Institution Id
+                x-ms-visibility: important
+              client_id:
+                type: string
+                title: Client Id
+                x-ms-visibility: important
+              secret:
+                type: string
+                title: Secret
+                x-ms-visibility: important
+              country_codes:
+                type: array
+                items:
+                  type: string
+                title: Country Codes
+                x-ms-visibility: important
+              options:
+                type: object
+                properties:
+                  include_optional_metadata:
+                    type: boolean
+                    description: When true, return an institution's logo, brand color, and URL. When available, the bank's logo is returned as a base64 encoded 152x152 PNG, the brand color is in hexadecimal format.
+                    title: Include Optional Metadata
+                    x-ms-visibility: advanced
+                  include_status:
+                    type: boolean
+                    title: Include Status
+                    x-ms-visibility: advanced
+                  include_auth_metadata:
+                    type: boolean
+                    title: Include Auth Metadata
+                    x-ms-visibility: advanced
+                  include_payment_initiation_metadata:
+                    type: boolean
+                    title: Include Payment Initiation Metadata
+                    x-ms-visibility: advanced
+                title: Options
+                x-ms-visibility: advanced
+            required:
+              - client_id
+              - country_codes
+              - institution_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              institution:
+                type: object
+                properties:
+                  institution_id:
+                    type: string
+                    title: Institution Id
+                    x-ms-visibility: important
+                  name:
+                    type: string
+                    title: Name
+                    x-ms-visibility: important
+                  products:
+                    type: array
+                    items:
+                      type: string
+                    title: Products
+                    x-ms-visibility: advanced
+                  country_codes:
+                    type: array
+                    items:
+                      type: string
+                    title: Country Codes
+                    x-ms-visibility: advanced
+                    description: A list of the country codes supported by the institution.
+                  url:
+                    type: string
+                    title: Url
+                    x-ms-visibility: advanced
+                  primary_color:
+                    type: string
+                    title: Primary Color
+                    x-ms-visibility: advanced
+                  logo:
+                    type: string
+                    title: Logo
+                    x-ms-visibility: advanced
+                  routing_numbers:
+                    type: array
+                    items:
+                      type: string
+                    title: Routing Numbers
+                    x-ms-visibility: advanced
+                  dtc_numbers:
+                    type: array
+                    items:
+                      type: string
+                    title: DTC Numbers
+                    x-ms-visibility: advanced
+                  oauth:
+                    type: boolean
+                    title: Oauth
+                    x-ms-visibility: advanced
+                  status:
+                    type: object
+                    properties:
+                      item_logins:
+                        type: object
+                        properties:
+                          last_status_change:
+                            type: string
+                            title: Last Status Change
+                            x-ms-visibility: advanced
+                            format: date-time
+                          breakdown:
+                            type: object
+                            properties:
+                              success:
+                                type: number
+                                format: double
+                                title: Success
+                                x-ms-visibility: advanced
+                              error_plaid:
+                                type: number
+                                format: double
+                                title: Error Plaid
+                                x-ms-visibility: advanced
+                              error_institution:
+                                type: number
+                                format: double
+                                title: Error Institution
+                                x-ms-visibility: advanced
+                              refresh_interval:
+                                type: string
+                                title: Refresh Interval
+                                x-ms-visibility: advanced
+                            title: Breakdown
+                        title: Item Logins
+                      transactions_updates:
+                        type: object
+                        properties:
+                          last_status_change:
+                            type: string
+                            title: Last Status Change
+                            x-ms-visibility: advanced
+                            format: date-time
+                          breakdown:
+                            type: object
+                            properties:
+                              success:
+                                type: number
+                                format: double
+                                title: Success
+                                x-ms-visibility: advanced
+                              error_plaid:
+                                type: number
+                                format: double
+                                title: Error Plaid
+                                x-ms-visibility: advanced
+                              error_institution:
+                                type: number
+                                format: double
+                                title: Error Institution
+                                x-ms-visibility: advanced
+                              refresh_interval:
+                                type: string
+                                title: Refresh Interval
+                                x-ms-visibility: advanced
+                            title: Breakdown
+                        title: Transactions Updates
+                      auth:
+                        type: object
+                        properties:
+                          last_status_change:
+                            type: string
+                            title: Last Status Change
+                            x-ms-visibility: advanced
+                            format: date-time
+                          breakdown:
+                            type: object
+                            properties:
+                              success:
+                                type: number
+                                format: double
+                                title: Success
+                                x-ms-visibility: advanced
+                              error_plaid:
+                                type: number
+                                format: double
+                                title: Error Plaid
+                                x-ms-visibility: advanced
+                              error_institution:
+                                type: number
+                                format: double
+                                title: Error Institution
+                                x-ms-visibility: advanced
+                              refresh_interval:
+                                type: string
+                                title: Refresh Interval
+                                x-ms-visibility: advanced
+                            title: Breakdown
+                        title: Auth
+                      investments:
+                        type: object
+                        properties:
+                          last_status_change:
+                            type: string
+                            title: Last Status Change
+                            x-ms-visibility: advanced
+                            format: date-time
+                          breakdown:
+                            type: object
+                            properties:
+                              success:
+                                type: number
+                                format: double
+                                title: Success
+                                x-ms-visibility: advanced
+                              error_plaid:
+                                type: number
+                                format: double
+                                title: Error Plaid
+                                x-ms-visibility: advanced
+                              error_institution:
+                                type: number
+                                format: double
+                                title: Error Institution
+                                x-ms-visibility: advanced
+                              refresh_interval:
+                                type: string
+                                title: Refresh Interval
+                                x-ms-visibility: advanced
+                            title: Breakdown
+                        title: Investments
+                      investments_updates:
+                        type: object
+                        properties:
+                          last_status_change:
+                            type: string
+                            title: Last Status Change
+                            x-ms-visibility: advanced
+                            format: date-time
+                          breakdown:
+                            type: object
+                            properties:
+                              success:
+                                type: number
+                                format: double
+                                title: Success
+                                x-ms-visibility: advanced
+                              error_plaid:
+                                type: number
+                                format: double
+                                title: Error Plaid
+                                x-ms-visibility: advanced
+                              error_institution:
+                                type: number
+                                format: double
+                                title: Error Institution
+                                x-ms-visibility: advanced
+                              refresh_interval:
+                                type: string
+                                title: Refresh Interval
+                                x-ms-visibility: advanced
+                            title: Breakdown
+                        title: Investments Updates
+                      health_incidents:
+                        type: object
+                        title: Health Incidents
+                        properties:
+                          start_date:
+                            type: string
+                            title: Start Date
+                            x-ms-visibility: advanced
+                            format: date-time
+                          end_date:
+                            type: string
+                            title: End Date
+                            x-ms-visibility: advanced
+                            format: date-time
+                          title:
+                            type: string
+                            title: Title
+                            x-ms-visibility: advanced
+                          incident_updates:
+                            type: array
+                            title: Incident Updates
+                            items:
+                              type: object
+                              properties:
+                                updated_date:
+                                  type: string
+                                  title: Update Date
+                                  x-ms-visibility: advanced
+                                  format: date-time
+                                description:
+                                  type: string
+                                  title: Description
+                                  x-ms-visibility: advanced
+                                status:
+                                  type: string
+                                  title: Status
+                                  x-ms-visibility: advanced
+                    title: Status
+                  payment_initiation_metadata:
+                    type: object
+                    title: Payment Initiation Metadata
+                    properties:
+                      supports_international_payments:
+                        type: boolean
+                        title: Supports International Payments
+                        x-ms-visibility: advanced
+                      supports_sepa_instant:
+                        type: boolean
+                        title: Supports Sepa Instant
+                        x-ms-visibility: advanced
+                      maximum_payment_amount:
+                        type: object
+                        title: Maximum Payment Amount
+                        x-ms-visibility: advanced
+                      supports_refund_details:
+                        type: boolean
+                        title: Supports Refund Details
+                        x-ms-visibility: advanced
+                      standing_order_support:
+                        type: object
+                        title: Standing Order Support
+                        properties:
+                          supports_standing_order_end_date:
+                            type: boolean
+                            title: Supports Standing Order End Date
+                            x-ms-visibility: advanced
+                          supports_standing_order_negative_execution_days:
+                            type: boolean
+                            title: Supports Standing Order Negative Execution Days
+                            x-ms-visibility: advanced
+                          valid_standing_order_intervals:
+                            type: array
+                            items:
+                              type: string
+                            title: Valid Standing Order Intervals
+                            x-ms-visibility: advanced
+                          supports_payment_consents:
+                            type: boolean
+                            title: Supports Payment Consents
+                            x-ms-visibility: advanced
+                      supports_payment_consents:
+                        type: boolean
+                        title: Supports Payment Consents
+                        x-ms-visibility: advanced
+                  auth_metadata:
+                    type: object
+                    title: Auth Metadata
+                    properties:
+                      supported_methods:
+                        type: object
+                        title: Supported Methods
+                        properties:
+                          instant_auth:
+                            type: boolean
+                            title: Instant Auth
+                            x-ms-visibility: advanced
+                          instant_match:
+                            type: boolean
+                            title: Instant Match
+                            x-ms-visibility: advanced
+                          automated_micro_deposits:
+                            type: boolean
+                            title: Automated micro Deposits
+                            x-ms-visibility: advanced
+                          instant_micro_deposits:
+                            type: boolean
+                            title: Instant Micro Deposits
+                            x-ms-visibility: advanced
+                title: Institution
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /user/create:
+    post:
+      operationId: CreateUser
+      summary: Create User
+      description: https://plaid.com/docs/api/users/#usercreate
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                x-ms-visibility: important
+                title: Client Id
+              secret:
+                type: string
+                x-ms-visibility: important
+                title: Secret
+              client_user_id:
+                type: string
+                title: Client User Id
+                x-ms-visibility: important
+                description: A unique ID representing the end user. Maximum of 128 characters. Typically this will be a user ID number from your application.
+            required:
+              - client_id
+              - client_user_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+              user_id:
+                type: string
+                title: User Id
+                x-ms-visibility: important
+              user_token:
+                type: string
+                title: User Token
+                x-ms-visibility: advanced
+  /user/update:
+    post:
+      operationId: UpdateUser
+      summary: Update User
+      description: https://plaid.com/docs/api/users/#userupdate
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                x-ms-visibility: important
+                title: Client Id
+              secret:
+                type: string
+                x-ms-visibility: important
+                title: Secret
+              user_id:
+                type: string
+                x-ms-visibility: important
+                title: User Id
+              user_token:
+                type: string
+                x-ms-visibility: advanced
+                title: User Token
+            required:
+              - client_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /user/remove:
+    post:
+      operationId: RemoveUser
+      summary: Remove User
+      description: https://plaid.com/docs/api/users/#userremove
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                x-ms-visibility: important
+                title: Client Id
+              secret:
+                type: string
+                x-ms-visibility: important
+                title: Secret
+              user_id:
+                type: string
+                x-ms-visibility: important
+                title: User Id
+              user_token:
+                type: string
+                x-ms-visibility: advanced
+                title: User Token
+            required:
+              - client_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /item/remove:
+    post:
+      operationId: RemoveItem
+      summary: Remove Item
+      description: https://plaid.com/docs/api/items/#itemremove
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                x-ms-visibility: important
+                title: Client Id
+              secret:
+                type: string
+                x-ms-visibility: important
+                title: Secret
+              access_token:
+                type: string
+                x-ms-visibility: important
+                title: Access Token
+              reason_code:
+                type: string
+                x-ms-visibility: advanced
+                title: Reason Code
+              reason_note:
+                type: string
+                x-ms-visibility: advanced
+                title: Reason Note
+            required:
+              - access_token
+              - client_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /item/get:
+    post:
+      operationId: GetItem
+      summary: Get Item
+      description: https://plaid.com/docs/api/items/#itemget
+      parameters:
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                title: Client Id
+                x-ms-visibility: important
+              secret:
+                type: string
+                title: Secret
+                x-ms-visibility: important
+              access_token:
+                type: string
+                title: Access Token
+                x-ms-visibility: important
+            required:
+              - access_token
+              - client_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              item:
+                type: object
+                properties:
+                  item_id:
+                    type: string
+                    title: Item Id
+                    x-ms-visibility: important
+                  institution_id:
+                    type: string
+                    title: Institution Id
+                    x-ms-visibility: important
+                  institution_name:
+                    type: string
+                    title: Institution Name
+                    x-ms-visibility: important
+                  webhook:
+                    type: string
+                    title: Webhook
+                    x-ms-visibility: advanced
+                  auth_method:
+                    type: string
+                    title: Auth Method
+                    x-ms-visibility: advanced
+                  available_products:
+                    type: array
+                    items:
+                      type: string
+                    title: Available Products
+                    x-ms-visibility: advanced
+                  billed_products:
+                    type: array
+                    items:
+                      type: string
+                    title: Billed Products
+                    x-ms-visibility: advanced
+                  products:
+                    type: array
+                    items:
+                      type: string
+                    title: Products
+                    x-ms-visibility: advanced
+                  consented_products:
+                    type: array
+                    items:
+                      type: string
+                    title: Consented Products
+                    x-ms-visibility: advanced
+                  consent_expiration_time:
+                    type: string
+                    title: Consent Expiration Time
+                    format: date-time
+                    x-ms-visibility: advanced
+                  udpate_type:
+                    type: string
+                    title: Update Type
+                    x-ms-visibility: advanced
+                  created_at:
+                    type: string
+                    title: Created At
+                    format: date-time
+                    x-ms-visibility: advanced
+                  consented_use_cases:
+                    type: array
+                    items:
+                      type: string
+                    title: Consented Use Cases
+                    x-ms-visibility: advanced
+                  consented_data_scopes:
+                    type: array
+                    items:
+                      type: string
+                    title: Consented Data Scopes
+                    x-ms-visibility: advanced
+                  error:
+                    type: object
+                    title: Error
+                    x-ms-visibility: advanced
+                    properties:
+                      error_type:
+                        type: string
+                        title: Error Type
+                      error_code:
+                        type: string
+                        title: Error Code
+                      error_code_reason:
+                        type: string
+                        title: Error Code Reason
+                      error_message:
+                        type: string
+                        title: Error Message
+                      display_message:
+                        type: string
+                        title: Display Message
+                      request_id:
+                        type: string
+                        title: Request Id
+                      causes:
+                        type: array
+                        title: Causes
+                        items:
+                          type: string
+                      status:
+                        type: integer
+                        format: int32
+                        title: Status
+                      documentation_url:
+                        type: string
+                        title: Documentation Url
+                      suggested_action:
+                        type: string
+                        title: Suggested Action
+                      required_account_subtypes:
+                        type: array
+                        title: Required Account Subtypes
+                        items:
+                          type: string
+                      provided_account_subtypes:
+                        type: array
+                        title: Provided Account Subtypes
+                        items:
+                          type: string
+              status:
+                type: object
+                title: Status
+                x-ms-visibility: advanced
+                properties:
+                  investments:
+                    type: object
+                    title: Investments
+                    properties:
+                      last_successful_update:
+                        type: string
+                        format: date-time
+                        title: Last Successful Update
+                      last_failed_update:
+                        type: string
+                        format: date-time
+                        title: Last Failed Update
+                  transactions:
+                    type: object
+                    title: Transactions
+                    properties:
+                      last_successful_update:
+                        type: string
+                        format: date-time
+                        title: Last Successful Update
+                      last_failed_update:
+                        type: string
+                        format: date-time
+                        title: Last Failed Update
+                  last_webhook:
+                    type: object
+                    title: Last Webhook
+                    properties:
+                      sent_at:
+                        type: string
+                        format: date-time
+                        title: Sent At
+                      code_sent:
+                        type: string
+                        title: Code Sent
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /accounts/get:
+    post:
+      operationId: GetAccounts
+      summary: Get Accounts
+      description: https://plaid.com/docs/api/accounts/#accountsget
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                title: Client Id
+                x-ms-visibility: important
+              secret:
+                type: string
+                title: Secret
+                x-ms-visibility: important
+              access_token:
+                type: string
+                title: Access Token
+                x-ms-visibility: important
+              options:
+                type: object
+                properties:
+                  account_ids:
+                    type: array
+                    items:
+                      type: string
+                    title: Account Ids
+                    x-ms-visibility: advanced
+                title: Options
+                x-ms-visibility: advanced
+            required:
+              - access_token
+              - client_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              accounts:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    account_id:
+                      type: string
+                      title: Account Id
+                      x-ms-visibility: important
+                    balances:
+                      type: object
+                      properties:
+                        available:
+                          type: number
+                          format: double
+                          title: Available
+                          x-ms-visibility: important
+                        current:
+                          type: number
+                          format: double
+                          title: Current
+                          x-ms-visibility: important
+                        iso_currency_code:
+                          type: string
+                          title: ISO Currency Code
+                          x-ms-visibility: important
+                        limit:
+                          type: number
+                          format: double
+                          title: Limit
+                          x-ms-visibility: advanced
+                        unofficial_currency_code:
+                          type: string
+                          title: Unofficial Currency Code
+                          x-ms-visibility: advanced
+                        last_updated_datetime:
+                          type: string
+                          format: date-time
+                          title: Last Updated Datetime
+                          x-ms-visibility: advanced
+                    mask:
+                      type: string
+                      title: Mask
+                      x-ms-visibility: advanced
+                    name:
+                      type: string
+                      title: Name
+                      x-ms-visibility: important
+                    official_name:
+                      type: string
+                      title: Official Name
+                      x-ms-visibility: important
+                    type:
+                      type: string
+                      title: Type
+                      x-ms-visibility: important
+                    subtype:
+                      type: string
+                      title: Subtype
+                      x-ms-visibility: important
+                    verification_status:
+                      type: string
+                      title: Verification Status
+                      x-ms-visibility: advanced
+                      description: Indicates an Item's micro-deposit-based verification or database verification status. This field is only populated when using Auth and falling back to micro-deposit or database verification.
+                    verification_name:
+                      type: string
+                      title: Verification Name
+                      x-ms-visibility: advanced
+                      description: The account holder name that was used for micro-deposit and/or database verification.
+                    verification_insights:
+                      type: object
+                      title: Verification Insights
+                      properties:
+                        name_match_score:
+                          type: integer
+                          format: int32
+                          title: Name Match Score
+                        account_number_format:
+                          type: string
+                          title: Account Number Format
+                        network_status:
+                          type: object
+                          title: Network Status
+                          properties:
+                            has_numbers_match:
+                              type: boolean
+                              title: Has Numbers Match
+                            is_numbers_match_verified:
+                              type: boolean
+                              title: Is Numbers Match Verified
+                        previous_returns:
+                          type: object
+                          title: Previous Returns
+                          properties:
+                            has_previous_administrative_return:
+                              type: boolean
+                              title: Has Previous Administrative Return
+                    persistent_account_id:
+                      type: string
+                      description: A unique and persistent identifier for accounts that can be used to trace multiple instances of the same account across different Items for depository accounts.
+                      title: Persistent Account Id
+                      x-ms-visibility: advanced
+                    holder_category:
+                      type: string
+                      title: Holder Category
+                      x-ms-visibility: advanced
+              item:
+                type: object
+                properties:
+                  item_id:
+                    type: string
+                    title: Item Id
+                    x-ms-visibility: important
+                  institution_id:
+                    type: string
+                    title: Institution Id
+                    x-ms-visibility: important
+                  institution_name:
+                    type: string
+                    title: Institution Name
+                    x-ms-visibility: important
+                  webhook:
+                    type: string
+                    title: Webhook
+                    x-ms-visibility: advanced
+                  auth_method:
+                    type: string
+                    title: Auth Method
+                    x-ms-visibility: advanced
+                  available_products:
+                    type: array
+                    items:
+                      type: string
+                    title: Available Products
+                    x-ms-visibility: advanced
+                  billed_products:
+                    type: array
+                    items:
+                      type: string
+                    title: Billed Products
+                    x-ms-visibility: advanced
+                  products:
+                    type: array
+                    items:
+                      type: string
+                    title: Products
+                    x-ms-visibility: advanced
+                  consented_products:
+                    type: array
+                    items:
+                      type: string
+                    title: Consented Products
+                    x-ms-visibility: advanced
+                  consent_expiration_time:
+                    type: string
+                    title: Consent Expiration Time
+                    format: date-time
+                    x-ms-visibility: advanced
+                  update_type:
+                    type: string
+                    title: Update Type
+                    x-ms-visibility: advanced
+                  error:
+                    type: object
+                    title: Error
+                    x-ms-visibility: advanced
+                    properties:
+                      error_type:
+                        type: string
+                        title: Error Type
+                      error_code:
+                        type: string
+                        title: Error Code
+                      error_code_reason:
+                        type: string
+                        title: Error Code Reason
+                      error_message:
+                        type: string
+                        title: Error Message
+                      display_message:
+                        type: string
+                        title: Display Message
+                      request_id:
+                        type: string
+                        title: Request Id
+                      causes:
+                        type: array
+                        title: Causes
+                        items:
+                          type: string
+                      status:
+                        type: integer
+                        format: int32
+                        title: Status
+                      documentation_url:
+                        type: string
+                        title: Documentation Url
+                      suggested_action:
+                        type: string
+                        title: Suggested Action
+                      required_account_subtypes:
+                        type: array
+                        title: Required Account Subtypes
+                        items:
+                          type: string
+                      provided_account_subtypes:
+                        type: array
+                        title: Provided Account Subtypes
+                        items:
+                          type: string
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /user/items/get:
+    post:
+      operationId: GetUserItems
+      summary: Get User Items
+      description: https://plaid.com/docs/api/users/#useritemsget
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                title: Client Id
+                x-ms-visibility: important
+              secret:
+                type: string
+                title: Secret
+                x-ms-visibility: important
+              user_id:
+                type: string
+                title: User Id
+                x-ms-visibility: important
+              user_token:
+                type: string
+                title: User Token
+                x-ms-visibility: advanced
+            required:
+              - client_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              items:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    item_id:
+                      type: string
+                      title: Item Id
+                      x-ms-visibility: important
+                    institution_id:
+                      type: string
+                      title: Institution Id
+                      x-ms-visibility: important
+                    institution_name:
+                      type: string
+                      title: Institution Name
+                      x-ms-visibility: important
+                    webhook:
+                      type: string
+                      title: Webhook
+                      x-ms-visibility: advanced
+                    auth_method:
+                      type: string
+                      title: Auth Method
+                      x-ms-visibility: advanced
+                    available_products:
+                      type: array
+                      items:
+                        type: string
+                      title: Available Products
+                      x-ms-visibility: advanced
+                    billed_products:
+                      type: array
+                      items:
+                        type: string
+                      title: Billed Products
+                      x-ms-visibility: advanced
+                    products:
+                      type: array
+                      items:
+                        type: string
+                      title: Products
+                      x-ms-visibility: advanced
+                    consented_products:
+                      type: array
+                      items:
+                        type: string
+                      title: Consented Products
+                      x-ms-visibility: advanced
+                    consent_expiration_time:
+                      type: string
+                      title: Consent Expiration Time
+                      format: date-time
+                      x-ms-visibility: advanced
+                    update_type:
+                      type: string
+                      title: Update Type
+                      x-ms-visibility: advanced
+                    error:
+                      type: object
+                      title: Error
+                      x-ms-visibility: advanced
+                      properties:
+                        error_type:
+                          type: string
+                          title: Error Type
+                        error_code:
+                          type: string
+                          title: Error Code
+                        error_code_reason:
+                          type: string
+                          title: Error Code Reason
+                        error_message:
+                          type: string
+                          title: Error Message
+                        display_message:
+                          type: string
+                          title: Display Message
+                        request_id:
+                          type: string
+                          title: Request Id
+                        causes:
+                          type: array
+                          title: Causes
+                          items:
+                            type: string
+                        status:
+                          type: integer
+                          format: int32
+                          title: Status
+                        documentation_url:
+                          type: string
+                          title: Documentation Url
+                        suggested_action:
+                          type: string
+                          title: Suggested Action
+                        required_account_subtypes:
+                          type: array
+                          title: Required Account Subtypes
+                          items:
+                            type: string
+                        provided_account_subtypes:
+                          type: array
+                          title: Provided Account Subtypes
+                          items:
+                            type: string
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /link/token/create:
+    post:
+      operationId: CreateLinkToken
+      summary: Create Link Token
+      description: https://plaid.com/docs/api/link/#linktokencreate
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                title: Client Id
+                x-ms-visibility: important
+              secret:
+                type: string
+                title: Secret
+                x-ms-visibility: important
+              client_name:
+                type: string
+                description: The name of your application, as it should be displayed in Link
+                title: Client Name
+                x-ms-visibility: important
+              country_codes:
+                type: array
+                items:
+                  type: string
+                description: Plaid-supported country codes
+                title: Country Codes
+                x-ms-visibility: important
+              language:
+                type: string
+                title: Language
+                description: The language that Link should be displayed in
+                x-ms-visibility: important
+              user_id:
+                type: string
+                title: User Id
+                description: A user_id generated using /user/create
+                x-ms-visibility: important
+              webhook:
+                type: string
+                title: Webhook
+                x-ms-visibility: important
+              enable_multi_item_link:
+                type: boolean
+                title: Enable Multi-Item Link
+                x-ms-visibility: important
+              access_token:
+                type: string
+                title: Access Token
+                description: Used when launching Link in update mode
+                x-ms-visibility: advanced
+              link_customization_name:
+                type: string
+                description: The name of the Link customization from the Plaid Dashboard to be applied to Link.
+                title: Link Customization Name
+                x-ms-visibility: advanced
+              products:
+                type: array
+                description: List of Plaid product(s) that the linked Item must support.
+                title: Products
+                x-ms-visibility: advanced
+                items:
+                  type: string
+              required_if_supported_products:
+                type: array
+                description: List of Plaid product(s) you wish to use only if the institution and account(s) selected by the user support the product.
+                title: Required if Supported Products
+                x-ms-visibility: advanced
+                items:
+                  type: string
+              optional_products:
+                type: array
+                description: List of Plaid product(s) that will enhance the consumer's use case, but that your app can function without.
+                title: Optional Products
+                x-ms-visibility: advanced
+                items:
+                  type: string
+              additional_consented_products:
+                type: array
+                description: List of additional Plaid product(s) you wish to collect consent for to support your use case.
+                title: Additional Consented Products
+                x-ms-visibility: advanced
+                items:
+                  type: string
+              transactions:
+                type: object
+                properties:
+                  days_requested:
+                    type: integer
+                    format: int32
+                    title: Days Requested
+                title: Transactions
+                x-ms-visibility: advanced
+              update:
+                type: object
+                properties:
+                  account_selection_enabled:
+                    type: boolean
+                    title: Account Selection Enabled
+                    x-ms-visibility: advanced
+                  user:
+                    type: boolean
+                    title: User
+                    x-ms-visibility: advanced
+                  item_ids:
+                    type: array
+                    items:
+                      type: string
+                    title: Item Ids
+                    x-ms-visibility: advanced
+                title: Update
+                x-ms-visibility: advanced
+              user_token:
+                type: string
+                title: User Token
+                x-ms-visibility: advanced
+              user:
+                type: object
+                properties:
+                  client_user_id:
+                    type: string
+                    title: Client User Id
+                    x-ms-visibility: advanced
+                  legal_name:
+                    type: string
+                    title: Legal Name
+                    x-ms-visibility: advanced
+                  phone_number:
+                    type: string
+                    title: Phone Number
+                    x-ms-visibility: advanced
+                  email_address:
+                    type: string
+                    title: Email Address
+                    x-ms-visibility: advanced
+                  date_of_birth:
+                    type: string
+                    format: date
+                    title: Date Of Birth
+                    x-ms-visibility: advanced
+                  address:
+                    type: object
+                    properties:
+                      street:
+                        type: string
+                        title: Street
+                        x-ms-visibility: advanced
+                      street2:
+                        type: string
+                        title: Street2
+                        x-ms-visibility: advanced
+                      city:
+                        type: string
+                        title: City
+                        x-ms-visibility: advanced
+                      region:
+                        type: string
+                        title: Region
+                        x-ms-visibility: advanced
+                      postal_code:
+                        type: string
+                        title: Postal Code
+                        x-ms-visibility: advanced
+                      country:
+                        type: string
+                        title: Country
+                        x-ms-visibility: advanced
+                    title: Address
+                  id_number:
+                    type: object
+                    title: Id Number
+                    properties:
+                      type:
+                        type: string
+                        title: Type
+                        x-ms-visibility: advanced
+                      value:
+                        type: string
+                        title: Value
+                        x-ms-visibility: advanced
+                  name:
+                    type: object
+                    title: Name
+                    properties:
+                      given_name:
+                        type: string
+                        title: Given Name
+                        x-ms-visibility: advanced
+                      family_name:
+                        type: string
+                        title: Family Name
+                        x-ms-visibility: advanced
+                title: User
+            required:
+              - client_id
+              - secret
+              - client_name
+              - country_codes
+              - language
+              - webhook
+              - enable_multi_item_link
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              hosted_link_url:
+                type: string
+                title: Hosted Link Url
+                x-ms-visibility: important
+              expiration:
+                type: string
+                format: date-time
+                title: Expiration
+                x-ms-visibility: advanced
+              link_token:
+                type: string
+                title: Link Token
+                x-ms-visibility: advanced
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+              user_id:
+                type: string
+                title: User Id
+                x-ms-visibility: advanced
+  /item/public_token/exchange:
+    post:
+      operationId: ExchangeToken
+      summary: Exchange Token
+      description: https://plaid.com/docs/api/items/#itempublic_tokenexchange
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                title: Client Id
+                x-ms-visibility: important
+              secret:
+                type: string
+                title: Secret
+                x-ms-visibility: important
+              public_token:
+                type: string
+                title: Public Token
+                x-ms-visibility: important
+            required:
+              - client_id
+              - public_token
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              access_token:
+                type: string
+                title: Access Token
+                x-ms-visibility: important
+              item_id:
+                type: string
+                title: Item Id
+                x-ms-visibility: important
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /webhook_verification_key/get:
+    post:
+      operationId: WebhookVerification
+      summary: Webhook Verification
+      description: https://plaid.com/docs/api/webhooks/webhook-verification/#get-webhook-verification-key
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                title: Client Id
+                x-ms-visibility: important
+              secret:
+                type: string
+                title: Secret
+                x-ms-visibility: important
+              key_id:
+                type: string
+                title: Plaid Verification Key
+                x-ms-visibility: important
+            required:
+              - client_id
+              - key_id
+              - secret
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              key:
+                type: object
+                properties:
+                  alg:
+                    type: string
+                    title: Alg
+                  created_at:
+                    type: integer
+                    format: int32
+                    title: Created At
+                  crv:
+                    type: string
+                    title: Crv
+                  expired_at:
+                    type: integer
+                    title: Expired At
+                    format: int32
+                  kid:
+                    type: string
+                    title: Kid
+                  kty:
+                    type: string
+                    title: Kty
+                  use:
+                    type: string
+                    title: Use
+                  x:
+                    type: string
+                    title: X
+                  y:
+                    type: string
+                    title: Y
+                title: Key
+                x-ms-visibility: important
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+  /item/webhook/update:
+    post:
+      operationId: ItemWebhookUpdate
+      summary: Item Webhook Update
+      description: https://plaid.com/docs/api/items/#itemwebhookupdate
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              client_id:
+                type: string
+                title: Client Id
+                x-ms-visibility: important
+              secret:
+                type: string
+                title: Secret
+                x-ms-visibility: important
+              access_token:
+                type: string
+                title: Access Token
+                x-ms-visibility: important
+              webhook:
+                type: string
+                title: Webhook Url
+                x-ms-visibility: important
+            required:
+              - access_token
+              - client_id
+              - secret
+              - webhook
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              item:
+                type: object
+                properties:
+                  item_id:
+                    type: string
+                    title: Item Id
+                    x-ms-visibility: important
+                  institution_id:
+                    type: string
+                    title: Institution Id
+                    x-ms-visibility: important
+                  institution_name:
+                    type: string
+                    title: Institution Name
+                    x-ms-visibility: important
+                  webhook:
+                    type: string
+                    title: Webhook
+                    x-ms-visibility: important
+                  auth_method:
+                    type: string
+                    title: Auth Method
+                    x-ms-visibility: advanced
+                  available_products:
+                    type: array
+                    items:
+                      type: string
+                    title: Available Products
+                    x-ms-visibility: advanced
+                  billed_products:
+                    type: array
+                    items:
+                      type: string
+                    title: Billed Products
+                    x-ms-visibility: advanced
+                  products:
+                    type: array
+                    items:
+                      type: string
+                    title: Products
+                    x-ms-visibility: advanced
+                  consented_products:
+                    type: array
+                    items:
+                      type: string
+                    title: Consented Products
+                    x-ms-visibility: advanced
+                  consent_expiration_time:
+                    type: string
+                    title: Consent Expiration Time
+                    format: date-time
+                    x-ms-visibility: advanced
+                  update_type:
+                    type: string
+                    title: Update Type
+                    x-ms-visibility: advanced
+                  error:
+                    type: object
+                    properties:
+                      error_type:
+                        type: string
+                        title: Error Type
+                      error_code:
+                        type: string
+                        title: Error Code
+                      error_code_reason:
+                        type: string
+                        title: Error Code Reason
+                      error_message:
+                        type: string
+                        title: Error Message
+                      display_message:
+                        type: string
+                        title: Display Message
+                      request_id:
+                        type: string
+                        title: Request Id
+                      causes:
+                        type: array
+                        title: Causes
+                        items:
+                          type: string
+                      status:
+                        type: integer
+                        format: int32
+                        title: Status
+                      documentation_url:
+                        type: string
+                        title: Documentation Url
+                      suggested_action:
+                        type: string
+                        title: Suggested Action
+                      required_account_subtypes:
+                        type: array
+                        title: Required Account Subtypes
+                        items:
+                          type: string
+                      provided_account_subtypes:
+                        type: array
+                        title: Provided Account Subtypes
+                        items:
+                          type: string
+                    title: Error
+                    x-ms-visibility: advanced
+                title: Item
+                x-ms-visibility: important
+              request_id:
+                type: string
+                title: Request Id
+                x-ms-visibility: advanced
+definitions: {}
+parameters: {}
+responses: {}
+securityDefinitions: {}
+security: []
+tags: []
+consumes: []
+produces: []
