@@ -1,0 +1,2180 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  TransactionsScreen:
+    Properties:
+      Fill: =RGBA(224, 224, 224, 1)
+      Height: =App.Height
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      Width: =App.Width
+    Children:
+      - ContainerTs:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =App.Height
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: |-
+              =Min(
+                  App.Width,
+                  1200
+              )
+            X: =Parent.Width/2 - Self.Width/2
+          Children:
+            - TransactionsGallery:
+                Control: Gallery@2.15.0
+                Variant: VariableHeight
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  Default: ={}
+                  DelayItemLoading: =false
+                  Height: |-
+                    =Sum(
+                        Parent.Height,
+                        -Self.Y,
+                        -ActionContainerTs.Height
+                    )
+                  Items: |-
+                    =If(
+                        And(
+                            gvarTransactionsFilter.Applied,
+                            Not(gvarTransactionsFilter.CategoriesChecked)
+                        ),
+                        SortByColumns(
+                            Search(
+                                Filter(
+                                    Transactions,
+                                    ProfileGuid = Text(gvarSelectedRole.Profile.Guid),
+                                    BankAccount.PlaidAccountId in ShowColumns(
+                                        gvarTransactionsFilter.Accounts,
+                                        PlaidAccountId
+                                    ),
+                                    Pending in gvarTransactionsFilter.Pending,
+                                    Amount >= gvarTransactionsFilter.FirstAmount,
+                                    Amount <= gvarTransactionsFilter.SecondAmount,
+                                    Date >= gvarTransactionsFilter.FirstDate,
+                                    Date <= gvarTransactionsFilter.SecondDate,
+                                    HasSplits in gvarTransactionsFilter.Splits
+                                ),
+                                TrimEnds(SearchInputTs.Text),
+                                Description,
+                                MerchantName,
+                                CategoryLabel
+                            ),
+                            "mda_pending",
+                            SortOrder.Descending,
+                            "mda_date",
+                            SortOrder.Descending
+                        ),
+                        And(
+                            gvarTransactionsFilter.Applied,
+                            gvarTransactionsFilter.CategoriesChecked,
+                            gvarTransactionsFilter.Categories
+                        ),
+                        SortByColumns(
+                            Search(
+                                Filter(
+                                    Transactions,
+                                    ProfileGuid = Text(gvarSelectedRole.Profile.Guid),
+                                    BankAccount.PlaidAccountId in ShowColumns(
+                                        gvarTransactionsFilter.Accounts,
+                                        PlaidAccountId
+                                    ),
+                                    Pending in gvarTransactionsFilter.Pending,
+                                    Amount >= gvarTransactionsFilter.FirstAmount,
+                                    Amount <= gvarTransactionsFilter.SecondAmount,
+                                    Date >= gvarTransactionsFilter.FirstDate,
+                                    Date <= gvarTransactionsFilter.SecondDate,
+                                    HasSplits in gvarTransactionsFilter.Splits,
+                                    CategoryLabel <> Blank()
+                                ),
+                                TrimEnds(SearchInputTs.Text),
+                                Description,
+                                MerchantName,
+                                CategoryLabel
+                            ),
+                            "mda_pending",
+                            SortOrder.Descending,
+                            "mda_date",
+                            SortOrder.Descending
+                        ),
+                        And(
+                            gvarTransactionsFilter.Applied,
+                            gvarTransactionsFilter.CategoriesChecked,
+                            Not(gvarTransactionsFilter.Categories)
+                        ),
+                        SortByColumns(
+                            Search(
+                                Filter(
+                                    Transactions,
+                                    ProfileGuid = Text(gvarSelectedRole.Profile.Guid),
+                                    BankAccount.PlaidAccountId in ShowColumns(
+                                        gvarTransactionsFilter.Accounts,
+                                        PlaidAccountId
+                                    ),
+                                    Pending in gvarTransactionsFilter.Pending,
+                                    Amount >= gvarTransactionsFilter.FirstAmount,
+                                    Amount <= gvarTransactionsFilter.SecondAmount,
+                                    Date >= gvarTransactionsFilter.FirstDate,
+                                    Date <= gvarTransactionsFilter.SecondDate,
+                                    HasSplits in gvarTransactionsFilter.Splits,
+                                    CategoryLabel = Blank()
+                                ),
+                                TrimEnds(SearchInputTs.Text),
+                                Description,
+                                MerchantName,
+                                CategoryLabel
+                            ),
+                            "mda_pending",
+                            SortOrder.Descending,
+                            "mda_date",
+                            SortOrder.Descending
+                        ),
+                        SortByColumns(
+                            Search(
+                                Filter(
+                                    Transactions,
+                                    ProfileGuid = Text(gvarSelectedRole.Profile.Guid)
+                                ),
+                                TrimEnds(SearchInputTs.Text),
+                                Description,
+                                MerchantName,
+                                CategoryLabel
+                            ),
+                            "mda_pending",
+                            SortOrder.Descending,
+                            "mda_date",
+                            SortOrder.Descending
+                        )
+                    )
+                  LoadingSpinnerColor: =RGBA(123, 94, 87, 1)
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  Width: =Parent.Width
+                  Y: |-
+                    =Sum(
+                        ScreenHeaderTs.Height,
+                        SearchContainerTs.Height,
+                        50
+                    )
+                Children:
+                  - BackgroundTs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(244,240,234,1)
+                        Height: =120
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =ThisItem.IsSelected
+                        Width: =Parent.Width
+                  - DividingLineTs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(106, 122, 127, 1)
+                        Height: =1
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width - Self.X*2
+                        X: =40
+                        Y: =120
+                  - AmountLabelTs:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Right
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Color: |-
+                          =If(
+                              -Value(ThisItem.Amount) < 0,
+                              RGBA(
+                                  161,
+                                  78,
+                                  58,
+                                  1
+                              ),
+                              RGBA(
+                                  122,
+                                  139,
+                                  117,
+                                  1
+                              )
+                          )
+                        Font: =Font.'Open Sans'
+                        Height: =50
+                        Italic: =ThisItem.Pending
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =Parent.Width*(2/3) + 20
+                        PaddingRight: =50
+                        PaddingTop: =0
+                        Size: =20
+                        Text: |-
+                          =Concatenate(
+                              If(
+                                  gvarShowCurrencySymbol,
+                                  Concatenate(
+                                      LookUp(
+                                          colCurrencies,
+                                          ThisItem.CurrencyCode in codes
+                                      ).symbol,
+                                      " "
+                                  ),
+                                  Blank()
+                              ),
+                              Text(
+                                  If(
+                                      gvarDemoMode,
+                                      -Value(ThisItem.RandomAmount),
+                                      -Value(ThisItem.Amount)
+                                  ),
+                                  "#,##0.00"
+                              )
+                          )
+                        Tooltip: =Self.Text
+                        Width: =Parent.TemplateWidth - Parent.TemplatePadding*2
+                        Wrap: =false
+                        Y: |-
+                          =If(
+                              And(
+                                  First(colTransactionVisibility).Value,
+                                  Not(ThisItem.Pending)
+                              ),
+                              15,
+                              35
+                          )
+                  - DateLabelTs:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Lighter
+                        Height: =50
+                        Italic: =ThisItem.Pending
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =150
+                        PaddingRight: =Parent.Width/4 + 20
+                        PaddingTop: =0
+                        Size: =18
+                        Text: |-
+                          =If(
+                              ThisItem.Pending,
+                              "Pending",
+                              Text(
+                                  ThisItem.Date,
+                                  "mm/dd/yyyy"
+                              )
+                          )
+                        Width: =Parent.TemplateWidth - Parent.TemplatePadding*2
+                        Wrap: =false
+                        Y: =60
+                  - MerchantLogoTs:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Height: =80
+                        Image: |-
+                          =Coalesce(
+                              ThisItem.LogoUrl,
+                              ThisItem.FinanceCategoryUrl
+                          )
+                        OnSelect: =Select(Parent)
+                        Width: =80
+                        X: =50
+                        Y: =20
+                  - DescriptionLabelTs:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =110
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =20
+                        PaddingLeft: =150
+                        PaddingRight: =Parent.Width/4 + 20
+                        PaddingTop: =20
+                        Text: =ThisItem.Description
+                        Tooltip: =Self.Text
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =Parent.TemplateWidth - Parent.TemplatePadding*2
+                        Wrap: =false
+                  - CategorySplitContainerTs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: |-
+                          =Coalesce(
+                              ColorValue(ThisItem.Category.Color),
+                              RGBA(
+                                  123,
+                                  94,
+                                  87,
+                                  1
+                              )
+                          )
+                        BorderThickness: =2
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =35
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Visible: |-
+                          =And(
+                              First(colTransactionVisibility).Value,
+                              Not(ThisItem.Pending)
+                          )
+                        Width: |-
+                          =Min(
+                              If(
+                                  ThisItem.HasSplits,
+                                  75,
+                                  Len(
+                                      Coalesce(
+                                          ThisItem.CategoryLabel,
+                                          "no category"
+                                      )
+                                  ) * 15 + 50
+                              ),
+                              Parent.Width / 3
+                          )
+                        X: |-
+                          =Sum(
+                              Parent.Width,
+                              -Self.Width,
+                              -50
+                          )
+                        Y: =67.5
+                      Children:
+                        - SplitIconTs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              DisplayMode: =DisplayMode.View
+                              Height: =Parent.Height
+                              Image: =arrow_split_500dp_7B5E57_FILL0_wght500_GRAD0_opsz48
+                              PaddingBottom: =Self.Height/9
+                              PaddingLeft: =Self.Height/9
+                              PaddingRight: =Self.Height/9
+                              PaddingTop: =Self.Height/9
+                              Width: =Parent.Width
+                        - CategoryValueTs:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              BorderColor: |-
+                                =If(
+                                    IsBlank(ThisItem.Category),
+                                    RGBA(
+                                        123,
+                                        94,
+                                        87,
+                                        1
+                                    ),
+                                    RGBA(
+                                        0,
+                                        0,
+                                        0,
+                                        0
+                                    )
+                                )
+                              BorderStyle: =BorderStyle.None
+                              Color: |-
+                                =If(
+                                    IsBlank(ThisItem.Category),
+                                    RGBA(
+                                        117,
+                                        117,
+                                        117,
+                                        1
+                                    ),
+                                    RGBA(
+                                        255,
+                                        255,
+                                        255,
+                                        1
+                                    )
+                                )
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              DisabledFill: =RGBA(244, 244, 244, 1)
+                              Fill: |-
+                                =Coalesce(
+                                    ColorValue(ThisItem.Category.Color),
+                                    RGBA(
+                                        255,
+                                        255,
+                                        255,
+                                        1
+                                    )
+                                )
+                              Font: =Font.'Open Sans'
+                              FontWeight: |-
+                                =If(
+                                    IsBlank(ThisItem.Category),
+                                    FontWeight.Lighter,
+                                    FontWeight.Semibold
+                                )
+                              Height: =Parent.Height
+                              OnSelect: |-
+                                =Navigate(
+                                    CategoriesScreen,
+                                    ScreenTransition.Cover,
+                                    {
+                                        varScreenReuse: "transactionList",
+                                        varCategory: ThisItem.Category
+                                    }
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =20
+                              PaddingRight: =20
+                              PaddingTop: =0
+                              Size: =18
+                              Text: |-
+                                =Coalesce(
+                                    ThisItem.Category.Name,
+                                    "no category"
+                                )
+                              Visible: =Not(ThisItem.HasSplits)
+                              Width: =Parent.Width
+                              Wrap: =false
+            - NoItemsLabelTs:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  DisplayMode: =DisplayMode.View
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Lighter
+                  Height: =Parent.Height - Self.Y
+                  PaddingBottom: =0
+                  PaddingLeft: =50
+                  PaddingRight: =50
+                  PaddingTop: =40
+                  Text: ="No transactions found"
+                  VerticalAlign: =VerticalAlign.Top
+                  Visible: =TransactionsGallery.AllItemsCount = 0
+                  Width: =Parent.Width
+                  Y: |-
+                    =Sum(
+                        SearchContainerTs.Y,
+                        SearchContainerTs.Height,
+                        25
+                    )
+            - ActionContainerTs:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  DropShadow: =DropShadow.None
+                  Height: =Parent.Width / 4.75
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =Self.Height/4
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  PaddingBottom: =Self.Height/4
+                  PaddingLeft: =Self.Height/4
+                  PaddingRight: =Self.Height/4
+                  PaddingTop: =Self.Height/4
+                  RadiusBottomLeft: =20
+                  RadiusBottomRight: =20
+                  RadiusTopLeft: =20
+                  RadiusTopRight: =20
+                  Width: =Parent.Width - Self.X*2
+                  Y: |-
+                    =Sum(
+                        Parent.Height,
+                        -Self.Height
+                    )
+                Children:
+                  - BackContainerTs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(123, 94, 87, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - BackIconTs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Height: =Parent.Height
+                              Image: =chevron_left_500dp_7B5E57_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =Concurrent(
+                                    Reset(TransactionsGallery),
+                                    Reset(SearchInputTs)
+                                );
+                                Back(ScreenTransition.Fade)
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Back"
+                              Width: =Parent.Width
+                  - VisibleContainerTs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(74, 101, 114, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - VisibleIconTs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Height: =Parent.Height
+                              Image: |-
+                                =If(
+                                    First(colTransactionVisibility).Value,
+                                    visibility_off_500dp_4A6572_FILL0_wght500_GRAD0_opsz48,
+                                    visibility_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                                )
+                              OnSelect: |-
+                                =ClearCollect(
+                                    colTransactionVisibility,
+                                    {
+                                        Value: If(
+                                            First(colTransactionVisibility).Value,
+                                            false,
+                                            true
+                                        )
+                                    }
+                                );
+                                SaveData(
+                                    colTransactionVisibility,
+                                    "colTransactionVisibility"
+                                )
+                              PaddingBottom: =Parent.Height/9
+                              PaddingLeft: =Parent.Height/9
+                              PaddingRight: =Parent.Height/9
+                              PaddingTop: =Parent.Height/9
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: |-
+                                =If(
+                                    First(colTransactionVisibility).Value,
+                                    "Hide",
+                                    "Show"
+                                )
+                              Width: =Parent.Width
+                  - ExportTransContainerTs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(74, 101, 114, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        Fill: |-
+                          =RGBA(
+                              0,
+                              0,
+                              0,
+                              0
+                          )
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - ExportTransIconTs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Fill: |-
+                                =RGBA(
+                                    0,
+                                    0,
+                                    0,
+                                    0
+                                )
+                              Height: =Parent.Height
+                              Image: =output_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =If(
+                                    Not(gvarTransactionsFilter.Applied),
+                                    Notify(
+                                        "Apply a filter before exporting transactions",
+                                        NotificationType.Warning
+                                    ),
+                                    Not(IsBlank(TrimEnds(SearchInputTs.Text))),
+                                    Notify(
+                                        "Remove any search terms before exporting transactions",
+                                        NotificationType.Warning
+                                    ),
+                                    IsEmpty(TransactionsGallery.AllItems),
+                                    Notify(
+                                        "Apply a filter that includes transactions before exporting",
+                                        NotificationType.Warning
+                                    ),
+                                    IfError(
+                                        ExportTransactions.Run(
+                                            Concatenate(
+                                                If(
+                                                    gvarTransactionsFilter.PendingChecked,
+                                                    Concatenate(
+                                                        "<condition attribute=""mda_pending"" operator=""eq"" value=""",
+                                                        Lower(First(gvarTransactionsFilter.Pending).Value),
+                                                        """ />"
+                                                    ),
+                                                    Blank()
+                                                ),
+                                                If(
+                                                    gvarTransactionsFilter.AmountChecked,
+                                                    Switch(
+                                                        varFilterType.Amount,
+                                                        "Equal To",
+                                                        Concatenate(
+                                                            "<condition attribute=""mda_amount"" operator=""eq"" value=""",
+                                                            Text(gvarTransactionsFilter.FirstAmount),
+                                                            """ />"
+                                                        ),
+                                                        "Greater Than or Equal",
+                                                        Concatenate(
+                                                            "<condition attribute=""mda_amount"" operator=""le"" value=""",
+                                                            Text(gvarTransactionsFilter.SecondAmount),
+                                                            """ />"
+                                                        ),
+                                                        "Less Than or Equal",
+                                                        Concatenate(
+                                                            "<condition attribute=""mda_amount"" operator=""ge"" value=""",
+                                                            Text(gvarTransactionsFilter.FirstAmount),
+                                                            """ />"
+                                                        ),
+                                                        "Between",
+                                                        Concatenate(
+                                                            "<condition attribute=""mda_amount"" operator=""ge"" value=""",
+                                                            Text(gvarTransactionsFilter.FirstAmount),
+                                                            """ />",
+                                                            "<condition attribute=""mda_amount"" operator=""le"" value=""",
+                                                            Text(gvarTransactionsFilter.SecondAmount),
+                                                            """ />"
+                                                        )
+                                                    ),
+                                                    Blank()
+                                                ),
+                                                If(
+                                                    gvarTransactionsFilter.DateChecked,
+                                                    Switch(
+                                                        varFilterType.Date,
+                                                        "Equal To",
+                                                        Concatenate(
+                                                            "<condition attribute=""mda_date"" operator=""eq"" value=""",
+                                                            Text(
+                                                                gvarTransactionsFilter.FirstDate,
+                                                                "yyyy-mm-dd"
+                                                            ),
+                                                            """ />"
+                                                        ),
+                                                        "Greater Than or Equal",
+                                                        Concatenate(
+                                                            "<condition attribute=""mda_date"" operator=""ge"" value=""",
+                                                            Text(
+                                                                gvarTransactionsFilter.FirstDate,
+                                                                "yyyy-mm-dd"
+                                                            ),
+                                                            """ />"
+                                                        ),
+                                                        "Less Than or Equal",
+                                                        Concatenate(
+                                                            "<condition attribute=""mda_date"" operator=""le"" value=""",
+                                                            Text(
+                                                                gvarTransactionsFilter.SecondDate,
+                                                                "yyyy-mm-dd"
+                                                            ),
+                                                            """ />"
+                                                        ),
+                                                        "Between",// fix this?
+                                                        Concatenate(
+                                                            "mda_date ge ",
+                                                            Concatenate(
+                                                                Text(
+                                                                    gvarTransactionsFilter.FirstDate,
+                                                                    "yyyy-mm-dd"
+                                                                )
+                                                            ),
+                                                            " and mda_date le ",
+                                                            Text(
+                                                                gvarTransactionsFilter.SecondDate,
+                                                                "yyyy-mm-dd"
+                                                            )
+                                                        )
+                                                    ),
+                                                    Blank()
+                                                ),
+                                                If(
+                                                    gvarTransactionsFilter.AccountChecked,
+                                                    Concatenate(
+                                                        "<condition entityname=""bankaccount"" attribute=""mda_plaidaccountid"" operator=""in""><value>",
+                                                        Concat(
+                                                            ShowColumns(
+                                                                gvarTransactionsFilter.Accounts,
+                                                                PlaidAccountId
+                                                            ),
+                                                            mda_plaidaccountid,
+                                                            "</value><value>"
+                                                        ),
+                                                        "</value></condition>"
+                                                    ),
+                                                    Blank()
+                                                ),
+                                                If(
+                                                    gvarTransactionsFilter.SplitsChecked,
+                                                    Concatenate(
+                                                        "<condition attribute=""mda_hassplits"" operator=""eq"" value=""",
+                                                        Lower(First(gvarTransactionsFilter.Splits).Value),
+                                                        """ />"
+                                                    ),
+                                                    Blank()
+                                                ),
+                                                If(
+                                                    gvarTransactionsFilter.CategoriesChecked,
+                                                    Concatenate(
+                                                        "<condition attribute=""mda_categorylabel"" operator=""",
+                                                        If(
+                                                            gvarTransactionsFilter.Categories,
+                                                            "not-null",
+                                                            "null"
+                                                        ),
+                                                        """ />"
+                                                    ),
+                                                    Blank()
+                                                )
+                                            ),
+                                            gvarProfile.Guid,
+                                            {text_1: User().EntraObjectId}
+                                        ),
+                                        Notify(
+                                            "There was an error generating the export",
+                                            NotificationType.Error
+                                        ),
+                                        Notify(
+                                            "You'll get a notification when the export is ready.",
+                                            NotificationType.Success
+                                        )
+                                    )
+                                )
+                              PaddingBottom: =Parent.Height/9
+                              PaddingLeft: =Parent.Height/9
+                              PaddingRight: =Parent.Height/9
+                              PaddingTop: =Parent.Height/9
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Export"
+                              Width: =Parent.Width
+                  - TransDetailContainerTs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(123, 94, 87, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - TransDetailIconTs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              DisplayMode: |-
+                                =If(
+                                    IsBlank(TransactionsGallery.Selected),
+                                    DisplayMode.Disabled,
+                                    DisplayMode.Edit
+                                )
+                              Height: =Parent.Height
+                              Image: =receipt_long_500dp_7B5E57_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =ClearCollect(
+                                    colTransactionSplits,
+                                    Filter(
+                                        TransactionSplits,
+                                        Transaction.Guid = TransactionsGallery.Selected.Guid
+                                    )
+                                );
+                                Set(
+                                    gvarTransaction,
+                                    LookUp(
+                                        Transactions,
+                                        Guid = TransactionsGallery.Selected.Guid
+                                    )
+                                );
+                                Navigate(
+                                    TransactionDetailScreen,
+                                    ScreenTransition.Fade,
+                                    {
+                                        varAccount: TransactionsGallery.Selected.BankAccount,
+                                        varInstitution: LookUp(
+                                            Institutions,
+                                            Guid = TransactionsGallery.Selected.BankAccount.AccessToken.Institution.Guid
+                                        )
+                                    }
+                                )
+                              PaddingBottom: =Parent.Height/9
+                              PaddingLeft: =Parent.Height/9
+                              PaddingRight: =Parent.Height/9
+                              PaddingTop: =Parent.Height/9
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Details"
+                              Width: =Parent.Width
+            - FilterIconTs:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  Color: =RGBA(123, 94, 87, 1)
+                  FocusedBorderThickness: =0
+                  Height: =Min(Parent.Width/12,75)
+                  HoverBorderColor: =Self.BorderColor
+                  HoverColor: =Self.Color
+                  Icon: |-
+                    =If(
+                        gvarTransactionsFilter.Applied,
+                        Icon.FilterFlatFilled,
+                        Icon.FilterFlat
+                    )
+                  OnSelect: |-
+                    =Concurrent(
+                        Set(
+                            gvarTransactionsFilter,
+                            {
+                                Visible: true,
+                                Applied: gvarTransactionsFilter.Applied,
+                                PendingChecked: gvarTransactionsFilter.PendingChecked,
+                                DateChecked: gvarTransactionsFilter.DateChecked,
+                                AmountChecked: gvarTransactionsFilter.AmountChecked,
+                                AccountChecked: gvarTransactionsFilter.AccountChecked,
+                                CategoriesChecked: gvarTransactionsFilter.CategoriesChecked,
+                                SplitsChecked: gvarTransactionsFilter.SplitsChecked,
+                                Pending: gvarTransactionsFilter.Pending,
+                                Accounts: gvarTransactionsFilter.Accounts,
+                                FirstAmount: gvarTransactionsFilter.FirstAmount,
+                                SecondAmount: gvarTransactionsFilter.SecondAmount,
+                                FirstDate: gvarTransactionsFilter.FirstDate,
+                                SecondDate: gvarTransactionsFilter.SecondDate,
+                                Categories: gvarTransactionsFilter.Categories,
+                                Splits: gvarTransactionsFilter.Splits
+                            }
+                        ),
+                        UpdateContext(
+                            {
+                                varFilterType: {
+                                    Date: Coalesce(
+                                        varFilterType.Date,
+                                        "Equal To"
+                                    ),
+                                    Amount: Coalesce(
+                                        varFilterType.Amount,
+                                        "Equal To"
+                                    )
+                                }
+                            }
+                        )
+                    )
+                  PaddingBottom: =10
+                  PaddingTop: =10
+                  Tooltip: ="Filter"
+                  Width: =Min(Parent.Width/12,75)
+                  X: =Sum(Parent.Width, -Self.Width, -50 )
+                  Y: |-
+                    =Sum(
+                        ScreenHeaderTs.Height,
+                        25
+                    )
+            - ScreenHeaderTs:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(123, 94, 87, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: |-
+                    =Min(
+                        Parent.Width / 8,
+                        100
+                    )
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =Self.Height/3
+                  Text: ="Transactions"
+                  Width: =Parent.Width
+            - RiataLogoTs:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Height: |-
+                    =Min(
+                        Parent.Width / 8,
+                        100
+                    )
+                  Image: ='Riata Hat'
+                  OnSelect: |-
+                    =Concurrent(
+                        Reset(TransactionsGallery),
+                        Reset(SearchInputTs)
+                    );
+                    Navigate(
+                        HomeScreen,
+                        ScreenTransition.Fade
+                    )
+                  Tooltip: ="Home"
+                  Width: =Self.Height*1.5
+            - SearchContainerTs:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.Regular
+                  Height: =Min(Parent.Width/12,75)
+                  RadiusBottomLeft: =25
+                  RadiusBottomRight: =25
+                  RadiusTopLeft: =25
+                  RadiusTopRight: =25
+                  Width: =Sum(Parent.Width, -Self.X*2, -FilterIconTs.Width, -30)
+                  X: =50
+                  Y: |-
+                    =Sum(
+                        ScreenHeaderTs.Height,
+                        25
+                    )
+                Children:
+                  - SearchInputTs:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        Clear: =true
+                        Default: =
+                        DelayOutput: =true
+                        EnableSpellCheck: =true
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.'Open Sans'
+                        Height: =Parent.Height
+                        HintText: ="Search"
+                        HoverBorderColor: =Self.BorderColor
+                        HoverColor: =Self.Color
+                        HoverFill: =Self.Fill
+                        PaddingBottom: =0
+                        PaddingLeft: =10
+                        PaddingRight: =25
+                        PaddingTop: =0
+                        RadiusTopLeft: =0
+                        Size: =Self.Height/3
+                        Width: =Sum(Parent.Width, -Self.X, -20)
+                        X: =SearchIconTs.X + SearchIconTs.Width
+                  - SearchIconTs:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        Color: =RGBA(79, 90, 94, 1)
+                        DisplayMode: =DisplayMode.View
+                        FocusedBorderThickness: =0
+                        Height: =Parent.Height
+                        HoverBorderColor: =Self.BorderColor
+                        HoverColor: =Self.Color
+                        Icon: =Icon.Search
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Width: =Parent.Height
+                        X: =10
+            - FilterContainerTs:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =Self.Fill
+                  BorderStyle: =BorderStyle.None
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(224, 224, 224, 0.9)
+                  Height: =Parent.Height
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =gvarTransactionsFilter.Visible
+                  Width: =Parent.Width
+                Children:
+                  - FilterModalTs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(139, 154, 159, 1)
+                        BorderThickness: =2
+                        DropShadow: =DropShadow.ExtraBold
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: =1175
+                        RadiusBottomLeft: =40
+                        RadiusBottomRight: =40
+                        RadiusTopLeft: =40
+                        RadiusTopRight: =40
+                        Width: =Min(Sum(Parent.Width, - 80), 600)
+                        X: =Parent.Width/2 - Self.Width/2
+                        Y: =Parent.Height/2 - Self.Height/2
+                      Children:
+                        - ClearFilterButton:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =Self.Color
+                              BorderThickness: =5
+                              Color: =RGBA(161, 78, 58, 1)
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              Font: =Font.'Open Sans'
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: |-
+                                =Concurrent(
+                                    UpdateContext(
+                                        {
+                                            varReset: true,
+                                            varDateError: false,
+                                            varAmountError: false,
+                                            varAccountError: false,
+                                            varFilterType: {
+                                                Date: "Equal To",
+                                                Amount: "Equal To"
+                                            }
+                                        }
+                                    ),
+                                    Set(
+                                        gvarTransactionsFilter,
+                                        {
+                                            Visible: false,
+                                            Applied: false
+                                        }
+                                    ),
+                                    Reset(PendingFilterInput),
+                                    Reset(CategoryFilterInput),
+                                    Reset(SplitsFilterInput)
+                                );
+                                UpdateContext({varReset: false})
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              PressedBorderColor: =Self.BorderColor
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =30
+                              RadiusBottomRight: =30
+                              RadiusTopLeft: =30
+                              RadiusTopRight: =30
+                              Text: ="Clear"
+                              Width: =Parent.Width/3
+                              X: =Parent.Width/9
+                              Y: =Parent.Height - Self.Height - Parent.Width/9
+                        - ApplyFilterButton:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =Self.Fill
+                              BorderThickness: =5
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =RGBA(123, 94, 87, 1)
+                              Font: =Font.'Open Sans'
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: |-
+                                =UpdateContext(
+                                    {
+                                        varDateError: And(
+                                            DateFilterCheckbox.Value,
+                                            Or(
+                                                And(
+                                                    varFilterType.Date <> "Between",
+                                                    IsBlank(FirstDateFilterInput.SelectedDate)
+                                                ),
+                                                And(
+                                                    varFilterType.Date = "Between",
+                                                    Or(
+                                                        IsBlank(SecondDateFilterInput.SelectedDate),
+                                                        IsBlank(FirstDateFilterInput.SelectedDate)
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        varAmountError: And(
+                                            AmountFilterCheckbox.Value,
+                                            Or(
+                                                And(
+                                                    varFilterType.Amount <> "Between",
+                                                    IsBlank(FirstAmountFilterInput.Text)
+                                                ),
+                                                And(
+                                                    varFilterType.Amount = "Between",
+                                                    Or(
+                                                        IsBlank(FirstAmountFilterInput.Text),
+                                                        IsBlank(SecondAmountFilterInput.Text)
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        varAccountError: And(
+                                            AccountFilterCheckbox.Value,
+                                            Or(
+                                                IsEmpty(AccountFilterInput.SelectedItems),
+                                                IsBlank(AccountFilterInput.SelectedItems)
+                                            )
+                                        )
+                                    }
+                                );
+                                If(
+                                    And(
+                                        Not(varDateError),
+                                        Not(varAmountError),
+                                        Not(varAccountError),
+                                        Or(
+                                            AmountFilterCheckbox.Value,
+                                            DateFilterCheckbox.Value,
+                                            PendingFilterCheckbox.Value,
+                                            AccountFilterCheckbox.Value,
+                                            CategoryFilterCheckbox.Value,
+                                            SplitsFilterCheckbox.Value
+                                        )
+                                    ),
+                                    Set(
+                                        gvarTransactionsFilter,
+                                        {
+                                            Visible: false,
+                                            Applied: true,
+                                            PendingChecked: PendingFilterCheckbox.Value,
+                                            DateChecked: DateFilterCheckbox.Value,
+                                            AmountChecked: AmountFilterCheckbox.Value,
+                                            AccountChecked: AccountFilterCheckbox.Value,
+                                            CategoriesChecked: CategoryFilterCheckbox.Value,
+                                            SplitsChecked: SplitsFilterCheckbox.Value,
+                                            Pending: If(
+                                                PendingFilterCheckbox.Value,
+                                                [PendingFilterInput.Checked],
+                                                [
+                                                    true,
+                                                    false
+                                                ]
+                                            ),
+                                            Accounts: AccountFilterInput.SelectedItems,
+                                            FirstAmount: If(
+                                                AmountFilterCheckbox.Value,
+                                                Switch(
+                                                    varFilterType.Amount,
+                                                    "Equal To",
+                                                    -Value(FirstAmountFilterInput.Text),
+                                                    "Greater Than or Equal",
+                                                    -999999999999,
+                                                    "Less Than or Equal",
+                                                    -Value(FirstAmountFilterInput.Text),
+                                                    "Between",
+                                                    Min(
+                                                        -Value(FirstAmountFilterInput.Text),
+                                                        -Value(SecondAmountFilterInput.Text)
+                                                    )
+                                                ),
+                                                -999999999999
+                                            ),
+                                            SecondAmount: If(
+                                                AmountFilterCheckbox.Value,
+                                                Switch(
+                                                    varFilterType.Amount,
+                                                    "Equal To",
+                                                    -Value(FirstAmountFilterInput.Text),
+                                                    "Greater Than or Equal",
+                                                    -Value(FirstAmountFilterInput.Text),
+                                                    "Less Than or Equal",
+                                                    999999999999,
+                                                    "Between",
+                                                    Max(
+                                                        -Value(FirstAmountFilterInput.Text),
+                                                        -Value(SecondAmountFilterInput.Text)
+                                                    )
+                                                ),
+                                                999999999999
+                                            ),
+                                            FirstDate: If(
+                                                DateFilterCheckbox.Value,
+                                                Switch(
+                                                    varFilterType.Date,
+                                                    "Equal To",
+                                                    FirstDateFilterInput.SelectedDate,
+                                                    "Greater Than or Equal",
+                                                    FirstDateFilterInput.SelectedDate,
+                                                    "Less Than or Equal",
+                                                    Date(
+                                                        2019,
+                                                        12,
+                                                        31
+                                                    ),//This is an arbitrary date. Assuming no transactions will be before this date.
+                                                    "Between",
+                                                    Min(
+                                                        FirstDateFilterInput.SelectedDate,
+                                                        SecondDateFilterInput.SelectedDate
+                                                    )
+                                                ),
+                                                Date(
+                                                    2019,
+                                                    12,
+                                                    31
+                                                )//This is an arbitrary date. Assuming no transactions will be before this date.
+                                            ),
+                                            SecondDate: If(
+                                                DateFilterCheckbox.Value,
+                                                Switch(
+                                                    varFilterType.Date,
+                                                    "Equal To",
+                                                    FirstDateFilterInput.SelectedDate,
+                                                    "Greater Than or Equal",
+                                                    Today() + 1,//Assuming that there won't be transactions for the future.
+                                                    "Less Than or Equal",
+                                                    FirstDateFilterInput.SelectedDate,
+                                                    "Between",
+                                                    Max(
+                                                        FirstDateFilterInput.SelectedDate,
+                                                        SecondDateFilterInput.SelectedDate
+                                                    )
+                                                ),
+                                                Today() + 1//Assuming that there won't be transactions for the future.
+                                            ),
+                                            Categories: If(
+                                                CategoryFilterCheckbox.Value,
+                                                Not(CategoryFilterInput.Checked),
+                                                Blank()
+                                            ),
+                                            Splits: If(
+                                                SplitsFilterCheckbox.Value,
+                                                [Not(SplitsFilterInput.Checked)],
+                                                [
+                                                    true,
+                                                    false
+                                                ]
+                                            )
+                                        }
+                                    );
+                                    UpdateContext(
+                                        {
+                                            varFilterType: {
+                                                Date: If(
+                                                    DateFilterCheckbox.Value,
+                                                    varFilterType.Date,
+                                                    "Equal To"
+                                                ),
+                                                Amount: If(
+                                                    AmountFilterCheckbox.Value,
+                                                    varFilterType.Amount,
+                                                    "Equal To"
+                                                )
+                                            }
+                                        }
+                                    );
+                                    Concurrent(
+                                        If(
+                                            Not(DateFilterCheckbox.Value),
+                                            Reset(FirstDateFilterInput);
+                                            Reset(SecondDateFilterInput),
+                                            varFilterType.Date <> "Between",
+                                            Reset(SecondDateFilterInput)
+                                        ),
+                                        If(
+                                            Not(AmountFilterCheckbox.Value),
+                                            Reset(FirstAmountFilterInput);
+                                            Reset(SecondAmountFilterInput),
+                                            varFilterType.Amount <> "Between",
+                                            Reset(SecondAmountFilterInput)
+                                        ),
+                                        If(
+                                            Not(PendingFilterCheckbox.Value),
+                                            Reset(PendingFilterInput)
+                                        ),
+                                        If(
+                                            Not(AccountFilterCheckbox.Value),
+                                            Reset(AccountFilterInput)
+                                        ),
+                                        If(
+                                            Not(CategoryFilterCheckbox.Value),
+                                            Reset(CategoryFilterInput)
+                                        ),
+                                        If(
+                                            Not(SplitsFilterCheckbox.Value),
+                                            Reset(SplitsFilterInput)
+                                        )
+                                    ),
+                                    Or(
+                                        varDateError,
+                                        varAmountError,
+                                        varAccountError
+                                    ),
+                                    Notify(
+                                        If(
+                                            varAmountError,
+                                            "Please provide an amount to filter.",
+                                            varDateError,
+                                            "Please provide a date to filter.",
+                                            varAccountError,
+                                            "Please select an account to filter"
+                                        ),
+                                        NotificationType.Warning
+                                    ),
+                                    Select(ClearFilterButton)
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              PressedBorderColor: =Self.BorderColor
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =30
+                              RadiusBottomRight: =30
+                              RadiusTopLeft: =30
+                              RadiusTopRight: =30
+                              Text: ="Apply"
+                              Width: =Parent.Width/3
+                              X: =Parent.Width - Self.Width - Parent.Width/9
+                              Y: =Parent.Height - Self.Height - Parent.Width/9
+                        - CancelFilterIcon:
+                            Control: Classic/Icon@2.5.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              Color: =RGBA(161, 78, 58, 1)
+                              FocusedBorderThickness: =0
+                              Height: =80
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              Icon: =Icon.CancelBadge
+                              OnSelect: |-
+                                =Concurrent(
+                                    UpdateContext(
+                                        {
+                                            varAccountError: false,
+                                            varDateError: false,
+                                            varAmountError: false,
+                                            varReset: true,
+                                            varFilterType: {
+                                                Date: varFilterType.Date,
+                                                Amount: varFilterType.Amount
+                                            }
+                                        }
+                                    ),
+                                    Set(
+                                        gvarTransactionsFilter,
+                                        {
+                                            Visible: false,
+                                            Applied: gvarTransactionsFilter.Applied,
+                                            PendingChecked: gvarTransactionsFilter.PendingChecked,
+                                            DateChecked: gvarTransactionsFilter.DateChecked,
+                                            AmountChecked: gvarTransactionsFilter.AmountChecked,
+                                            AccountChecked: gvarTransactionsFilter.AccountChecked,
+                                            CategoriesChecked: gvarTransactionsFilter.CategoriesChecked,
+                                            SplitsChecked: gvarTransactionsFilter.SplitsChecked,
+                                            Pending: gvarTransactionsFilter.Pending,
+                                            Accounts: gvarTransactionsFilter.Accounts,
+                                            FirstAmount: gvarTransactionsFilter.FirstAmount,
+                                            SecondAmount: gvarTransactionsFilter.SecondAmount,
+                                            FirstDate: gvarTransactionsFilter.FirstDate,
+                                            SecondDate: gvarTransactionsFilter.SecondDate,
+                                            Categories: gvarTransactionsFilter.Categories,
+                                            Splits: gvarTransactionsFilter.Splits
+                                        }
+                                    ),
+                                    Reset(PendingFilterInput),
+                                    Reset(CategoryFilterInput),
+                                    Reset(SplitsFilterInput)
+                                );
+                                UpdateContext({varReset: false})
+                              PaddingBottom: =10
+                              PaddingLeft: =10
+                              PaddingRight: =20
+                              PaddingTop: =20
+                              Width: =80
+                              X: =Sum(Parent.Width, -Self.Width)
+                        - SplitsFilterInput:
+                            Control: Toggle@1.1.5
+                            Properties:
+                              Checked: |-
+                                =If(
+                                    gvarTransactionsFilter.SplitsChecked,
+                                    Not(First(gvarTransactionsFilter.Splits).Value)
+                                )
+                              FontSize: =30
+                              Height: =60
+                              Label: =
+                              LabelPosition: ='Toggle.LabelPosition'.After
+                              ToggleSize: =80
+                              Width: =100
+                              X: =90
+                              Y: =915
+                        - SplitsFilterCheckbox:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              CheckboxBorderColor: =RGBA(79, 90, 94, 1)
+                              CheckboxSize: =50
+                              CheckmarkFill: =RGBA(123, 94, 87, 1)
+                              Default: =gvarTransactionsFilter.SplitsChecked
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: =
+                              PaddingLeft: =20
+                              PressedBorderColor: =Self.BorderColor
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              Text: =
+                              Width: =90
+                              Y: =855
+                        - SplitsFilterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =60
+                              Size: =20
+                              Text: |-
+                                =If(
+                                    SplitsFilterInput.Checked,
+                                    "No Splits",
+                                    "Has Splits"
+                                )
+                              Width: =Parent.Width - Self.X*2
+                              X: =90
+                              Y: =855
+                        - CategoryFilterInput:
+                            Control: Toggle@1.1.5
+                            Properties:
+                              Checked: |-
+                                =If(
+                                    gvarTransactionsFilter.CategoriesChecked,
+                                    Not(gvarTransactionsFilter.Categories)
+                                )
+                              FontSize: =30
+                              Height: =60
+                              Label: =
+                              LabelPosition: ='Toggle.LabelPosition'.After
+                              ToggleSize: =80
+                              Width: =100
+                              X: =90
+                              Y: =760
+                        - CategoryFilterCheckbox:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              CheckboxBorderColor: =RGBA(79, 90, 94, 1)
+                              CheckboxSize: =50
+                              CheckmarkFill: =RGBA(123, 94, 87, 1)
+                              Default: =gvarTransactionsFilter.CategoriesChecked
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: =
+                              PaddingLeft: =20
+                              PressedBorderColor: =Self.BorderColor
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              Text: =
+                              Width: =90
+                              Y: =700
+                        - CategoryFilterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =60
+                              Size: =20
+                              Text: |-
+                                =If(
+                                    CategoryFilterInput.Checked,
+                                    "Missing Category",
+                                    "Has Category"
+                                )
+                              Width: =Parent.Width - Self.X*2
+                              X: =90
+                              Y: =700
+                        - PendingFilterInput:
+                            Control: Toggle@1.1.5
+                            Properties:
+                              Checked: =If(gvarTransactionsFilter.PendingChecked, First(gvarTransactionsFilter.Pending).Value)
+                              FontSize: =30
+                              Height: =60
+                              Label: =
+                              LabelPosition: ='Toggle.LabelPosition'.After
+                              ToggleSize: =80
+                              Width: =100
+                              X: =90
+                              Y: =605
+                        - PendingFilterCheckbox:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              CheckboxBorderColor: =RGBA(79, 90, 94, 1)
+                              CheckboxSize: =50
+                              CheckmarkFill: =RGBA(123, 94, 87, 1)
+                              Default: =gvarTransactionsFilter.PendingChecked
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: =
+                              PaddingLeft: =20
+                              PressedBorderColor: =Self.BorderColor
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              Text: =
+                              Width: =90
+                              Y: =545
+                        - PendingFilterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =60
+                              Size: =20
+                              Text: |-
+                                =If(
+                                    PendingFilterInput.Checked,
+                                    "Pending",
+                                    "Posted"
+                                )
+                              Width: =Parent.Width - Self.X*2
+                              X: =90
+                              Y: =545
+                        - SecondAmountFilterInput:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: |-
+                                =If(
+                                    And(
+                                        varAmountError,
+                                        IsBlank(Self.Text),
+                                        AmountFilterCheckbox.Value
+                                    ),
+                                    RGBA(
+                                        196,
+                                        154,
+                                        90,
+                                        1
+                                    ),
+                                    RGBA(
+                                        166,
+                                        166,
+                                        166,
+                                        1
+                                    )
+                                )
+                              Default: =If(gvarTransactionsFilter.AmountChecked, gvarTransactionsFilter.SecondAmount)
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Format: =TextFormat.Number
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              PaddingBottom: =0
+                              PaddingLeft: =20
+                              PaddingRight: =20
+                              PaddingTop: =0
+                              PressedBorderColor: =Self.BorderColor
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Reset: =varReset
+                              Size: =20
+                              Visible: =varFilterType.Amount = "Between"
+                              Width: =200
+                              X: =320
+                              Y: =450
+                        - FirstAmountFilterInput:
+                            Control: Classic/TextInput@2.3.2
+                            Properties:
+                              BorderColor: |-
+                                =If(
+                                    And(
+                                        varAmountError,
+                                        IsBlank(Self.Text),
+                                        AmountFilterCheckbox.Value
+                                    ),
+                                    RGBA(
+                                        196,
+                                        154,
+                                        90,
+                                        1
+                                    ),
+                                    RGBA(
+                                        166,
+                                        166,
+                                        166,
+                                        1
+                                    )
+                                )
+                              Default: =If(gvarTransactionsFilter.AmountChecked, gvarTransactionsFilter.FirstAmount)
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Format: =TextFormat.Number
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              PaddingBottom: =0
+                              PaddingLeft: =20
+                              PaddingRight: =20
+                              PaddingTop: =0
+                              PressedBorderColor: =Self.BorderColor
+                              RadiusBottomLeft: =20
+                              RadiusBottomRight: =20
+                              RadiusTopLeft: =20
+                              RadiusTopRight: =20
+                              Reset: =varReset
+                              Size: =20
+                              Width: =200
+                              X: =90
+                              Y: =450
+                        - AmountFilterCheckbox:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              CheckboxBorderColor: =RGBA(79, 90, 94, 1)
+                              CheckboxSize: =50
+                              CheckmarkFill: =RGBA(123, 94, 87, 1)
+                              Default: =gvarTransactionsFilter.AmountChecked
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: =
+                              PaddingLeft: =20
+                              PressedBorderColor: =Self.BorderColor
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              Text: =
+                              Width: =90
+                              Y: =390
+                        - AmountFilterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =60
+                              Size: =20
+                              Text: ="Amount"
+                              Width: =Parent.Width - Self.X*2
+                              X: =90
+                              Y: =390
+                        - AmountFilterType:
+                            Control: Button@0.0.45
+                            Properties:
+                              Align: =Align.Left
+                              Appearance: ='ButtonCanvas.Appearance'.Secondary
+                              BasePaletteColor: =RGBA(189, 178, 176, 1)
+                              BorderColor: =RGBA(106, 122, 127, 1)
+                              BorderRadius: =20
+                              FontSize: =21
+                              FontWeight: =FontWeight.Normal
+                              Height: =46
+                              Icon: ="AppsList"
+                              IconStyle: ='ButtonCanvas.IconStyle'.Filled
+                              Layout: ='ButtonCanvas.Layout'.IconBefore
+                              OnSelect: |-
+                                =UpdateContext(
+                                    {
+                                        varFilterType: {
+                                            Field: "Amount",
+                                            Date: varFilterType.Date,
+                                            Amount: varFilterType.Amount
+                                        }
+                                    }
+                                )
+                              PaddingLeft: =20
+                              PaddingRight: =20
+                              Text: =varFilterType.Amount
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: |-
+                                =If(
+                                    Or(
+                                        varFilterType.Amount = "Between",
+                                        varFilterType.Amount = "Equal To"
+                                    ),
+                                    150,
+                                    275
+                                )
+                              X: =200
+                              Y: =397
+                        - SecondDateFilterInput:
+                            Control: Classic/DatePicker@2.6.0
+                            Properties:
+                              BorderColor: |-
+                                =If(
+                                    And(
+                                        varDateError,
+                                        IsBlank(Self.SelectedDate),
+                                        DateFilterCheckbox.Value
+                                    ),
+                                    RGBA(
+                                        196,
+                                        154,
+                                        90,
+                                        1
+                                    ),
+                                    RGBA(
+                                        166,
+                                        166,
+                                        166,
+                                        1
+                                    )
+                                )
+                              DefaultDate: =If(gvarTransactionsFilter.DateChecked, gvarTransactionsFilter.SecondDate)
+                              EndYear: =Year(Today())
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderColor: =Self.HoverBorderColor
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Format: ="m/d/yyyy"
+                              Height: =60
+                              IconBackground: =Self.Fill
+                              IconFill: =Self.BorderColor
+                              InputTextPlaceholder: =
+                              IsEditable: =true
+                              OnChange: |-
+                                =If(
+                                    Self.SelectedDate > Today(),
+                                    Concurrent(
+                                        Notify(
+                                            "Can't pick a date greater than today.",
+                                            NotificationType.Warning
+                                        ),
+                                        Reset(Self)
+                                    )
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =10
+                              PaddingRight: =10
+                              Reset: =varReset
+                              Size: =20
+                              StartYear: =2020
+                              Visible: =varFilterType.Date = "Between"
+                              Width: =215
+                              X: =305
+                              Y: =295
+                        - FirstDateFilterInput:
+                            Control: Classic/DatePicker@2.6.0
+                            Properties:
+                              BorderColor: |-
+                                =If(
+                                    And(
+                                        varDateError,
+                                        IsBlank(Self.SelectedDate),
+                                        DateFilterCheckbox.Value
+                                    ),
+                                    RGBA(
+                                        196,
+                                        154,
+                                        90,
+                                        1
+                                    ),
+                                    RGBA(
+                                        166,
+                                        166,
+                                        166,
+                                        1
+                                    )
+                                )
+                              DefaultDate: =If(gvarTransactionsFilter.DateChecked, gvarTransactionsFilter.FirstDate)
+                              EndYear: =Year(Today())
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderColor: =Self.HoverBorderColor
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Format: ="m/d/yyyy"
+                              Height: =60
+                              IconBackground: =Self.Fill
+                              IconFill: =Self.BorderColor
+                              InputTextPlaceholder: =
+                              IsEditable: =true
+                              OnChange: |-
+                                =If(
+                                    Self.SelectedDate > Today(),
+                                    Concurrent(
+                                        Notify(
+                                            "Can't pick a date greater than today.",
+                                            NotificationType.Warning
+                                        ),
+                                        Reset(Self)
+                                    )
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =10
+                              PaddingRight: =10
+                              Reset: =varReset
+                              Size: =20
+                              StartYear: =2020
+                              Width: =215
+                              X: =90
+                              Y: =295
+                        - DateFilterCheckbox:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              CheckboxBorderColor: =RGBA(79, 90, 94, 1)
+                              CheckboxSize: =50
+                              CheckmarkFill: =RGBA(123, 94, 87, 1)
+                              Default: =gvarTransactionsFilter.DateChecked
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: =
+                              PaddingLeft: =20
+                              PressedBorderColor: =Self.BorderColor
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              Text: =
+                              Width: =90
+                              Y: =235
+                        - DateFilterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =60
+                              Size: =20
+                              Text: ="Date"
+                              Width: =Parent.Width - Self.X*2
+                              X: =90
+                              Y: =235
+                        - DateFilterType:
+                            Control: Button@0.0.45
+                            Properties:
+                              Align: =Align.Left
+                              Appearance: ='ButtonCanvas.Appearance'.Secondary
+                              BasePaletteColor: =RGBA(189, 178, 176, 1)
+                              BorderColor: =RGBA(106, 122, 127, 1)
+                              BorderRadius: =20
+                              FontSize: =21
+                              FontWeight: =FontWeight.Normal
+                              Height: =46
+                              Icon: ="AppsList"
+                              IconStyle: ='ButtonCanvas.IconStyle'.Filled
+                              Layout: ='ButtonCanvas.Layout'.IconBefore
+                              OnSelect: |-
+                                =UpdateContext(
+                                    {
+                                        varFilterType: {
+                                            Field: "Date",
+                                            Date: varFilterType.Date,
+                                            Amount: varFilterType.Amount
+                                        }
+                                    }
+                                )
+                              PaddingLeft: =20
+                              PaddingRight: =20
+                              Text: =varFilterType.Date
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: |-
+                                =If(
+                                    Or(
+                                        varFilterType.Date = "Between",
+                                        varFilterType.Date = "Equal To"
+                                    ),
+                                    150,
+                                    275
+                                )
+                              X: =160
+                              Y: =242
+                        - AccountFilterInput:
+                            Control: Classic/ComboBox@2.4.0
+                            Properties:
+                              BorderColor: =RGBA(166,166,166,1)
+                              ChevronBackground: =RGBA(0, 0, 0, 0)
+                              ChevronFill: =RGBA(0, 0, 0, 0)
+                              ChevronHoverBackground: =Self.ChevronBackground
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              DefaultSelectedItems: =If(gvarTransactionsFilter.AccountChecked, gvarTransactionsFilter.Accounts)
+                              DisplayFields: =["mda_name","mda_institutionname"]
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              IsSearchable: =false
+                              Items: |-
+                                =SortByColumns(
+                                    Filter(
+                                        BankAccounts,
+                                        AccessToken.Profile.Guid = gvarSelectedRole.Profile.Guid
+                                    ),
+                                    "mda_institutionname",
+                                    SortOrder.Ascending,
+                                    "mda_name",
+                                    SortOrder.Ascending
+                                )
+                              PressedColor: =Self.Color
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              SearchFields: =["mda_name"]
+                              SelectionColor: =Self.HoverColor
+                              SelectionFill: =Self.HoverFill
+                              Width: =430
+                              X: =90
+                              Y: =140
+                        - AccountFilterCheckbox:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              CheckboxBorderColor: =RGBA(79, 90, 94, 1)
+                              CheckboxSize: =50
+                              CheckmarkFill: =RGBA(123, 94, 87, 1)
+                              Default: =gvarTransactionsFilter.AccountChecked
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: =
+                              PaddingLeft: =20
+                              PressedBorderColor: =Self.BorderColor
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              Text: =
+                              Width: =90
+                              Y: =80
+                        - AccountFilterLabel:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =60
+                              Size: =20
+                              Text: ="Accounts"
+                              Width: =Parent.Width - Self.X*2
+                              X: =90
+                              Y: =80
+                        - FilterTypeGalleryContainer:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              DropShadow: =DropShadow.None
+                              Fill: =RGBA(255, 255, 255, 1)
+                              Height: =Parent.Height
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Visible: =Not(IsBlank(varFilterType.Field))
+                              Width: =Parent.Width
+                            Children:
+                              - FilterTypeGallery:
+                                  Control: Gallery@2.15.0
+                                  Variant: Vertical
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    BorderStyle: =BorderStyle.None
+                                    Default: |-
+                                      =If(
+                                          varFilterType.Field = "Date",
+                                          {Value: varFilterType.Date},
+                                          {Value: varFilterType.Amount}
+                                      )
+                                    Height: =Self.TemplateHeight*4
+                                    Items: |-
+                                      =Sort(
+                                          [
+                                              "Greater Than or Equal",
+                                              "Less Than or Equal",
+                                              "Equal To",
+                                              "Between"
+                                          ],
+                                          Value,
+                                          SortOrder.Ascending
+                                      )
+                                    ShowScrollbar: =false
+                                    TemplatePadding: =0
+                                    TemplateSize: =125
+                                    Width: |-
+                                      =Min(
+                                          Parent.Width,
+                                          500
+                                      )
+                                    WrapCount: =0
+                                    X: =Parent.Width / 2 - Self.Width/2
+                                    Y: =Parent.Height /2 - Self.Height /2
+                                  Children:
+                                    - FilterTypeContainer:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: ManualLayout
+                                        Properties:
+                                          BorderColor: =RGBA(79, 90, 94, 1)
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.Regular
+                                          Fill: |-
+                                            =If(
+                                                ThisItem.IsSelected,
+                                                RGBA(
+                                                    244,
+                                                    240,
+                                                    234,
+                                                    1
+                                                ),
+                                                RGBA(
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0
+                                                )
+                                            )
+                                          Height: =Parent.TemplateHeight - Self.Y*2
+                                          RadiusBottomLeft: =20
+                                          RadiusBottomRight: =20
+                                          RadiusTopLeft: =20
+                                          RadiusTopRight: =20
+                                          Width: =Parent.Width - Self.X*2
+                                          X: =25
+                                          Y: =25
+                                        Children:
+                                          - FilterTypeLabel:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                BorderColor: =RGBA(0, 0, 0, 0)
+                                                Font: =Font.'Open Sans'
+                                                Height: =Parent.Height
+                                                OnSelect: |-
+                                                  =UpdateContext(
+                                                      {
+                                                          varFilterType: {
+                                                              Field: Blank(),
+                                                              Date: If(
+                                                                  varFilterType.Field = "Date",
+                                                                  ThisItem.Value,
+                                                                  varFilterType.Date
+                                                              ),
+                                                              Amount: If(
+                                                                  varFilterType.Field = "Amount",
+                                                                  ThisItem.Value,
+                                                                  varFilterType.Amount
+                                                              )
+                                                          }
+                                                      }
+                                                  )
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Text: =ThisItem.Value
+                                                Width: =Parent.Width

@@ -1,0 +1,579 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps-1": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0-1": {
+        "api": {
+          "name": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+          "logicalName": "mda_plaid"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Plaid"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_powerappsnotification-1": {
+        "api": {
+          "name": "shared_powerappsnotification"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_PushNotification"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "Plaid Client Id (mda_PlaidClientId)": {
+          "defaultValue": "N/A",
+          "type": "String",
+          "metadata": {
+            "schemaName": "mda_PlaidClientId",
+            "description": "This is your Plaid client identifier. Provided by Plaid."
+          }
+        },
+        "Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)": {
+          "defaultValue": "N/A",
+          "type": "String",
+          "metadata": {
+            "schemaName": "mda_PlaidSecretKeyPlainText",
+            "description": "In case you'd rather not configure an Azure Key Vault, this will be used instead. If a valid Azure Key Vault reference is provided, that will be used in lieu of this."
+          }
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "1ca7b2fd-d6fb-4445-8292-07afd7786d8f"
+          },
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "description": "User Guid",
+                  "title": "UserGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": []
+            }
+          }
+        }
+      },
+      "actions": {
+        "For_Each_Institution": {
+          "foreach": "@outputs('Get_Institutions')?['body/value']",
+          "actions": {
+            "Find_Existing_Reference": {
+              "metadata": {
+                "operationMetadataId": "52439f99-e552-4b8d-ac01-feb9b5f111e3"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_accesstokens",
+                  "$filter": "mda_Institution/mda_plaidinstitutionid eq '@{item()?['mda_plaidinstitutionid']}'",
+                  "$top": 1,
+                  "x-ms-odata-metadata-full": false
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            },
+            "Existing_Reference_Exists": {
+              "actions": {
+                "Get_Institution_By_ID": {
+                  "metadata": {
+                    "operationMetadataId": "dcf746c5-935c-4d57-bce4-e9273060037d"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "body/institution_id": "@item()?['mda_plaidinstitutionid']",
+                      "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                      "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                      "body/country_codes": [
+                        "US"
+                      ],
+                      "body/options/include_optional_metadata": true
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                      "operationId": "GetInstitutionById",
+                      "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0-1"
+                    }
+                  },
+                  "runtimeConfiguration": {
+                    "secureData": {
+                      "properties": [
+                        "inputs"
+                      ]
+                    }
+                  }
+                },
+                "Update_Institution": {
+                  "runAfter": {
+                    "Get_Institution_By_ID": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "630c62ea-f4bf-4f86-acfa-9d7669eba156"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "mda_institutions",
+                      "recordId": "@item()?['mda_institutionid']",
+                      "x-ms-odata-metadata-full": false,
+                      "item/mda_name": "@outputs('Get_Institution_By_ID')?['body/institution/name']",
+                      "item/mda_primarycolor": "@outputs('Get_Institution_By_ID')?['body/institution/primary_color']",
+                      "item/mda_routingnumbers": "@join(outputs('Get_Institution_By_ID')?['body/institution/routing_numbers'],';')",
+                      "item/mda_url": "@outputs('Get_Institution_By_ID')?['body/institution/url']",
+                      "item/mda_logo": "@outputs('Get_Institution_By_ID')?['body/institution/logo']"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "UpdateOnlyRecord",
+                      "connectionName": "shared_commondataserviceforapps-1"
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Find_Existing_Reference": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "Remove_Institution": {
+                    "metadata": {
+                      "operationMetadataId": "f9a02700-a3d8-4e0c-b3a7-0d69112457e1"
+                    },
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "parameters": {
+                        "entityName": "mda_institutions",
+                        "recordId": "@item()?['mda_institutionid']"
+                      },
+                      "host": {
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                        "operationId": "DeleteRecord",
+                        "connectionName": "shared_commondataserviceforapps-1"
+                      }
+                    }
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(outputs('Find_Existing_Reference')?['body/value'])",
+                      "@false"
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "50133517-eabb-45bf-9a62-6c3e275948a3"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Get_Plaid_Secret_Key": [
+              "Succeeded",
+              "Failed"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d1f61dfc-79d6-41ce-9fd0-0f2c82f7583f"
+          },
+          "type": "Foreach"
+        },
+        "User_Guid_was_provided": {
+          "actions": {
+            "Send_push_on_success": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "payload/recipients": [
+                    "@triggerBody()?['text']"
+                  ],
+                  "payload/message": "Institutions refreshed",
+                  "payload/openApp": false
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                  "operationId": "SendPushNotification",
+                  "connectionName": "shared_powerappsnotification-1"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "For_Each_Institution": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {}
+          },
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@empty(triggerBody()?['text'])",
+                  "@false"
+                ]
+              }
+            ]
+          },
+          "type": "If"
+        },
+        "On_failure": {
+          "actions": {
+            "Flow_run_metadata": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Log_error": {
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            },
+            "User_Guid_was_provided_(failure)": {
+              "actions": {
+                "Send_push_on_failure": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "payload/recipients": [
+                        "@triggerBody()?['text']"
+                      ],
+                      "payload/message": "Error: Instutution refresh failed",
+                      "payload/openApp": false
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                      "operationId": "SendPushNotification",
+                      "connectionName": "shared_powerappsnotification-1"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(triggerBody()?['text'])",
+                      "@false"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "User_Guid_was_provided": [
+              "TimedOut",
+              "Skipped",
+              "Failed"
+            ]
+          },
+          "type": "Scope"
+        },
+        "Terminate_on_Error": {
+          "runAfter": {
+            "On_failure": [
+              "TimedOut",
+              "Failed",
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "33513984-64fb-4095-9e05-225fa375364a"
+          },
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed"
+          }
+        },
+        "License_check": {
+          "actions": {
+            "Check_for_license": {
+              "metadata": {
+                "operationMetadataId": "d5e28c8e-1e6f-4182-a096-12d47f83cec0"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "actionName": "ian_IanusLicenseValidation",
+                  "item/PublisherId": "bc2bd1f6-d301-446e-bc31-7324d15e89eb",
+                  "item/PublicKeys": [
+                    "@'-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsVbi3L74u0xMwBBsPcQ0\r\nC5oCEbGVybP+XE/zCPbQPb5qf/9BtElaPUyTTcDXNqYoACgQMQ7wEYsw+ZA6wNpi\r\nTbGNyAfs/ZqPWv8SF2UMPJSvajZftgXJKZx8WpE52+gt/cKOewwWUd9S380FbLk8\r\nGrI99OrY07XWgneV1VwGPP4LW9wi3E2Kyms5uG8bTa80fau3z8ZBCk7gCYJsMVn8\r\nSH6kBF7nvNjHkN5lyrwV2Sphzrxuwc/B1jVeGu6RK1xJNKaNvMCUCcO9qlrD1+Yi\r\njrLCHK7li93gWVU7DHn2xd8U8yrZK5vAqOeEZKUp1QrijBWDL8i4/8RE+TCpXX0B\r\n8QIDAQAB\r\n-----END PUBLIC KEY-----'"
+                  ],
+                  "item/ProductId": "6c27ac1c-e7e8-429c-b0f2-42ea8cce3066"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "PerformUnboundAction",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            },
+            "License_is_Valid": {
+              "actions": {},
+              "runAfter": {
+                "Check_for_license": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "Unlicensed_Failure": {
+                    "runAfter": {
+                      "Unlicensed_Response": [
+                        "Succeeded"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "ff5cac30-171a-4f5f-bc44-2ae5427576d6"
+                    },
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Failed",
+                      "runError": {
+                        "message": "Unlicensed"
+                      }
+                    }
+                  },
+                  "Unlicensed_Response": {
+                    "type": "Response",
+                    "kind": "Http",
+                    "inputs": {
+                      "statusCode": 400,
+                      "body": {
+                        "message": "Riata is missing its proper license."
+                      },
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@outputs('Check_for_license')?['body/IsValid']",
+                      "@true"
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6923beac-75f8-4fc8-b562-dacd96170a03"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "486438a8-fcb6-4caf-ae65-b8a21e31cce2"
+          },
+          "type": "Scope"
+        },
+        "Get_Plaid_Secret_Key": {
+          "runAfter": {
+            "Get_Institutions": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "actionName": "RetrieveEnvironmentVariableSecretValue",
+              "item/EnvironmentVariableName": "mda_PlaidSecretKeyVault"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "PerformUnboundAction",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runtimeConfiguration": {
+            "secureData": {
+              "properties": [
+                "outputs"
+              ]
+            }
+          }
+        },
+        "Get_Institutions": {
+          "runAfter": {
+            "Async_Response": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "24bddaa0-0c2a-42ef-b29a-fd04ea2e0f92"
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "mda_institutions",
+              "$select": "mda_institutionid,mda_plaidinstitutionid",
+              "x-ms-odata-metadata-full": false
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          }
+        },
+        "Async_Response": {
+          "runAfter": {
+            "License_check": [
+              "Succeeded"
+            ]
+          },
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 202
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

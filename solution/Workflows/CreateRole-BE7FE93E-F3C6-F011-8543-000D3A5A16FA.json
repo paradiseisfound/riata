@@ -1,0 +1,337 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps-1": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "description": "Profile Guid",
+                  "title": "ProfileGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_1": {
+                  "description": "User Guid",
+                  "title": "UserGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text",
+                "text_1"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "cfecf7ef-676c-42cd-bc56-da2c41e7e138"
+          }
+        }
+      },
+      "actions": {
+        "Create_role": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "mda_roles",
+              "x-ms-odata-metadata-full": false,
+              "item/mda_accountowner": false,
+              "item/mda_id": "@null",
+              "item/mda_Profile@odata.bind": "/mda_profiles(@{triggerBody()?['text']})",
+              "item/mda_UserId@odata.bind": "/systemusers(azureactivedirectoryobjectid=@{triggerBody()?['text_1']})"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "CreateRecord",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runAfter": {
+            "License_check": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "64e78064-017c-4ca1-b3d3-af013646e934"
+          }
+        },
+        "License_check": {
+          "type": "Scope",
+          "actions": {
+            "Check_for_license": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "actionName": "ian_IanusLicenseValidation",
+                  "item/PublisherId": "bc2bd1f6-d301-446e-bc31-7324d15e89eb",
+                  "item/PublicKeys": [
+                    "@'-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsVbi3L74u0xMwBBsPcQ0\r\nC5oCEbGVybP+XE/zCPbQPb5qf/9BtElaPUyTTcDXNqYoACgQMQ7wEYsw+ZA6wNpi\r\nTbGNyAfs/ZqPWv8SF2UMPJSvajZftgXJKZx8WpE52+gt/cKOewwWUd9S380FbLk8\r\nGrI99OrY07XWgneV1VwGPP4LW9wi3E2Kyms5uG8bTa80fau3z8ZBCk7gCYJsMVn8\r\nSH6kBF7nvNjHkN5lyrwV2Sphzrxuwc/B1jVeGu6RK1xJNKaNvMCUCcO9qlrD1+Yi\r\njrLCHK7li93gWVU7DHn2xd8U8yrZK5vAqOeEZKUp1QrijBWDL8i4/8RE+TCpXX0B\r\n8QIDAQAB\r\n-----END PUBLIC KEY-----'"
+                  ],
+                  "item/ProductId": "6c27ac1c-e7e8-429c-b0f2-42ea8cce3066"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "PerformUnboundAction",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "d5e28c8e-1e6f-4182-a096-12d47f83cec0"
+              }
+            },
+            "License_is_Valid": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@outputs('Check_for_license')?['body/IsValid']",
+                      "@true"
+                    ]
+                  }
+                ]
+              },
+              "actions": {},
+              "else": {
+                "actions": {
+                  "Unlicensed_Failure": {
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Failed",
+                      "runError": {
+                        "message": "Unlicensed"
+                      }
+                    },
+                    "runAfter": {
+                      "Unlicensed_Response": [
+                        "SUCCEEDED"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "ff5cac30-171a-4f5f-bc44-2ae5427576d6"
+                    }
+                  },
+                  "Unlicensed_Response": {
+                    "type": "Response",
+                    "kind": "Http",
+                    "inputs": {
+                      "statusCode": 400,
+                      "body": {
+                        "message": "Riata is missing its proper license."
+                      },
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Check_for_license": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6923beac-75f8-4fc8-b562-dacd96170a03"
+              }
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "486438a8-fcb6-4caf-ae65-b8a21e31cce2"
+          }
+        },
+        "On_failure": {
+          "type": "Scope",
+          "actions": {
+            "Flow_run_metadata": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "2e7f2cb6-e958-4c03-96e6-7b6379327a18"
+              }
+            },
+            "Terminate_on_Error": {
+              "type": "Terminate",
+              "inputs": {
+                "runStatus": "Failed"
+              },
+              "runAfter": {
+                "Log_error": [
+                  "Succeeded",
+                  "Failed",
+                  "TimedOut"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "33513984-64fb-4095-9e05-225fa375364a"
+              }
+            },
+            "Log_error": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              },
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "1cd7287c-3fdc-4492-be56-1366572c1315"
+              }
+            },
+            "Failed_Response": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 500
+              }
+            }
+          },
+          "runAfter": {
+            "Response": [
+              "TimedOut",
+              "Failed",
+              "Skipped"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "596fa008-c6f2-43a0-b62f-b672f9edaf39"
+          }
+        },
+        "Response": {
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 200
+          },
+          "runAfter": {
+            "Create_role": [
+              "Succeeded"
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="mda_PlaidSecretKeyVault">
+  <description default="/subscriptions/ [subscription id] /resourceGroups/ [resource group name] /providers/Microsoft.KeyVault/vaults/ [vault name] /secrets/ [secret name]            This is the key/token necessary to make Plaid API calls. This is provided by Plaid, and can be rotated in the Plaid developer portal.">
+    <label description="/subscriptions/ [subscription id] /resourceGroups/ [resource group name] /providers/Microsoft.KeyVault/vaults/ [vault name] /secrets/ [secret name]            This is the key/token necessary to make Plaid API calls. This is provided by Plaid, and can be rotated in the Plaid developer portal." languagecode="1033" />
+  </description>
+  <displayname default="Plaid Secret Key (Vault)">
+    <label description="Plaid Secret Key (Vault)" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.4.3.2</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000005</type>
+</environmentvariabledefinition>

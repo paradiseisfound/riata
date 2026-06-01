@@ -1,0 +1,815 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps-1": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_webcontents": {
+        "api": {
+          "name": "shared_webcontents"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_BatchPatch"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_powerappsnotification-1": {
+        "api": {
+          "name": "shared_powerappsnotification"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_PushNotification"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "description": "User Guid",
+                  "title": "UserGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": []
+            }
+          }
+        }
+      },
+      "actions": {
+        "Initialize_Incremental_Date": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Incremental Date",
+                "type": "string"
+              }
+            ]
+          },
+          "runAfter": {
+            "Async_Response": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "9913ee5d-d97f-4c56-833c-b2e99c067cbc"
+          }
+        },
+        "Recurrence_Table": {
+          "type": "Compose",
+          "inputs": [
+            {
+              "recurrenceValue": 0,
+              "functionInterval": "Day",
+              "intervalMultiplier": 1
+            },
+            {
+              "recurrenceValue": 1,
+              "functionInterval": "Day",
+              "intervalMultiplier": 7
+            },
+            {
+              "recurrenceValue": 2,
+              "functionInterval": "Day",
+              "intervalMultiplier": 14
+            },
+            {
+              "recurrenceValue": 3,
+              "functionInterval": "Month",
+              "intervalMultiplier": 1
+            },
+            {
+              "recurrenceValue": 4,
+              "functionInterval": "Month",
+              "intervalMultiplier": 1
+            },
+            {
+              "recurrenceValue": 5,
+              "functionInterval": "Month",
+              "intervalMultiplier": 2
+            },
+            {
+              "recurrenceValue": 6,
+              "functionInterval": "Month",
+              "intervalMultiplier": 3
+            },
+            {
+              "recurrenceValue": 7,
+              "functionInterval": "Month",
+              "intervalMultiplier": 6
+            },
+            {
+              "recurrenceValue": 8,
+              "functionInterval": "Year",
+              "intervalMultiplier": 1
+            }
+          ],
+          "runAfter": {
+            "Initialize_Batch_Patch_Body": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d07a5464-cec7-4e82-9d8a-b08702ed54c0"
+          }
+        },
+        "Initialize_Batch_Patch_Body": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Batch Patch Body",
+                "type": "string"
+              }
+            ]
+          },
+          "runAfter": {
+            "Initialize_Counter": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "6177b787-ede2-4016-873e-db5973050376"
+          }
+        },
+        "For_each_budget": {
+          "type": "Foreach",
+          "foreach": "@outputs('Get_budgets_with_an_infinite_recurrence')?['body/value']",
+          "actions": {
+            "Get_max_date_entry": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_budgetentries",
+                  "fetchXml": "<fetch top=\"1\">\n  <entity name=\"mda_budgetentry\">\n    <attribute name=\"mda_date\"/>\n    <filter>\n      <condition attribute=\"mda_budget\" operator=\"eq\" value=\"@{item()?['mda_budgetid']}\" />\n    </filter>\n   <order attribute=\"mda_date\" descending=\"true\"/>\n  </entity>\n</fetch>",
+                  "x-ms-odata-metadata-full": false
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "ListRecords",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "f4f9b68b-706d-49f5-8e91-ee3e036a279d"
+              }
+            },
+            "Max_date_is_5_years_from_today": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "greater": [
+                      "@coalesce(first(outputs('Get_max_date_entry')?['body/value'])?['mda_date'],item()?['mda_date'])",
+                      "@formatDateTime(addToTime(utcNow(), 5, 'Year'), 'yyyy-MM-ddT00:00:00Z')"
+                    ]
+                  }
+                ]
+              },
+              "actions": {},
+              "else": {
+                "actions": {
+                  "Set_Batch_Patch_Body": {
+                    "type": "SetVariable",
+                    "inputs": {
+                      "name": "Batch Patch Body",
+                      "value": "POST [Organization Uri]/api/data/v9.2/$batch HTTP/1.1\nOData-MaxVersion: 4.0\nOData-Version: 4.0\nIf-None-Match: null\nAccept: application/json\nContent-Type: multipart/mixed; boundary=\"batch_body\"\n\n--batch_body\nContent-Type: multipart/mixed; boundary=\"changeset_body\""
+                    },
+                    "metadata": {
+                      "operationMetadataId": "8c0453cc-348e-47db-b483-ac601ffff350"
+                    }
+                  },
+                  "End_Batch_Patch_Body": {
+                    "type": "AppendToStringVariable",
+                    "inputs": {
+                      "name": "Batch Patch Body",
+                      "value": "\n\n--changeset_body--\n\n\n--batch_body--\n\n\n\n"
+                    },
+                    "runAfter": {
+                      "Create_occurrences_until": [
+                        "Succeeded"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "9e2930a3-ec0d-4ca2-aff1-d368a31c07ee"
+                    }
+                  },
+                  "DEBUG_BATCH_OBJECT": {
+                    "type": "Compose",
+                    "inputs": "@variables('Batch Patch Body')",
+                    "runAfter": {
+                      "End_Batch_Patch_Body": [
+                        "Succeeded"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "eceea324-3e08-401b-9ba0-cec5c9b4c6ce"
+                    }
+                  },
+                  "Lookup_recurrence_table": {
+                    "type": "Query",
+                    "inputs": {
+                      "from": "@outputs('Recurrence_Table')",
+                      "where": "@equals(item()?['recurrenceValue'],items('For_each_budget')?['mda_recurrence'])"
+                    },
+                    "runAfter": {
+                      "Set_Batch_Patch_Body": [
+                        "Succeeded"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "32bba65b-dc0a-4bc0-a0a7-cad0a5f476d5"
+                    }
+                  },
+                  "Create_occurrences_until": {
+                    "type": "Until",
+                    "expression": "@greaterOrEquals(variables('Incremental Date'),formatDateTime(addToTime(utcNow(), 5, 'Year'), 'yyyy-MM-ddT00:00:00Z'))",
+                    "limit": {
+                      "count": 5000,
+                      "timeout": "PT1H"
+                    },
+                    "actions": {
+                      "Set_Incremental_Date": {
+                        "type": "SetVariable",
+                        "inputs": {
+                          "name": "Incremental Date",
+                          "value": "@coalesce(\r\n  outputs('Increment_semi-monthly_date_by_whole_month'),\r\n  outputs('Increment_semi-monthly_date_by_month_less_15_days'),\r\n  outputs('Increment_non-semi-monthly_date')\r\n)"
+                        },
+                        "runAfter": {
+                          "Recurrence_is_semi-monthly": [
+                            "Succeeded"
+                          ]
+                        },
+                        "metadata": {
+                          "operationMetadataId": "3551394a-6b2b-4522-8d84-26ad66020b42"
+                        }
+                      },
+                      "Append_to_Batch_Patch_Body": {
+                        "type": "AppendToStringVariable",
+                        "inputs": {
+                          "name": "Batch Patch Body",
+                          "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{guid()}\n\nPOST /api/data/v9.2/mda_budgetentries HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"mda_date\": \"@{formatDateTime(variables('Incremental Date'),'yyyy-MM-dd')}\",\n  \"mda_Budget@odata.bind\": \"/mda_budgets(@{item()?['mda_budgetid']})\"\n}"
+                        },
+                        "runAfter": {
+                          "Set_Incremental_Date": [
+                            "Succeeded"
+                          ]
+                        },
+                        "metadata": {
+                          "operationMetadataId": "76e46131-b506-4d72-ab68-65eaeb538252"
+                        }
+                      },
+                      "Recurrence_is_semi-monthly": {
+                        "type": "If",
+                        "expression": {
+                          "and": [
+                            {
+                              "equals": [
+                                "@items('For_each_budget')?['mda_recurrence']",
+                                3
+                              ]
+                            }
+                          ]
+                        },
+                        "actions": {
+                          "Counter_not_yet_set": {
+                            "type": "If",
+                            "expression": {
+                              "and": [
+                                {
+                                  "equals": [
+                                    "@variables('Counter')",
+                                    -1
+                                  ]
+                                }
+                              ]
+                            },
+                            "actions": {
+                              "Get_count_of_semi-monthly_occurrences": {
+                                "type": "OpenApiConnection",
+                                "inputs": {
+                                  "parameters": {
+                                    "entityName": "mda_budgetentries",
+                                    "fetchXml": "<fetch aggregate=\"true\">\n  <entity name=\"mda_budgetentry\">\n<filter>\n      <condition attribute=\"mda_budget\" operator=\"eq\" value=\"@{item()?['mda_budgetid']}\" />\n    </filter>\n    <attribute name=\"mda_budgetentryid\" alias=\"count\"\n      aggregate=\"count\"/>\n  </entity>\n</fetch>",
+                                    "x-ms-odata-metadata-full": false
+                                  },
+                                  "host": {
+                                    "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                    "operationId": "ListRecords",
+                                    "connectionName": "shared_commondataserviceforapps-1"
+                                  }
+                                }
+                              },
+                              "Set_Counter": {
+                                "type": "SetVariable",
+                                "inputs": {
+                                  "name": "Counter",
+                                  "value": "@first(outputs('Get_count_of_semi-monthly_occurrences')?['body/value'])?['count']"
+                                },
+                                "runAfter": {
+                                  "Get_count_of_semi-monthly_occurrences": [
+                                    "Succeeded"
+                                  ]
+                                }
+                              }
+                            },
+                            "else": {
+                              "actions": {
+                                "Increment_Counter": {
+                                  "type": "IncrementVariable",
+                                  "inputs": {
+                                    "name": "Counter",
+                                    "value": 1
+                                  }
+                                }
+                              }
+                            }
+                          },
+                          "Counter_is_even": {
+                            "type": "If",
+                            "expression": {
+                              "and": [
+                                {
+                                  "equals": [
+                                    "@mod(variables('Counter'),2)",
+                                    0
+                                  ]
+                                }
+                              ]
+                            },
+                            "actions": {
+                              "Increment_semi-monthly_date_by_whole_month": {
+                                "type": "Compose",
+                                "inputs": "@addToTime(\r\n  item()?['mda_date'],\r\n  div(variables('Counter'),2),\r\n  'Month',\r\n  'yyyy-MM-ddT00:00:00Z'\r\n)\r\n",
+                                "metadata": {
+                                  "operationMetadataId": "1d6e39ca-467e-430b-a520-8ae1e33568e2"
+                                }
+                              }
+                            },
+                            "else": {
+                              "actions": {
+                                "Increment_semi-monthly_date_by_month_less_15_days": {
+                                  "type": "Compose",
+                                  "inputs": "@addToTime(\r\n  subtractFromTime(\r\n    item()?['mda_date'],\r\n    15,\r\n    'Day'),\r\n  add(int(div(variables('Counter'),2)),1),\r\n  'Month',\r\n  'yyyy-MM-ddT00:00:00Z'\r\n)",
+                                  "metadata": {
+                                    "operationMetadataId": "1d6e39ca-467e-430b-a520-8ae1e33568e2"
+                                  }
+                                }
+                              }
+                            },
+                            "runAfter": {
+                              "Counter_not_yet_set": [
+                                "Succeeded"
+                              ]
+                            }
+                          }
+                        },
+                        "else": {
+                          "actions": {
+                            "Increment_non-semi-monthly_date": {
+                              "type": "Compose",
+                              "inputs": "@addToTime(\r\n  if(\r\n    equals(variables('Incremental Date'),''),\r\n    coalesce(\r\n      first(outputs('Get_max_date_entry')?['body/value'])?['mda_date'],\r\n      item()?['mda_date']\r\n    ),\r\n    variables('Incremental Date'))\r\n  ,\r\n  if(\r\n    and(\r\n      empty(outputs('Get_max_date_entry')?['body/value']),\r\n      equals(variables('Incremental Date'),'')\r\n      ),\r\n    0,\r\n    First(body('Lookup_recurrence_table'))?['intervalMultiplier']\r\n  ),\r\n  First(body('Lookup_recurrence_table'))?['functionInterval'],\r\n  'yyyy-MM-ddT00:00:00Z'\r\n)\r\n",
+                              "metadata": {
+                                "operationMetadataId": "1d6e39ca-467e-430b-a520-8ae1e33568e2"
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "runAfter": {
+                      "Lookup_recurrence_table": [
+                        "Succeeded"
+                      ]
+                    }
+                  },
+                  "Batch_Patch": {
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "parameters": {
+                        "request/method": "POST",
+                        "request/url": "/api/data/v9.2/$batch",
+                        "request/headers": {
+                          "OData-MaxVersion": "4.0",
+                          "OData-Version": "4.0",
+                          "If-None-Match": "@{string('null')}",
+                          "Accept": "application/json",
+                          "Content-Type": "multipart/mixed;boundary=@{string('\"batch_body\"')}"
+                        },
+                        "request/body": "@variables('Batch Patch Body')"
+                      },
+                      "host": {
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_webcontents",
+                        "operationId": "InvokeHttp",
+                        "connectionName": "shared_webcontents"
+                      }
+                    },
+                    "runAfter": {
+                      "DEBUG_BATCH_OBJECT": [
+                        "Succeeded"
+                      ]
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_max_date_entry": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "e7b1fa26-1256-493a-926c-a43792199be3"
+              }
+            }
+          },
+          "runAfter": {
+            "Get_budgets_with_an_infinite_recurrence": [
+              "Succeeded"
+            ]
+          },
+          "runtimeConfiguration": {
+            "concurrency": {
+              "repetitions": 50
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "04b1cae5-5dd6-412b-979c-8e31ec592a0a"
+          }
+        },
+        "Get_budgets_with_an_infinite_recurrence": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "mda_budgets",
+              "$filter": "mda_recurs eq true and mda_recurrenceend eq null",
+              "x-ms-odata-metadata-full": false
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runAfter": {
+            "Recurrence_Table": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "540f6205-e072-43ba-a56f-371acf87e785"
+          }
+        },
+        "Initialize_Counter": {
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Counter",
+                "type": "integer",
+                "value": -1
+              }
+            ]
+          },
+          "runAfter": {
+            "Initialize_Incremental_Date": [
+              "Succeeded"
+            ]
+          }
+        },
+        "User_Guid_was_provided": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@empty(triggerBody()?['text'])",
+                  "@false"
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Send_push_on_success": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "payload/recipients": [
+                    "@triggerBody()?['text']"
+                  ],
+                  "payload/message": "Recurring budget entries extended",
+                  "payload/openApp": false
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                  "operationId": "SendPushNotification",
+                  "connectionName": "shared_powerappsnotification-1"
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "For_each_budget": [
+              "Succeeded"
+            ]
+          }
+        },
+        "License_check": {
+          "type": "Scope",
+          "actions": {
+            "Check_for_license": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "actionName": "ian_IanusLicenseValidation",
+                  "item/PublisherId": "bc2bd1f6-d301-446e-bc31-7324d15e89eb",
+                  "item/PublicKeys": [
+                    "@'-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsVbi3L74u0xMwBBsPcQ0\r\nC5oCEbGVybP+XE/zCPbQPb5qf/9BtElaPUyTTcDXNqYoACgQMQ7wEYsw+ZA6wNpi\r\nTbGNyAfs/ZqPWv8SF2UMPJSvajZftgXJKZx8WpE52+gt/cKOewwWUd9S380FbLk8\r\nGrI99OrY07XWgneV1VwGPP4LW9wi3E2Kyms5uG8bTa80fau3z8ZBCk7gCYJsMVn8\r\nSH6kBF7nvNjHkN5lyrwV2Sphzrxuwc/B1jVeGu6RK1xJNKaNvMCUCcO9qlrD1+Yi\r\njrLCHK7li93gWVU7DHn2xd8U8yrZK5vAqOeEZKUp1QrijBWDL8i4/8RE+TCpXX0B\r\n8QIDAQAB\r\n-----END PUBLIC KEY-----'"
+                  ],
+                  "item/ProductId": "6c27ac1c-e7e8-429c-b0f2-42ea8cce3066"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "PerformUnboundAction",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "d5e28c8e-1e6f-4182-a096-12d47f83cec0"
+              }
+            },
+            "License_is_Valid": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@outputs('Check_for_license')?['body/IsValid']",
+                      "@true"
+                    ]
+                  }
+                ]
+              },
+              "actions": {},
+              "else": {
+                "actions": {
+                  "Unlicensed_Failure": {
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Failed",
+                      "runError": {
+                        "message": "Unlicensed"
+                      }
+                    },
+                    "runAfter": {
+                      "Unlicensed_Response": [
+                        "SUCCEEDED"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "ff5cac30-171a-4f5f-bc44-2ae5427576d6"
+                    }
+                  },
+                  "Unlicensed_Response": {
+                    "type": "Response",
+                    "kind": "Http",
+                    "inputs": {
+                      "statusCode": 400,
+                      "body": {
+                        "message": "Riata is missing its proper license."
+                      },
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "runAfter": {
+                "Check_for_license": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6923beac-75f8-4fc8-b562-dacd96170a03"
+              }
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "486438a8-fcb6-4caf-ae65-b8a21e31cce2"
+          }
+        },
+        "On_failure": {
+          "type": "Scope",
+          "actions": {
+            "Flow_run_metadata": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Log_error": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              },
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "User_Guid_was_provided_(failure)": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(triggerBody()?['text'])",
+                      "@false"
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Send_push_on_failure": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "payload/recipients": [
+                        "@triggerBody()?['text']"
+                      ],
+                      "payload/message": "Error: Extending recurring budgets failed",
+                      "payload/openApp": false
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                      "operationId": "SendPushNotification",
+                      "connectionName": "shared_powerappsnotification-1"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              }
+            }
+          },
+          "runAfter": {
+            "User_Guid_was_provided": [
+              "TimedOut",
+              "Skipped",
+              "Failed"
+            ]
+          }
+        },
+        "Terminate_on_Error": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed"
+          },
+          "runAfter": {
+            "On_failure": [
+              "TimedOut",
+              "Failed",
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "33513984-64fb-4095-9e05-225fa375364a"
+          }
+        },
+        "Async_Response": {
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 202
+          },
+          "runAfter": {
+            "License_check": [
+              "Succeeded"
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

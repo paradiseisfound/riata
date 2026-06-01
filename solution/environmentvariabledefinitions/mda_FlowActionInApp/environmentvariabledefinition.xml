@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="mda_FlowActionInApp">
+  <description default="&quot;Yes&quot; means that a button will appear on the home screen of the app that will allow the user to manually trigger background flows. &quot;No&quot; means the button will not be visible.">
+    <label description="&quot;Yes&quot; means that a button will appear on the home screen of the app that will allow the user to manually trigger background flows. &quot;No&quot; means the button will not be visible." languagecode="1033" />
+  </description>
+  <displayname default="Show Flow Action in App">
+    <label description="Show Flow Action in App" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.4.0.2</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000002</type>
+</environmentvariabledefinition>

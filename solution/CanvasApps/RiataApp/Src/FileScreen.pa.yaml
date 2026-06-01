@@ -1,0 +1,1116 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  FileScreen:
+    Properties:
+      Fill: =RGBA(224, 224, 224, 1)
+      Height: =App.Height
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: =Refresh(Notes)
+      Width: =App.Width
+    Children:
+      - ContainerFs:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =App.Height
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: |-
+              =Min(
+                  App.Width,
+                  1200
+              )
+            X: =Parent.Width/2 - Self.Width/2
+          Children:
+            - FilesGallery:
+                Control: Gallery@2.15.0
+                Variant: VariableHeight
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  Default: ={}
+                  Height: |-
+                    =Sum(
+                        Parent.Height,
+                        -Self.Y,
+                        -ActionContainerFs.Height
+                    )
+                  Items: |-
+                    =If(
+                        varFilter.Applied,
+                        Sort(
+                            Search(
+                                Filter(
+                                    Notes,
+                                    'Is Document',
+                                    Regarding = gvarProfile,
+                                    'Created On' >= varFilter.FirstDate,
+                                    'Created On' <= DateAdd(
+                                        varFilter.SecondDate,
+                                        1,
+                                        TimeUnit.Days
+                                    )
+                                ),
+                                TrimEnds(SearchInputFs.Text),
+                                'File Name'
+                            ),
+                            'Created On',
+                            SortOrder.Descending
+                        ),
+                        Sort(
+                            Search(
+                                Filter(
+                                    Notes,
+                                    'Is Document',
+                                    Regarding = gvarProfile
+                                ),
+                                TrimEnds(SearchInputFs.Text),
+                                'File Name'
+                            ),
+                            'Created On',
+                            SortOrder.Descending
+                        )
+                    )
+                  LoadingSpinnerColor: =RGBA(123, 94, 87, 1)
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  Width: =Parent.Width
+                  Y: |-
+                    =Sum(
+                        ScreenHeaderFs.Height,
+                        SearchContainerFs.Height,
+                        50
+                    )
+                Children:
+                  - BackgroundFs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(244,240,234,1)
+                        Height: =120
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Visible: =ThisItem.IsSelected
+                        Width: =Parent.Width
+                  - DividingLineFs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        DropShadow: =DropShadow.None
+                        Fill: =RGBA(106, 122, 127, 1)
+                        Height: =1
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width - Self.X*2
+                        X: =40
+                        Y: =120
+                  - FileImageFs:
+                      Control: Image@2.2.3
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        Fill: =RGBA(74, 101, 114, 1)
+                        Height: =80
+                        Image: =draft_500dp_FFFFFF_FILL0_wght500_GRAD0_opsz48
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =15
+                        PaddingLeft: =15
+                        PaddingRight: =15
+                        PaddingTop: =15
+                        RadiusBottomLeft: =Self.Height/2
+                        RadiusBottomRight: =Self.Height/2
+                        RadiusTopLeft: =Self.Height/2
+                        RadiusTopRight: =Self.Height/2
+                        Width: =80
+                        X: =50
+                        Y: =20
+                  - FileCreatedOnLabelFs:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Lighter
+                        Height: =50
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =150
+                        PaddingRight: =20
+                        PaddingTop: =0
+                        Size: =18
+                        Text: =ThisItem.'Created On'
+                        Width: =Parent.TemplateWidth - Parent.TemplatePadding*2
+                        Wrap: =false
+                        Y: |+
+                          =60
+                  - FileNameLabelFs:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Semibold
+                        Height: =110
+                        OnSelect: =
+                        PaddingBottom: =20
+                        PaddingLeft: =150
+                        PaddingRight: =20
+                        PaddingTop: =20
+                        Text: =ThisItem.'File Name'
+                        Tooltip: =Self.Text
+                        VerticalAlign: =VerticalAlign.Top
+                        Width: =Parent.TemplateWidth - Parent.TemplatePadding*2
+                        Wrap: =false
+            - NoItemsLabelFs:
+                Control: Label@2.5.1
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  DisplayMode: =DisplayMode.View
+                  Fill: =RGBA(255, 255, 255, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Lighter
+                  Height: =Parent.Height - Self.Y
+                  PaddingBottom: =0
+                  PaddingLeft: =50
+                  PaddingRight: =50
+                  PaddingTop: =40
+                  Text: ="No downloads found"
+                  VerticalAlign: =VerticalAlign.Top
+                  Visible: =FilesGallery.AllItemsCount = 0
+                  Width: =Parent.Width
+                  Y: |-
+                    =Sum(
+                        SearchContainerFs.Height,
+                        SearchContainerFs.Y,
+                        25
+                    )
+            - ActionContainerFs:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  DropShadow: =DropShadow.None
+                  Height: =Parent.Width / 4.75
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =Self.Height/4
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  PaddingBottom: =Self.Height/4
+                  PaddingLeft: =Self.Height/4
+                  PaddingRight: =Self.Height/4
+                  PaddingTop: =Self.Height/4
+                  RadiusBottomLeft: =20
+                  RadiusBottomRight: =20
+                  RadiusTopLeft: =20
+                  RadiusTopRight: =20
+                  Width: =Parent.Width - Self.X*2
+                  Y: |-
+                    =Sum(
+                        Parent.Height,
+                        -Self.Height
+                    )
+                Children:
+                  - BackContainerFs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(123, 94, 87, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - BackIconFs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Height: =Parent.Height
+                              Image: =chevron_left_500dp_7B5E57_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =Concurrent(
+                                    Reset(SearchInputFs),
+                                    Reset(FilesGallery)
+                                );
+                                Back(ScreenTransition.Fade)
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Back"
+                              Width: =Parent.Width
+                  - RefreshContainerFs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(74, 101, 114, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - RefreshIconFs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Height: =Parent.Height
+                              Image: =refresh_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: =Refresh(Notes)
+                              PaddingBottom: =Parent.Height/9
+                              PaddingLeft: =Parent.Height/9
+                              PaddingRight: =Parent.Height/9
+                              PaddingTop: =Parent.Height/9
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Refresh"
+                              Width: =Parent.Width
+                  - DownloadConatinerFs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(74, 101, 114, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - DownloadIconFs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: |-
+                                =RGBA(
+                                        224,
+                                        224,
+                                        224,
+                                        1
+                                    )
+                              DisplayMode: |-
+                                =If(
+                                    IsBlank(FilesGallery.Selected),
+                                    DisplayMode.Disabled,
+                                    DisplayMode.Edit
+                                )
+                              Height: =Parent.Height
+                              Image: =download_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                              PaddingBottom: =Parent.Height/12
+                              PaddingLeft: =Parent.Height/12
+                              PaddingRight: =Parent.Height/12
+                              PaddingTop: =Parent.Height/12
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: =
+                              Width: =Parent.Width
+                        - AttachmentCardFs:
+                            Control: Attachments@2.3.0
+                            Properties:
+                              AccessibleLabel: =
+                              AddAttachmentColor: =RGBA(0, 0, 0, 0)
+                              AddAttachmentText: =
+                              AddedItemColor: =RGBA(0, 0, 0, 0)
+                              AddedItemFill: =RGBA(0, 0, 0, 0)
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderThickness: =0
+                              Color: =RGBA(0, 0, 0, 0)
+                              ContentLanguage: =
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(0, 0, 0, 0)
+                              DisplayMode: |-
+                                =If(
+                                    IsBlank(FilesGallery.Selected),
+                                    DisplayMode.Disabled,
+                                    DisplayMode.Edit
+                                )
+                              DropTargetBackgroundColor: =RGBA(0, 0, 0, 0)
+                              DropTargetBorderColor: =RGBA(0, 0, 0, 0)
+                              DropTargetTextColor: =RGBA(0, 0, 0, 0)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderThickness: =0
+                              Font: =Font.'Open Sans'
+                              Height: =Parent.Height
+                              HoverBorderColor: =RGBA(0, 0, 0, 0)
+                              HoverColor: =RGBA(0, 0, 0, 0)
+                              HoverFill: =RGBA(0, 0, 0, 0)
+                              ItemColor: =RGBA(0, 0, 0, 0)
+                              ItemDisabledColor: =RGBA(0, 0, 0, 0)
+                              ItemDisabledFill: =RGBA(0, 0, 0, 0)
+                              ItemErrorColor: =RGBA(0, 0, 0, 0)
+                              ItemErrorFill: =RGBA(0, 0, 0, 0)
+                              ItemFill: =RGBA(0, 0, 0, 0)
+                              ItemHoverColor: =RGBA(0, 0, 0, 0)
+                              ItemHoverFill: =RGBA(0, 0, 0, 0)
+                              ItemPressedColor: =RGBA(0, 0, 0, 0)
+                              ItemPressedFill: =RGBA(0, 0, 0, 0)
+                              Items: |-
+                                ={
+                                    DisplayName: FilesGallery.Selected.'File Name',
+                                    Id: FilesGallery.Selected.Note,
+                                    AbsoluteUri: Concatenate(
+                                        "https://",
+                                        envarEnvDomain,
+                                        "/api/data/v9.0/annotations%28",
+                                        FilesGallery.Selected.Note,
+                                        "%29?%24select=documentbody%2Cmimetype"
+                                    ),
+                                    Value: Concatenate(
+                                        "appres://datasources/Profiles/table/mda_profile/rows/",
+                                        gvarProfile.Guid,
+                                        "/attachment/https:%2F%2F",
+                                        envarEnvDomain,
+                                        "%2Fapi%2Fdata%2Fv9.0%2Fannotations%2528",
+                                        FilesGallery.Selected.Note,
+                                        "%2529%3F%2524select=documentbody%252Cmimetype"
+                                    )
+                                }
+                              Items.Name: =AbsoluteUri
+                              Items.Value: =Value
+                              MaxAttachmentSize: =1
+                              MaxAttachments: =1
+                              MaxAttachmentsColor: =RGBA(0, 0, 0, 0)
+                              MaxAttachmentsText: =
+                              NoAttachmentsColor: =RGBA(0, 0, 0, 0)
+                              NoAttachmentsText: =
+                              PressedBorderColor: =RGBA(0, 0, 0, 0)
+                              PressedColor: =RGBA(0, 0, 0, 0)
+                              PressedFill: =RGBA(0, 0, 0, 0)
+                              RemovedItemColor: =RGBA(0, 0, 0, 0)
+                              RemovedItemFill: =RGBA(0, 0, 0, 0)
+                              Size: =Self.Height/2
+                              Tooltip: ="Download"
+                              Width: =Parent.Width*4
+            - FilterIconFs:
+                Control: Classic/Icon@2.5.0
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  Color: =RGBA(123, 94, 87, 1)
+                  FocusedBorderThickness: =0
+                  Height: =Min(Parent.Width/12,75)
+                  HoverBorderColor: =Self.BorderColor
+                  HoverColor: =Self.Color
+                  Icon: |-
+                    =If(
+                        varFilter.Applied,
+                        Icon.FilterFlatFilled,
+                        Icon.FilterFlat
+                    )
+                  OnSelect: |-
+                    =UpdateContext(
+                        {
+                            varFilter: {
+                                Visible: true,
+                                Applied: varFilter.Applied,
+                                DateChecked: varFilter.DateChecked,
+                                FirstDate: varFilter.FirstDate,
+                                SecondDate: varFilter.SecondDate
+                            },
+                            varFilterType: {
+                                Date: Coalesce(
+                                    varFilterType.Date,
+                                    "Equal To"
+                                ),
+                                Amount: Coalesce(
+                                    varFilterType.Amount,
+                                    "Equal To"
+                                )
+                            }
+                        }
+                    )
+                  PaddingBottom: =10
+                  PaddingTop: =10
+                  Tooltip: ="Filter"
+                  Width: =Min(Parent.Width/12,75)
+                  X: =Sum(Parent.Width, -Self.Width, -50 )
+                  Y: |-
+                    =Sum(
+                        ScreenHeaderFs.Height,
+                        25
+                    )
+            - ScreenHeaderFs:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(123, 94, 87, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: |-
+                    =Min(
+                        Parent.Width / 8,
+                        100
+                    )
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =Self.Height/3
+                  Text: ="Downloads"
+                  Width: =Parent.Width
+            - RiataLogoFs:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Height: |-
+                    =Min(
+                        Parent.Width / 8,
+                        100
+                    )
+                  Image: ='Riata Hat'
+                  OnSelect: |-
+                    =Concurrent(
+                        Reset(SearchInputFs),
+                        Reset(FilesGallery)
+                    );
+                    Navigate(
+                        HomeScreen,
+                        ScreenTransition.Fade
+                    )
+                  Tooltip: ="Home"
+                  Width: =Self.Height*1.5
+            - SearchContainerFs:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  BorderThickness: =1
+                  DropShadow: =DropShadow.Regular
+                  Height: =Min(Parent.Width/12,75)
+                  RadiusBottomLeft: =25
+                  RadiusBottomRight: =25
+                  RadiusTopLeft: =25
+                  RadiusTopRight: =25
+                  Width: =Sum(Parent.Width, -Self.X*2, -FilterIconFs.Width, -30)
+                  X: =50
+                  Y: |-
+                    =Sum(
+                        ScreenHeaderFs.Height,
+                        25
+                    )
+                Children:
+                  - SearchIconFs:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        Color: =RGBA(79, 90, 94, 1)
+                        DisplayMode: =DisplayMode.View
+                        FocusedBorderThickness: =0
+                        Height: =Parent.Height
+                        HoverBorderColor: =Self.BorderColor
+                        HoverColor: =Self.Color
+                        Icon: =Icon.Search
+                        PaddingBottom: =10
+                        PaddingLeft: =10
+                        PaddingRight: =10
+                        PaddingTop: =10
+                        Width: =Parent.Height
+                        X: =10
+                  - SearchInputFs:
+                      Control: Classic/TextInput@2.3.2
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        Clear: =true
+                        Default: =
+                        DelayOutput: =true
+                        EnableSpellCheck: =true
+                        Fill: =RGBA(0, 0, 0, 0)
+                        Font: =Font.'Open Sans'
+                        Height: =Parent.Height
+                        HintText: ="Search"
+                        HoverBorderColor: =Self.BorderColor
+                        HoverColor: =Self.Color
+                        HoverFill: =Self.Fill
+                        PaddingBottom: =0
+                        PaddingLeft: =10
+                        PaddingRight: =25
+                        PaddingTop: =0
+                        RadiusTopLeft: =0
+                        Size: =Self.Height/3
+                        Width: =Sum(Parent.Width, -Self.X, -20)
+                        X: =SearchIconFs.X + SearchIconFs.Width
+            - FilterContainerFs:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =Self.Fill
+                  BorderStyle: =BorderStyle.None
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(224, 224, 224, 0.9)
+                  Height: =Parent.Height
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: =varFilter.Visible
+                  Width: =Parent.Width
+                Children:
+                  - FilterModalFs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(139, 154, 159, 1)
+                        BorderThickness: =2
+                        DropShadow: =DropShadow.ExtraBold
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: |-
+                          =If(
+                              Not(IsBlank(varFilterType.Field)),
+                              550,
+                              400
+                          )
+                        RadiusBottomLeft: =40
+                        RadiusBottomRight: =40
+                        RadiusTopLeft: =40
+                        RadiusTopRight: =40
+                        Width: =Min(Sum(Parent.Width, - 80), 600)
+                        X: =Parent.Width/2 - Self.Width/2
+                        Y: =Parent.Height/2 - Self.Height/2
+                      Children:
+                        - ClearFilterButtonFs:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =Self.Color
+                              BorderThickness: =5
+                              Color: =RGBA(161, 78, 58, 1)
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =RGBA(255, 255, 255, 1)
+                              Font: =Font.'Open Sans'
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: |-
+                                =UpdateContext(
+                                    {
+                                        varReset: true,
+                                        varFilter: {
+                                            Visible: false,
+                                            Applied: false
+                                        }
+                                    }
+                                );
+                                UpdateContext({varReset: false})
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              PressedBorderColor: =Self.BorderColor
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =30
+                              RadiusBottomRight: =30
+                              RadiusTopLeft: =30
+                              RadiusTopRight: =30
+                              Text: ="Clear"
+                              Width: =Parent.Width/3
+                              X: =Parent.Width/9
+                              Y: =Parent.Height - Self.Height - Parent.Width/9
+                        - ApplyFilterButtonFs:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =Self.Fill
+                              BorderThickness: =5
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =RGBA(123, 94, 87, 1)
+                              Font: =Font.'Open Sans'
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: |-
+                                =UpdateContext(
+                                    {
+                                        varDateError: And(
+                                            DateFilterCheckboxFs.Value,
+                                            Or(
+                                                And(
+                                                    varFilterType.Date <> "Between",
+                                                    IsBlank(FirstDateFilterInputFs.SelectedDate)
+                                                ),
+                                                And(
+                                                    varFilterType.Date = "Between",
+                                                    Or(
+                                                        IsBlank(SecondDateFilterInputFs.SelectedDate),
+                                                        IsBlank(FirstDateFilterInputFs.SelectedDate)
+                                                    )
+                                                )
+                                            )
+                                        )
+                                    }
+                                );
+                                If(
+                                    varDateError,
+                                    Notify(
+                                        "Please provide a date filter",
+                                        NotificationType.Warning
+                                    ),
+                                    DateFilterCheckboxFs.Value,
+                                    UpdateContext(
+                                        {
+                                            varFilter: {
+                                                Visible: false,
+                                                Applied: true,
+                                                DateChecked: DateFilterCheckboxFs.Value,
+                                                FirstDate: If(
+                                                    DateFilterCheckboxFs.Value,
+                                                    Switch(
+                                                        varFilterType.Date,
+                                                        "Equal To",
+                                                        FirstDateFilterInputFs.SelectedDate,
+                                                        "Greater Than or Equal",
+                                                        FirstDateFilterInputFs.SelectedDate,
+                                                        "Less Than or Equal",
+                                                        Date(
+                                                            2019,
+                                                            12,
+                                                            31
+                                                        ),//This is an arbitrary date. Assuming no files will be before this date.
+                                                        "Between",
+                                                        Min(
+                                                            FirstDateFilterInputFs.SelectedDate,
+                                                            SecondDateFilterInputFs.SelectedDate
+                                                        )
+                                                    ),
+                                                    Date(
+                                                        2019,
+                                                        12,
+                                                        31
+                                                    )//This is an arbitrary date. Assuming no files will be before this date.
+                                                ),
+                                                SecondDate: If(
+                                                    DateFilterCheckboxFs.Value,
+                                                    Switch(
+                                                        varFilterType.Date,
+                                                        "Equal To",
+                                                        FirstDateFilterInputFs.SelectedDate,
+                                                        "Greater Than or Equal",
+                                                        Today(),
+                                                        "Less Than or Equal",
+                                                        FirstDateFilterInputFs.SelectedDate,
+                                                        "Between",
+                                                        Max(
+                                                            FirstDateFilterInputFs.SelectedDate,
+                                                            SecondDateFilterInputFs.SelectedDate
+                                                        )
+                                                    ),
+                                                    Today()
+                                                )
+                                            }
+                                        }
+                                    ),
+                                    Select(ClearFilterButtonFs)
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              PressedBorderColor: =Self.BorderColor
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =30
+                              RadiusBottomRight: =30
+                              RadiusTopLeft: =30
+                              RadiusTopRight: =30
+                              Text: ="Apply"
+                              Width: =Parent.Width/3
+                              X: =Parent.Width - Self.Width - Parent.Width/9
+                              Y: =Parent.Height - Self.Height - Parent.Width/9
+                        - CancelFilterIconFs:
+                            Control: Classic/Icon@2.5.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              Color: =RGBA(161, 78, 58, 1)
+                              FocusedBorderThickness: =0
+                              Height: =80
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              Icon: =Icon.CancelBadge
+                              OnSelect: |-
+                                =UpdateContext(
+                                    {
+                                        varFilter: {
+                                            Visible: false,
+                                            Applied: varFilter.Applied,
+                                            DateChecked: varFilter.DateChecked,
+                                            FirstDate: varFilter.FirstDate,
+                                            SecondDate: varFilter.SecondDate
+                                        }
+                                    }
+                                )
+                              PaddingBottom: =10
+                              PaddingLeft: =10
+                              PaddingRight: =20
+                              PaddingTop: =20
+                              Width: =80
+                              X: =Sum(Parent.Width, -Self.Width)
+                        - DateFilterCheckboxFs:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              CheckboxBorderColor: =RGBA(79, 90, 94, 1)
+                              CheckboxSize: =50
+                              CheckmarkFill: =RGBA(123, 94, 87, 1)
+                              Default: =varFilter.DateChecked
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: =
+                              PaddingLeft: =20
+                              PressedBorderColor: =Self.BorderColor
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              Text: =
+                              Width: =90
+                              Y: =80
+                        - DateFilterLabelFs:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =60
+                              Size: =20
+                              Text: ="Date"
+                              Width: =Parent.Width - Self.X*2
+                              X: =90
+                              Y: =80
+                        - DateFilterTypeFs:
+                            Control: Button@0.0.45
+                            Properties:
+                              Align: =Align.Left
+                              Appearance: ='ButtonCanvas.Appearance'.Secondary
+                              BasePaletteColor: =RGBA(189, 178, 176, 1)
+                              BorderColor: =RGBA(106, 122, 127, 1)
+                              BorderRadius: =20
+                              FontSize: =21
+                              FontWeight: =FontWeight.Normal
+                              Height: =46
+                              Icon: ="AppsList"
+                              IconStyle: ='ButtonCanvas.IconStyle'.Filled
+                              Layout: ='ButtonCanvas.Layout'.IconBefore
+                              OnSelect: |-
+                                =UpdateContext(
+                                    {
+                                        varFilterType: {
+                                            Field: "Date",
+                                            Date: varFilterType.Date,
+                                            Amount: varFilterType.Amount
+                                        }
+                                    }
+                                )
+                              PaddingLeft: =20
+                              PaddingRight: =20
+                              Text: =varFilterType.Date
+                              VerticalAlign: =VerticalAlign.Middle
+                              Width: |-
+                                =If(
+                                    Or(
+                                        varFilterType.Date = "Between",
+                                        varFilterType.Date = "Equal To"
+                                    ),
+                                    150,
+                                    275
+                                )
+                              X: =160
+                              Y: =87
+                        - SecondDateFilterInputFs:
+                            Control: Classic/DatePicker@2.6.0
+                            Properties:
+                              BorderColor: |-
+                                =If(
+                                    And(
+                                        varDateError,
+                                        IsBlank(Self.SelectedDate),
+                                        DateFilterCheckboxFs.Value
+                                    ),
+                                    RGBA(
+                                        196,
+                                        154,
+                                        90,
+                                        1
+                                    ),
+                                    RGBA(
+                                        166,
+                                        166,
+                                        166,
+                                        1
+                                    )
+                                )
+                              DefaultDate: |-
+                                =If(
+                                    varFilter.DateChecked,
+                                    varFilter.SecondDate
+                                )
+                              EndYear: =Year(Today())
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderColor: =Self.HoverBorderColor
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Format: ="m/d/yyyy"
+                              Height: =60
+                              IconBackground: =Self.Fill
+                              IconFill: =Self.BorderColor
+                              InputTextPlaceholder: =
+                              IsEditable: =true
+                              OnChange: |-
+                                =If(
+                                    Self.SelectedDate > Today(),
+                                    Concurrent(
+                                        Notify(
+                                            "Can't pick a date greater than today.",
+                                            NotificationType.Warning
+                                        ),
+                                        Reset(Self)
+                                    )
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =10
+                              PaddingRight: =10
+                              Reset: =varReset
+                              Size: =20
+                              StartYear: =2020
+                              Visible: =varFilterType.Date = "Between"
+                              Width: =215
+                              X: =305
+                              Y: =140
+                        - FirstDateFilterInputFs:
+                            Control: Classic/DatePicker@2.6.0
+                            Properties:
+                              BorderColor: |-
+                                =If(
+                                    And(
+                                        varDateError,
+                                        IsBlank(Self.SelectedDate),
+                                        DateFilterCheckboxFs.Value
+                                    ),
+                                    RGBA(
+                                        196,
+                                        154,
+                                        90,
+                                        1
+                                    ),
+                                    RGBA(
+                                        166,
+                                        166,
+                                        166,
+                                        1
+                                    )
+                                )
+                              DefaultDate: |-
+                                =If(
+                                    varFilter.DateChecked,
+                                    varFilter.FirstDate
+                                )
+                              EndYear: =Year(Today())
+                              Fill: =RGBA(0, 0, 0, 0)
+                              FocusedBorderColor: =Self.HoverBorderColor
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Format: ="m/d/yyyy"
+                              Height: =60
+                              IconBackground: =Self.Fill
+                              IconFill: =Self.BorderColor
+                              InputTextPlaceholder: =
+                              IsEditable: =true
+                              OnChange: |-
+                                =If(
+                                    Self.SelectedDate > Today(),
+                                    Concurrent(
+                                        Notify(
+                                            "Can't pick a date greater than today.",
+                                            NotificationType.Warning
+                                        ),
+                                        Reset(Self)
+                                    )
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =10
+                              PaddingRight: =10
+                              Reset: =varReset
+                              Size: =20
+                              StartYear: =2020
+                              Width: =215
+                              X: =90
+                              Y: =140
+                        - FilterTypeGalleryContainerFs:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              DropShadow: =DropShadow.None
+                              Fill: =RGBA(255, 255, 255, 1)
+                              Height: =Parent.Height
+                              RadiusBottomLeft: =0
+                              RadiusBottomRight: =0
+                              RadiusTopLeft: =0
+                              RadiusTopRight: =0
+                              Visible: =Not(IsBlank(varFilterType.Field))
+                              Width: =Parent.Width
+                            Children:
+                              - FilterTypeGalleryFs:
+                                  Control: Gallery@2.15.0
+                                  Variant: Vertical
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    BorderStyle: =BorderStyle.None
+                                    Default: |-
+                                      =If(
+                                          varFilterType.Field = "Date",
+                                          {Value: varFilterType.Date},
+                                          {Value: varFilterType.Amount}
+                                      )
+                                    Height: =Self.TemplateHeight*4
+                                    Items: |-
+                                      =Sort(
+                                          [
+                                              "Greater Than or Equal",
+                                              "Less Than or Equal",
+                                              "Equal To",
+                                              "Between"
+                                          ],
+                                          Value,
+                                          SortOrder.Ascending
+                                      )
+                                    ShowScrollbar: =false
+                                    TemplatePadding: =0
+                                    TemplateSize: =125
+                                    Width: |-
+                                      =Min(
+                                          Parent.Width,
+                                          500
+                                      )
+                                    WrapCount: =0
+                                    X: =Parent.Width / 2 - Self.Width/2
+                                    Y: =Parent.Height /2 - Self.Height /2
+                                  Children:
+                                    - FilterTypeContainerFs:
+                                        Control: GroupContainer@1.5.0
+                                        Variant: ManualLayout
+                                        Properties:
+                                          BorderColor: =RGBA(79, 90, 94, 1)
+                                          BorderThickness: =1
+                                          DropShadow: =DropShadow.Regular
+                                          Fill: |-
+                                            =If(
+                                                ThisItem.IsSelected,
+                                                RGBA(
+                                                    244,
+                                                    240,
+                                                    234,
+                                                    1
+                                                ),
+                                                RGBA(
+                                                    0,
+                                                    0,
+                                                    0,
+                                                    0
+                                                )
+                                            )
+                                          Height: =Parent.TemplateHeight - Self.Y*2
+                                          RadiusBottomLeft: =20
+                                          RadiusBottomRight: =20
+                                          RadiusTopLeft: =20
+                                          RadiusTopRight: =20
+                                          Width: =Parent.Width - Self.X*2
+                                          X: =25
+                                          Y: =25
+                                        Children:
+                                          - FilterTypeLabelFs:
+                                              Control: Label@2.5.1
+                                              Properties:
+                                                Align: =Align.Center
+                                                BorderColor: =RGBA(0, 0, 0, 0)
+                                                Font: =Font.'Open Sans'
+                                                Height: =Parent.Height
+                                                OnSelect: |-
+                                                  =UpdateContext(
+                                                      {
+                                                          varFilterType: {
+                                                              Field: Blank(),
+                                                              Date: If(
+                                                                  varFilterType.Field = "Date",
+                                                                  ThisItem.Value,
+                                                                  varFilterType.Date
+                                                              ),
+                                                              Amount: If(
+                                                                  varFilterType.Field = "Amount",
+                                                                  ThisItem.Value,
+                                                                  varFilterType.Amount
+                                                              )
+                                                          }
+                                                      }
+                                                  )
+                                                PaddingBottom: =0
+                                                PaddingLeft: =0
+                                                PaddingRight: =0
+                                                PaddingTop: =0
+                                                Text: =ThisItem.Value
+                                                Width: =Parent.Width

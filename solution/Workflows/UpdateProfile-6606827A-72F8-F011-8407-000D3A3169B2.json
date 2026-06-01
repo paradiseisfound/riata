@@ -1,0 +1,359 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "description": "derived from the PlaidLanguage option set",
+                  "title": "LanguageChoice",
+                  "type": "number",
+                  "x-ms-content-hint": "NUMBER",
+                  "x-ms-dynamically-added": true
+                },
+                "text": {
+                  "description": "derived from the PlaidSupportedCountries option set",
+                  "title": "Countries",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_1": {
+                  "description": "Profile Guid",
+                  "title": "ProfileGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text_1"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "e8ece9c8-61a7-4a16-a73a-ddf16934f599"
+          }
+        }
+      },
+      "actions": {
+        "On_failure": {
+          "type": "Scope",
+          "actions": {
+            "Flow_run_metadata": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "2e7f2cb6-e958-4c03-96e6-7b6379327a18"
+              }
+            },
+            "Terminate_on_Error": {
+              "type": "Terminate",
+              "inputs": {
+                "runStatus": "Failed"
+              },
+              "runAfter": {
+                "Log_error": [
+                  "Succeeded",
+                  "Failed",
+                  "TimedOut"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "33513984-64fb-4095-9e05-225fa375364a"
+              }
+            },
+            "Log_error": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps"
+                }
+              },
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "1cd7287c-3fdc-4492-be56-1366572c1315"
+              }
+            },
+            "Failed_Response": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 500
+              }
+            }
+          },
+          "runAfter": {
+            "Response": [
+              "TimedOut",
+              "Skipped",
+              "Failed"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "596fa008-c6f2-43a0-b62f-b672f9edaf39"
+          }
+        },
+        "Data_is_missing": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@contains(triggerBody(),'text')",
+                  "@false"
+                ]
+              },
+              {
+                "equals": [
+                  "@contains(triggerBody(),'number')",
+                  "@false"
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Need_more_info_response": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 400,
+                "body": {
+                  "message": "please provide either a language code or country code."
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {}
+        },
+        "Both_parameters_provided": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@contains(triggerBody(),'text')",
+                  "@true"
+                ]
+              },
+              {
+                "equals": [
+                  "@contains(triggerBody(),'number')",
+                  "@true"
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Update_with_both": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_profiles",
+                  "recordId": "@triggerBody()?['text_1']",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_plaidcountries": "@triggerBody()?['text']",
+                  "item/mda_plaidlanguage": "@triggerBody()?['number']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "UpdateOnlyRecord",
+                  "connectionName": "shared_commondataserviceforapps"
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {
+              "Number_provided": {
+                "type": "If",
+                "expression": {
+                  "and": [
+                    {
+                      "equals": [
+                        "@contains(triggerBody(),'number')",
+                        "@true"
+                      ]
+                    }
+                  ]
+                },
+                "actions": {
+                  "Update_with_language_only": {
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "parameters": {
+                        "entityName": "mda_profiles",
+                        "recordId": "@triggerBody()?['text_1']",
+                        "x-ms-odata-metadata-full": false,
+                        "item/mda_plaidlanguage": "@triggerBody()?['number']"
+                      },
+                      "host": {
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                        "operationId": "UpdateOnlyRecord",
+                        "connectionName": "shared_commondataserviceforapps"
+                      }
+                    }
+                  }
+                },
+                "else": {
+                  "actions": {
+                    "Update_with_countries_only": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "mda_profiles",
+                          "recordId": "@triggerBody()?['text_1']",
+                          "x-ms-odata-metadata-full": false,
+                          "item/mda_plaidcountries": "@triggerBody()?['text']"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "UpdateOnlyRecord",
+                          "connectionName": "shared_commondataserviceforapps"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "Data_is_missing": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Response": {
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 200
+          },
+          "runAfter": {
+            "Both_parameters_provided": [
+              "Succeeded"
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

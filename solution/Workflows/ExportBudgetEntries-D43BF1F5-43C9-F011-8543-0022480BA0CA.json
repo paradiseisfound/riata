@@ -1,0 +1,368 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps-1": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_powerappsnotification": {
+        "api": {
+          "name": "shared_powerappsnotification"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_PushNotification"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text_1": {
+                  "description": "Guid",
+                  "title": "UserId",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text": {
+                  "description": "text string",
+                  "title": "FetchXmlFilter",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_3": {
+                  "description": "Profile Guid",
+                  "title": "ProfileGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text",
+                "text_3"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "90648a90-c92f-48c6-b8ca-f78205d61e65"
+          }
+        }
+      },
+      "actions": {
+        "Create_CSV_table": {
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Construct_Table')",
+            "format": "CSV"
+          },
+          "runAfter": {
+            "Construct_Table": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "57ee2c1f-dde1-46df-9d60-63ece02e6af6"
+          }
+        },
+        "Fetch_Budget_Entries": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "mda_budgetentries",
+              "fetchXml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" distinct=\"false\">\n  <entity name=\"mda_budgetentry\">\n    <attribute name=\"mda_amount\" />\n    <attribute name=\"mda_date\" />\n    <attribute name=\"mda_name\" />\n    <attribute name=\"mda_categoryname\" />\n    <order attribute=\"mda_date\" descending=\"true\" />\n    <link-entity name=\"mda_budget\"\n      from=\"mda_budgetid\"\n      to=\"mda_budget\"\n      link-type=\"inner\"\n      alias=\"budget\">\n      <link-entity name=\"mda_profile\"\n        from=\"mda_profileid\"\n        to=\"mda_profile\"\n        link-type=\"inner\"\n        alias=\"profile\">\n        <filter type=\"and\">\n          <condition attribute=\"mda_profileid\" operator=\"eq\" value=\"@{triggerBody()?['text_3']}\" />\n        </filter>\n      </link-entity>\n    </link-entity>\n    <filter type=\"and\">\n      @{triggerBody()?['text']}\n    </filter>\n  </entity>\n</fetch>",
+              "x-ms-odata-metadata-full": false
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "55f96cf2-9754-4537-a0a5-415b93ec9916"
+          }
+        },
+        "Construct_Table": {
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('Fetch_Budget_Entries')?['body/value']",
+            "select": {
+              "Date": "@item()?['mda_date']",
+              "Amount": "@item()?['mda_amount']",
+              "Budget": "@item()?['mda_name']",
+              "Category": "@item()?['mda_categoryname']"
+            }
+          },
+          "runAfter": {
+            "Fetch_Budget_Entries": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "25538fb7-3f04-403f-9341-e155d8633919"
+          }
+        },
+        "On_failure": {
+          "type": "Scope",
+          "actions": {
+            "Flow_run_metadata": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Log_error": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              },
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              }
+            },
+            "User_Guid_was_provided_(failure)": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(triggerBody()?['text_1'])",
+                      "@false"
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Send_push_on_failure": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "payload/recipients": [
+                        "@triggerBody()?['text_1']"
+                      ],
+                      "payload/message": "Error: Budget Entries export failed",
+                      "payload/openApp": false
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                      "operationId": "SendPushNotification",
+                      "connectionName": "shared_powerappsnotification"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              }
+            }
+          },
+          "runAfter": {
+            "User_Guid_was_provided": [
+              "TimedOut",
+              "Skipped",
+              "Failed"
+            ]
+          }
+        },
+        "Terminate_on_Error": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed"
+          },
+          "runAfter": {
+            "On_failure": [
+              "Succeeded",
+              "TimedOut",
+              "Failed"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fc5472cb-8c19-48e3-abaf-7ecc45873d8c"
+          }
+        },
+        "User_Guid_was_provided": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@empty(triggerBody()?['text_1'])",
+                  "@false"
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Send_Push_on_Success": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "payload/recipients": [
+                    "@triggerBody()?['text_1']"
+                  ],
+                  "payload/message": "Budget entries export is ready",
+                  "payload/openApp": true
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                  "operationId": "SendPushNotification",
+                  "connectionName": "shared_powerappsnotification"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "e3eba70b-00da-463a-92db-0d93886352e6"
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "Upload_file": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a75f4a21-2d8f-4b31-9fa7-6022b580a04d"
+          }
+        },
+        "Upload_file": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "annotations",
+              "x-ms-odata-metadata-full": false,
+              "item/subject": "Budget Entries Export.csv",
+              "item/isdocument": true,
+              "item/documentbody": "@base64(body('Create_CSV_table'))",
+              "item/filename": "Budget Entries Export.csv",
+              "item/mimetype": "text/csv",
+              "item/objectid_mda_profile@odata.bind": "/mda_profiles(@{triggerBody()?['text_3']})"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "CreateRecord",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runAfter": {
+            "Create_CSV_table": [
+              "Succeeded"
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

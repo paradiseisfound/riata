@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Role id="{ae6db9e8-b03c-f011-8779-6045bd06e3b2}" name="Riata User" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <IsCustomizable>0</IsCustomizable>
+  <IsAutoAssigned>0</IsAutoAssigned>
+  <RolePrivileges>
+    <RolePrivilege name="prvAppendmda_Budget" level="Global" />
+    <RolePrivilege name="prvAppendmda_BudgetEntry" level="Global" />
+    <RolePrivilege name="prvAppendmda_TransactionCategory" level="Global" />
+    <RolePrivilege name="prvAppendmda_TransactionSplit" level="Global" />
+    <RolePrivilege name="prvAppendTomda_AccessToken" level="Global" />
+    <RolePrivilege name="prvAppendTomda_BankAccount" level="Global" />
+    <RolePrivilege name="prvAppendTomda_Budget" level="Global" />
+    <RolePrivilege name="prvAppendTomda_BudgetEntry" level="Global" />
+    <RolePrivilege name="prvAppendTomda_Institution" level="Global" />
+    <RolePrivilege name="prvAppendTomda_Profile" level="Global" />
+    <RolePrivilege name="prvAppendTomda_Role" level="Global" />
+    <RolePrivilege name="prvAppendTomda_Transaction" level="Global" />
+    <RolePrivilege name="prvAppendTomda_TransactionCategory" level="Global" />
+    <RolePrivilege name="prvAppendTomda_TransactionSplit" level="Global" />
+    <RolePrivilege name="prvCreatemda_Budget" level="Global" />
+    <RolePrivilege name="prvCreatemda_BudgetEntry" level="Global" />
+    <RolePrivilege name="prvCreatemda_TransactionCategory" level="Global" />
+    <RolePrivilege name="prvCreatemda_TransactionSplit" level="Global" />
+    <RolePrivilege name="prvCreateSharePointData" level="Global" />
+    <RolePrivilege name="prvDeletemda_Budget" level="Global" />
+    <RolePrivilege name="prvDeletemda_BudgetEntry" level="Global" />
+    <RolePrivilege name="prvDeletemda_TransactionCategory" level="Global" />
+    <RolePrivilege name="prvDeletemda_TransactionSplit" level="Global" />
+    <RolePrivilege name="prvReadian_License" level="Global" />
+    <RolePrivilege name="prvReadmda_AccessToken" level="Global" />
+    <RolePrivilege name="prvReadmda_BankAccount" level="Global" />
+    <RolePrivilege name="prvReadmda_Budget" level="Global" />
+    <RolePrivilege name="prvReadmda_BudgetEntry" level="Global" />
+    <RolePrivilege name="prvReadmda_Institution" level="Global" />
+    <RolePrivilege name="prvReadmda_Profile" level="Global" />
+    <RolePrivilege name="prvReadmda_Role" level="Global" />
+    <RolePrivilege name="prvReadmda_Transaction" level="Global" />
+    <RolePrivilege name="prvReadmda_TransactionCategory" level="Global" />
+    <RolePrivilege name="prvReadmda_TransactionSplit" level="Global" />
+    <RolePrivilege name="prvReadSharePointData" level="Global" />
+    <RolePrivilege name="prvReadSharePointDocument" level="Global" />
+    <RolePrivilege name="prvWritemda_Budget" level="Global" />
+    <RolePrivilege name="prvWritemda_BudgetEntry" level="Global" />
+    <RolePrivilege name="prvWritemda_TransactionCategory" level="Global" />
+    <RolePrivilege name="prvWritemda_TransactionSplit" level="Global" />
+    <RolePrivilege name="prvWriteSharePointData" level="Global" />
+  </RolePrivileges>
+</Role>

@@ -1,0 +1,350 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_powerappsnotification": {
+        "api": {
+          "name": "shared_powerappsnotification"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_PushNotification"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "description": "User Guid",
+                  "title": "UserGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": []
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "f248249f-157b-4cda-bbbb-c4855998ba37"
+          }
+        }
+      },
+      "actions": {
+        "Get_null_records": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "annotations",
+              "$select": "annotationid",
+              "$filter": "(objecttypecode eq 'mda_profile' or objecttypecode eq 'mda_transaction') and documentbody eq null",
+              "x-ms-odata-metadata-full": false
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "connectionName": "shared_commondataserviceforapps"
+            }
+          },
+          "runAfter": {
+            "Async_Response": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "bf6bd7f9-6e75-4714-9993-0dc46ab7797e"
+          }
+        },
+        "for_each": {
+          "type": "Foreach",
+          "foreach": "@outputs('Get_null_records')?['body/value']",
+          "actions": {
+            "Delete_null_record": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "annotations",
+                  "recordId": "@item()?['annotationid']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "DeleteRecord",
+                  "connectionName": "shared_commondataserviceforapps"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "72fca9fb-8cd1-4c14-b7a9-c68057c0f625"
+              }
+            }
+          },
+          "runAfter": {
+            "Get_null_records": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ddf03906-090a-4461-bb79-27297d40cd89"
+          }
+        },
+        "User_Guid_was_provided": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@empty(triggerBody()?['text'])",
+                  "@false"
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Send_push_on_success": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "payload/recipients": [
+                    "@triggerBody()?['text']"
+                  ],
+                  "payload/message": "Attachment/Export cleanup complete",
+                  "payload/openApp": false
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                  "operationId": "SendPushNotification",
+                  "connectionName": "shared_powerappsnotification"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "92b257f1-363b-4bd1-b63f-4c8451d43b06"
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "for_each": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "37014009-6d56-4de8-9063-c4801885c9d2"
+          }
+        },
+        "On_failure": {
+          "type": "Scope",
+          "actions": {
+            "Flow_run_metadata": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "317cbcb4-73fa-455e-88cb-9ff1e802bdfc"
+              }
+            },
+            "Log_error": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps"
+                }
+              },
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "312b75c8-7d5f-4dd3-bf4a-28fab9054259"
+              }
+            },
+            "User_Guid_was_provided_(failure)": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(triggerBody()?['text'])",
+                      "@false"
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Send_push_on_failure": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "payload/recipients": [
+                        "@triggerBody()?['text']"
+                      ],
+                      "payload/message": "Error: Attachment/Export cleanup job failed",
+                      "payload/openApp": false
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                      "operationId": "SendPushNotification",
+                      "connectionName": "shared_powerappsnotification"
+                    }
+                  },
+                  "metadata": {
+                    "operationMetadataId": "e83f343d-bf09-4ddf-b861-1d581a31c967"
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "metadata": {
+                "operationMetadataId": "b2c8fe8c-202c-460a-b49d-1951614c101f"
+              }
+            }
+          },
+          "runAfter": {
+            "User_Guid_was_provided": [
+              "TimedOut",
+              "Failed",
+              "Skipped"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c0ba2e1a-b813-4177-839b-bb193e28e967"
+          }
+        },
+        "Terminate_on_Error": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed"
+          },
+          "runAfter": {
+            "On_failure": [
+              "Succeeded",
+              "TimedOut",
+              "Failed"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "33513984-64fb-4095-9e05-225fa375364a"
+          }
+        },
+        "Async_Response": {
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 202
+          },
+          "runAfter": {}
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

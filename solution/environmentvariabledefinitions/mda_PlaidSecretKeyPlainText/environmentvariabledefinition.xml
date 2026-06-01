@@ -1,0 +1,14 @@
+<environmentvariabledefinition schemaname="mda_PlaidSecretKeyPlainText">
+  <defaultvalue>N/A</defaultvalue>
+  <description default="In case you'd rather not configure an Azure Key Vault, this will be used instead. If a valid Azure Key Vault reference is provided, that will be used in lieu of this.">
+    <label description="In case you'd rather not configure an Azure Key Vault, this will be used instead. If a valid Azure Key Vault reference is provided, that will be used in lieu of this." languagecode="1033" />
+  </description>
+  <displayname default="Plaid Secret Key (Plain Text)">
+    <label description="Plaid Secret Key (Plain Text)" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.4.3.2</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

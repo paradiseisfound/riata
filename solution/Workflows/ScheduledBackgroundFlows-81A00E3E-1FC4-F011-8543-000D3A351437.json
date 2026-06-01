@@ -1,0 +1,74 @@
+{
+  "properties": {
+    "connectionReferences": {},
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "type": "Recurrence",
+          "recurrence": {
+            "frequency": "Week",
+            "interval": 1,
+            "startTime": "2025-11-16T17:00:00Z",
+            "schedule": {
+              "weekDays": [
+                "Saturday"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "bee4ab59-0747-479c-a6e2-7dca41830d11"
+          }
+        }
+      },
+      "actions": {
+        "Run_Calculate_Budgets": {
+          "type": "Workflow",
+          "inputs": {
+            "host": {
+              "workflowReferenceName": "0550ddd1-4f9d-f011-bbd2-6045bd02d262"
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "8110ef3d-f6a0-4732-a954-77141a61ba6b"
+          }
+        },
+        "Run_Institution_Refresh": {
+          "type": "Workflow",
+          "inputs": {
+            "host": {
+              "workflowReferenceName": "e43eda19-1aea-ef11-be1f-000d3a59da07"
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "eb382b4c-ec34-4f76-996d-7b1130ebc6f3"
+          }
+        },
+        "Run_File_Cleanup": {
+          "type": "Workflow",
+          "inputs": {
+            "host": {
+              "workflowReferenceName": "625c6d05-d5ec-f011-8406-7c1e528d2918"
+            }
+          },
+          "runAfter": {}
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

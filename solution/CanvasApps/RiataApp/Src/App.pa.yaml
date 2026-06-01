@@ -1,0 +1,443 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+App:
+  Properties:
+    BackEnabled: =false
+    OnError: |-
+      =If(
+          Not(
+              IsMatch(
+                  FirstError.Message,
+                  "^The value '.*' cannot be converted to a number\.$"
+              )
+          ),
+          Notify(
+              FirstError.Message,
+              NotificationType.Error
+          )
+      )
+    OnStart: |-
+      =Set(
+          gvarAppLaunching,
+          true
+      );
+      IfError(
+          If(
+              IsBlank(First(Profiles)),
+              CreatePlaidUser.Run(
+                  Coalesce(
+                      Value(
+                          ParseJSON(
+                              JSON(
+                                  First(
+                                      Choices(
+                                          PlaidLanguages,
+                                          Left(
+                                              Language(),
+                                              2
+                                          )
+                                      )
+                                  )
+                              )
+                          ).Value
+                      ),
+                      2
+                  ),
+                  If(
+                      CountRows(
+                          Split(
+                              Language(),
+                              "-"
+                          )
+                      ) = 1,
+                      "0",
+                      Coalesce(
+                          Text(
+                              ParseJSON(
+                                  JSON(
+                                      First(
+                                          Choices(
+                                              PlaidSupportedCountries,
+                                              Last(
+                                                  Split(
+                                                      Language(),
+                                                      "-"
+                                                  )
+                                              ).Value
+                                          )
+                                      )
+                                  )
+                              ).Value
+                          ),
+                          "0"
+                      )
+                  )
+              )
+          );
+          Refresh(Profiles);
+          Set(
+              gvarProfile,
+              First(Profiles)
+          );
+          If(
+              IsEmpty(
+                  Filter(
+                      Roles,
+                      SystemUser.'Azure AD Object ID' = User().EntraObjectId,
+                      Profile.Guid = gvarProfile.Guid
+                  )
+              ),
+              CreateRole.Run(
+                  gvarProfile.Guid,
+                  User().EntraObjectId
+              )
+          );
+          Refresh(Roles);
+          Concurrent(
+              Set(
+                  gvarSelectedRole,
+                  First(
+                      Filter(
+                          Roles,
+                          SystemUser.'Azure AD Object ID' = User().EntraObjectId,
+                          Profile.Guid = gvarProfile.Guid
+                      )
+                  )
+              ),
+              Set(
+                  envarUpdateItemWebhooks,
+                  LookUp(
+                      'Environment Variable Values',
+                      'Schema Name' = "mda_UpdateItemWebhookInApp",
+                      Value
+                  ) = "yes"
+              ),
+              Set(
+                  envarFlowRunVisible,
+                  LookUp(
+                      'Environment Variable Values',
+                      'Schema Name' = "mda_FlowActionInApp",
+                      Value
+                  ) = "yes"
+              ),
+              Set(
+                  envarEnvDomain,
+                  LookUp(
+                      'Environment Variable Values',
+                      'Schema Name' = "mda_EnvironmentDomain",
+                      Value
+                  )
+              ),
+              ClearCollect(
+                  colLanguages,
+                  [
+                      {
+                          code: "da",
+                          englishName: "Danish",
+                          nativeName: "Dansk"
+                      },
+                      {
+                          code: "nl",
+                          englishName: "Dutch",
+                          nativeName: "Nederlands"
+                      },
+                      {
+                          code: "en",
+                          englishName: "English",
+                          nativeName: "English"
+                      },
+                      {
+                          code: "et",
+                          englishName: "Estonian",
+                          nativeName: "Eesti"
+                      },
+                      {
+                          code: "fr",
+                          englishName: "French",
+                          nativeName: "Français"
+                      },
+                      {
+                          code: "de",
+                          englishName: "German",
+                          nativeName: "Deutsch"
+                      },
+                      {
+                          code: "hi",
+                          englishName: "Hindi",
+                          nativeName: "हिन्दी"
+                      },
+                      {
+                          code: "it",
+                          englishName: "Italian",
+                          nativeName: "Italiano"
+                      },
+                      {
+                          code: "lv",
+                          englishName: "Latvian",
+                          nativeName: "Latviešu"
+                      },
+                      {
+                          code: "no",
+                          englishName: "Norwegian",
+                          nativeName: "Norsk"
+                      },
+                      {
+                          code: "pl",
+                          englishName: "Polish",
+                          nativeName: "Polski"
+                      },
+                      {
+                          code: "pt",
+                          englishName: "Portuguese",
+                          nativeName: "Português"
+                      },
+                      {
+                          code: "ro",
+                          englishName: "Romanian",
+                          nativeName: "Română"
+                      },
+                      {
+                          code: "es",
+                          englishName: "Spanish",
+                          nativeName: "Español"
+                      },
+                      {
+                          code: "sv",
+                          englishName: "Swedish",
+                          nativeName: "Svenska"
+                      },
+                      {
+                          code: "vi",
+                          englishName: "Vietnamese",
+                          nativeName: "Tiếng Việt"
+                      }
+                  ]
+              ),
+              ClearCollect(
+                  colCountries,
+                  [
+                      {
+                          code: "us",
+                          englishName: "United States",
+                          nativeName: "United States"
+                      },
+                      {
+                          code: "gb",
+                          englishName: "United Kingdom",
+                          nativeName: "United Kingdom"
+                      },
+                      {
+                          code: "es",
+                          englishName: "Spain",
+                          nativeName: "España"
+                      },
+                      {
+                          code: "nl",
+                          englishName: "Netherlands",
+                          nativeName: "Nederland"
+                      },
+                      {
+                          code: "fr",
+                          englishName: "France",
+                          nativeName: "France"
+                      },
+                      {
+                          code: "ie",
+                          englishName: "Ireland",
+                          nativeName: "Ireland"
+                      },
+                      {
+                          code: "ca",
+                          englishName: "Canada",
+                          nativeName: "Canada"
+                      },
+                      {
+                          code: "de",
+                          englishName: "Germany",
+                          nativeName: "Deutschland"
+                      },
+                      {
+                          code: "it",
+                          englishName: "Italy",
+                          nativeName: "Italia"
+                      },
+                      {
+                          code: "pl",
+                          englishName: "Poland",
+                          nativeName: "Polska"
+                      },
+                      {
+                          code: "dk",
+                          englishName: "Denmark",
+                          nativeName: "Danmark"
+                      },
+                      {
+                          code: "no",
+                          englishName: "Norway",
+                          nativeName: "Norge"
+                      },
+                      {
+                          code: "se",
+                          englishName: "Sweden",
+                          nativeName: "Sverige"
+                      },
+                      {
+                          code: "ee",
+                          englishName: "Estonia",
+                          nativeName: "Eesti"
+                      },
+                      {
+                          code: "lt",
+                          englishName: "Lithuania",
+                          nativeName: "Lietuva"
+                      },
+                      {
+                          code: "lv",
+                          englishName: "Latvia",
+                          nativeName: "Latvija"
+                      },
+                      {
+                          code: "pt",
+                          englishName: "Portugal",
+                          nativeName: "Portugal"
+                      },
+                      {
+                          code: "be",
+                          englishName: "Belgium",
+                          nativeName: "België / Belgique"
+                      },
+                      {
+                          code: "at",
+                          englishName: "Austria",
+                          nativeName: "Österreich"
+                      },
+                      {
+                          code: "fi",
+                          englishName: "Finland",
+                          nativeName: "Suomi"
+                      }
+                  ]
+              ),
+              ClearCollect(
+                  colCurrencies,
+                  [
+                      {
+                          symbol: "$",
+                          codes: [
+                              "USD",
+                              "CAD"
+                          ],
+                          codecount: 2
+                      },
+                      {
+                          symbol: "€",
+                          codes: ["EUR"],
+                          codecount: 1
+                      },
+                      {
+                          symbol: "£",
+                          codes: ["GBP"],
+                          codecount: 1
+                      },
+                      {
+                          symbol: "kr",
+                          codes: [
+                              "SEK",
+                              "NOK",
+                              "DKK",
+                              "ISK"
+                          ],
+                          codecount: 4
+                      },
+                      {
+                          symbol: "CHF",
+                          codes: ["CHF"]
+                      },
+                      {
+                          symbol: "zł",
+                          codes: ["PLN"],
+                          codecount: 1
+                      },
+                      {
+                          symbol: "Kč",
+                          codes: ["CZK"],
+                          codecount: 1
+                      },
+                      {
+                          symbol: "Ft",
+                          codes: ["HUF"],
+                          codecount: 1
+                      },
+                      {
+                          symbol: "lei",
+                          codes: ["RON"],
+                          codecount: 1
+                      }
+                  ]
+              )
+          ),
+          Concurrent(
+              Set(
+                  gvarUserError,
+                  true
+              ),
+              AppLaunchError.Run(
+                  User().FullName,
+                  {text_1: JSON(FirstError)}
+              )
+          )
+      );
+      Concurrent(
+          IfError(
+              LoadData(
+                  colTransactionVisibility,
+                  "colTransactionVisibility",
+                  false
+              ),
+              ClearCollect(
+                  colTransactionVisibility,
+                  {Value: true}
+              );
+              SaveData(
+                  colTransactionVisibility,
+                  "colTransactionVisibility"
+              )
+          ),
+          IfError(
+              LoadData(
+                  colReportDisplay,
+                  "colReportDisplay",
+                  false
+              ),
+              ClearCollect(
+                  colReportDisplay,
+                  {
+                      NumColumns: 3,
+                      ColumnOrder: {
+                          Index: 1,
+                          Value: [
+                              "Budget",
+                              "Actual",
+                              "Act. - Bud."
+                          ]
+                      }
+                  }
+              );
+              SaveData(
+                  colReportDisplay,
+                  "colReportDisplay"
+              )
+          )
+      );
+      Set(
+          gvarAppLaunching,
+          false
+      )
+    StartScreen: =HomeScreen
+    Theme: =PowerAppsTheme

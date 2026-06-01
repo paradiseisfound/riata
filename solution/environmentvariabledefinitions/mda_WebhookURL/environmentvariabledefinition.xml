@@ -1,0 +1,13 @@
+<environmentvariabledefinition schemaname="mda_WebhookURL">
+  <description default="This webhook URL can be found (after first solution install) in the webhook settings in the 'Plaid Event Webhook' cloud flow. If you're installing this solution for the first time, the 'Plaid Event Webhook' flow won't be available, so leave this blank. After install, update this value with the URL via the 'Default Solution'.">
+    <label description="This webhook URL can be found (after first solution install) in the webhook settings in the 'Plaid Event Webhook' cloud flow. If you're installing this solution for the first time, the 'Plaid Event Webhook' flow won't be available, so leave this blank. After install, update this value with the URL via the 'Default Solution'." languagecode="1033" />
+  </description>
+  <displayname default="Webhook URL">
+    <label description="Webhook URL" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.0</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

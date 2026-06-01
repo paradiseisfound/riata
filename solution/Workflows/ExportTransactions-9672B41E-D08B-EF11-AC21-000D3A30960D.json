@@ -1,0 +1,385 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps-1": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_powerappsnotification": {
+        "api": {
+          "name": "shared_powerappsnotification"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_PushNotification"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text_1": {
+                  "description": "Guid",
+                  "title": "UserId",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text": {
+                  "description": "text string",
+                  "title": "FetchXmlFilter",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_3": {
+                  "description": "Profile Guid",
+                  "title": "ProfileGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text",
+                "text_3"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "90648a90-c92f-48c6-b8ca-f78205d61e65"
+          }
+        }
+      },
+      "actions": {
+        "Create_CSV_table": {
+          "type": "Table",
+          "inputs": {
+            "from": "@body('Construct_Table')",
+            "format": "CSV"
+          },
+          "runAfter": {
+            "Construct_Table": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "57ee2c1f-dde1-46df-9d60-63ece02e6af6"
+          }
+        },
+        "Construct_Table": {
+          "type": "Select",
+          "inputs": {
+            "from": "@outputs('Filter_Transactions')?['body/value']",
+            "select": {
+              "Institution": "@item()?['bankaccount.mda_institutionname']",
+              "Account": "@item()?['bankaccount.mda_name']",
+              "Authorized Date": "@if(equals(item()?['mda_authorizeddate'],null),null,formatDateTime(item()?['mda_authorizeddate'],'yyyy/MM/dd'))",
+              "Posted Date": "@formatDateTime(item()?['mda_date'],'yyyy/MM/dd')",
+              "Description": "@item()?['mda_description']",
+              "Amount": "@mul(item()?['mda_amount'],-1)",
+              "Merchant": "@item()?['mda_merchantname']",
+              "Pending": "@item()?['mda_pending']",
+              "Category": "@item()?['category.mda_name']",
+              "Split": "@item()?['mda_hassplits']",
+              "Currency Code": "@item()?['mda_currencycode']"
+            }
+          },
+          "runAfter": {
+            "Filter_Transactions": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "25538fb7-3f04-403f-9341-e155d8633919"
+          }
+        },
+        "On_failure": {
+          "type": "Scope",
+          "actions": {
+            "Flow_run_metadata": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "26b442a5-4033-44a1-8c40-9d3c50baf4c0"
+              }
+            },
+            "Log_error": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              },
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "12cd1566-d482-46b5-a86a-ab265ce37bcd"
+              }
+            },
+            "User_Guid_was_provided_(failure)": {
+              "type": "If",
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(triggerBody()?['text_1'])",
+                      "@false"
+                    ]
+                  }
+                ]
+              },
+              "actions": {
+                "Send_push_on_failure": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "payload/recipients": [
+                        "@triggerBody()?['text_1']"
+                      ],
+                      "payload/message": "Error: Transaction export failed",
+                      "payload/openApp": false
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                      "operationId": "SendPushNotification",
+                      "connectionName": "shared_powerappsnotification"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              }
+            }
+          },
+          "runAfter": {
+            "User_Guid_was_provided": [
+              "Failed",
+              "TimedOut",
+              "Skipped"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "d941170f-55f5-417f-9221-c2020c2c0234"
+          }
+        },
+        "Filter_Transactions": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "mda_transactions",
+              "fetchXml": "<fetch version=\"1.0\" output-format=\"xml-platform\" mapping=\"logical\" distinct=\"false\">\n  <entity name=\"mda_transaction\">\n    <attribute name=\"mda_amount\" />\n    <attribute name=\"mda_date\" />\n    <attribute name=\"mda_authorizeddate\" />\n    <attribute name=\"mda_description\" />\n    <attribute name=\"mda_merchantname\" />\n    <attribute name=\"mda_pending\" />\n    <attribute name=\"mda_currencycode\" />\n    <order attribute=\"mda_date\" descending=\"true\" />\n    <link-entity name=\"mda_bankaccount\" from=\"mda_bankaccountid\" to=\"mda_bankaccount\"\n      alias=\"bankaccount\">\n      <attribute name=\"mda_plaidaccountid\" />\n      <attribute name=\"mda_institutionname\" />\n      <attribute name=\"mda_name\" />\n      <order attribute=\"mda_institutionname\" descending=\"false\" />\n      <order attribute=\"mda_name\" descending=\"false\" />\n    </link-entity>\n    <link-entity name=\"mda_transactioncategory\" from=\"mda_transactioncategoryid\" to=\"mda_category\"\n      alias=\"category\" link-type=\"outer\">\n      <attribute name=\"mda_name\" />\n      <attribute name=\"mda_type\" />\n    </link-entity>\n    <filter type=\"and\"> \n@{triggerBody()?['text']} \n      <condition attribute=\"mda_profileguid\" operator=\"eq\" value=\"@{triggerBody()?['text_3']}\"/>\n    </filter>\n  </entity>\n</fetch>",
+              "x-ms-odata-metadata-full": false,
+              "$expand": "mda_BankAccount($select=mda_institutionname,mda_name)"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "55f96cf2-9754-4537-a0a5-415b93ec9916"
+          }
+        },
+        "Upload_file": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "annotations",
+              "x-ms-odata-metadata-full": false,
+              "item/subject": "Transaction Export.csv",
+              "item/isdocument": true,
+              "item/documentbody": "@base64(body('Create_CSV_table'))",
+              "item/filename": "Transaction Export.csv",
+              "item/mimetype": "text/csv",
+              "item/objectid_mda_profile@odata.bind": "/mda_profiles(@{triggerBody()?['text_3']})"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "CreateRecord",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runAfter": {
+            "Create_CSV_table": [
+              "Succeeded"
+            ]
+          }
+        },
+        "User_Guid_was_provided": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@empty(triggerBody()?['text_1'])",
+                  "@false"
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Send_Push_on_Success": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "payload/recipients": [
+                    "@triggerBody()?['text_1']"
+                  ],
+                  "payload/message": "Transaction export is ready",
+                  "payload/openApp": true
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                  "operationId": "SendPushNotification",
+                  "connectionName": "shared_powerappsnotification"
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "e3eba70b-00da-463a-92db-0d93886352e6"
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "Upload_file": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a75f4a21-2d8f-4b31-9fa7-6022b580a04d"
+          }
+        },
+        "Terminate_on_Error": {
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed"
+          },
+          "runAfter": {
+            "On_failure": [
+              "Succeeded",
+              "TimedOut",
+              "Failed"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "fc5472cb-8c19-48e3-abaf-7ecc45873d8c"
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

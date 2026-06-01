@@ -1,0 +1,1786 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0": {
+        "api": {
+          "name": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+          "logicalName": "mda_plaid"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Plaid"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_webcontents": {
+        "api": {
+          "name": "shared_webcontents"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_BatchPatch"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "Plaid Client Id (mda_PlaidClientId)": {
+          "defaultValue": "N/A",
+          "type": "String",
+          "metadata": {
+            "schemaName": "mda_PlaidClientId",
+            "description": "This is your Plaid client identifier. Provided by Plaid."
+          }
+        },
+        "Additional Webhook Security Enabled (mda_WebhookSecurityEnabled)": {
+          "defaultValue": "N/A",
+          "type": "String",
+          "metadata": {
+            "schemaName": "mda_WebhookSecurityEnabled",
+            "description": "If yes, provide the Azure Function Url or custom Url here. If not, leave this blank."
+          }
+        },
+        "Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)": {
+          "defaultValue": "N/A",
+          "type": "String",
+          "metadata": {
+            "schemaName": "mda_PlaidSecretKeyPlainText",
+            "description": "In case you'd rather not configure an Azure Key Vault, this will be used instead. If a valid Azure Key Vault reference is provided, that will be used in lieu of this."
+          }
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "724f4919-7c1b-42ef-96e5-89895d8de9e7"
+          },
+          "type": "Request",
+          "kind": "Http",
+          "inputs": {
+            "triggerAuthenticationType": "All",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "environment": {
+                  "type": "string"
+                },
+                "events": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "event_id": {
+                        "type": "string"
+                      },
+                      "event_metadata": {
+                        "type": "object",
+                        "properties": {
+                          "request_id": {
+                            "type": "string"
+                          },
+                          "view_name": {
+                            "type": "string"
+                          }
+                        }
+                      },
+                      "event_name": {
+                        "type": "string"
+                      },
+                      "timestamp": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "public_tokens": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "link_session_id": {
+                  "type": "string"
+                },
+                "link_token": {
+                  "type": "string"
+                },
+                "webhook_code": {
+                  "type": "string"
+                },
+                "webhook_type": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "string"
+                },
+                "item_id": {
+                  "type": "string"
+                },
+                "error": {
+                  "oneOf": [
+                    {
+                      "type": "null"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "display_message": {
+                          "type": "string"
+                        },
+                        "error_code": {
+                          "type": "string"
+                        },
+                        "error_code_reason": {
+                          "type": "string"
+                        },
+                        "error_message": {
+                          "type": "string"
+                        },
+                        "error_type": {
+                          "type": "string"
+                        },
+                        "status": {
+                          "type": "integer"
+                        }
+                      }
+                    }
+                  ]
+                },
+                "reason": {
+                  "type": "string"
+                }
+              }
+            },
+            "method": "POST"
+          }
+        }
+      },
+      "actions": {
+        "Universal_Container": {
+          "actions": {
+            "Link": {
+              "actions": {
+                "Find_Role": {
+                  "metadata": {
+                    "operationMetadataId": "9d4b7117-b1a6-4a9b-a9e1-f2225a7ef7fc"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "entityName": "mda_roles",
+                      "$filter": "mda_lastplaidlinktoken eq '@{triggerBody()?['link_token']}'",
+                      "$top": 1,
+                      "x-ms-odata-metadata-full": true
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                      "operationId": "ListRecords",
+                      "connectionName": "shared_commondataserviceforapps"
+                    }
+                  }
+                },
+                "Link_Successful": {
+                  "actions": {
+                    "Temp_Update_Link_Session": {
+                      "metadata": {
+                        "operationMetadataId": "ecada4f9-6601-4138-be0d-29667c0509b4"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "mda_roles",
+                          "recordId": "@first(outputs('Find_Role')?['body/value'])?['mda_roleid']",
+                          "x-ms-odata-metadata-full": false,
+                          "item/mda_lastlinksessionstatus": "Processing"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "UpdateRecord",
+                          "connectionName": "shared_commondataserviceforapps"
+                        }
+                      }
+                    },
+                    "Apply_to_each_public_token": {
+                      "foreach": "@triggerBody()?['public_tokens']",
+                      "actions": {
+                        "Find_Item_or_Institution_Match": {
+                          "runAfter": {
+                            "Get_Token_Details": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "70372241-7f10-479b-a8ae-4970f9842bf1"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "entityName": "mda_accesstokens",
+                              "$select": "mda_accesstokenid,mda_plaiditemid,mda_plaidaccesstoken",
+                              "$filter": "mda_Institution/mda_plaidinstitutionid eq '@{outputs('Get_Token_Details')?['body/item/institution_id']}' and mda_Profile/mda_profileid eq '@{first(outputs('Find_Role')?['body/value'])?['_mda_profile_value']}'",
+                              "$top": 1,
+                              "x-ms-odata-metadata-full": true
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                              "operationId": "ListRecords",
+                              "connectionName": "shared_commondataserviceforapps"
+                            }
+                          }
+                        },
+                        "Item_and_Institution_is_new": {
+                          "actions": {
+                            "For_Each_Account": {
+                              "foreach": "@outputs('Get_Item''s_Accounts')?['body/accounts']",
+                              "actions": {
+                                "Add_new_Account": {
+                                  "metadata": {
+                                    "operationMetadataId": "f254a5ae-f9fc-4817-81f6-10c62c2dc35b"
+                                  },
+                                  "type": "OpenApiConnection",
+                                  "inputs": {
+                                    "parameters": {
+                                      "entityName": "mda_bankaccounts",
+                                      "x-ms-odata-metadata-full": false,
+                                      "item/mda_AccessToken@odata.bind": "@outputs('Add_Item')?['body/@odata.id']",
+                                      "item/mda_name": "@item()?['name']",
+                                      "item/mda_plaidaccountid": "@replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')",
+                                      "item/mda_type": "@item()?['type']",
+                                      "item/mda_currencycode": "@coalesce(item()?['balances/iso_currency_code'],item()?['balances/unofficial_currency_code'])",
+                                      "item/mda_limit": "@item()?['balances/limit']",
+                                      "item/mda_mask": "@item()?['mask']",
+                                      "item/mda_officialname": "@item()?['official_name']",
+                                      "item/mda_subtype": "@item()?['subtype']"
+                                    },
+                                    "host": {
+                                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                      "operationId": "CreateRecord",
+                                      "connectionName": "shared_commondataserviceforapps"
+                                    }
+                                  }
+                                }
+                              },
+                              "runAfter": {
+                                "Get_Item's_Accounts": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "63049920-09b6-41cb-b123-baf88ccf5bfc"
+                              },
+                              "type": "Foreach"
+                            },
+                            "Check_for_Existing_Institution_Store": {
+                              "metadata": {
+                                "operationMetadataId": "31c39097-b951-47cc-86ac-9ad98aa043ea"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "parameters": {
+                                  "entityName": "mda_institutions",
+                                  "$select": "mda_institutionid",
+                                  "$filter": "mda_plaidinstitutionid eq '@{outputs('Get_Token_Details')?['body/item/institution_id']}'",
+                                  "$top": 1,
+                                  "x-ms-odata-metadata-full": true
+                                },
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "operationId": "ListRecords",
+                                  "connectionName": "shared_commondataserviceforapps"
+                                }
+                              }
+                            },
+                            "Institution_Exists": {
+                              "actions": {},
+                              "runAfter": {
+                                "Check_for_Existing_Institution_Store": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "else": {
+                                "actions": {
+                                  "Add_Institution_Store": {
+                                    "runAfter": {
+                                      "Get_Institution_By_ID": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "8ea4ebe6-ccb4-44d4-a428-84ce05162b66"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "parameters": {
+                                        "entityName": "mda_institutions",
+                                        "x-ms-odata-metadata-full": true,
+                                        "item/mda_name": "@outputs('Get_Institution_By_ID')?['body/institution/name']",
+                                        "item/mda_plaidinstitutionid": "@outputs('Get_Institution_By_ID')?['body/institution/institution_id']",
+                                        "item/mda_primarycolor": "@outputs('Get_Institution_By_ID')?['body/institution/primary_color']",
+                                        "item/mda_routingnumbers": "@join(outputs('Get_Institution_By_ID')?['body/institution/routing_numbers'],';')",
+                                        "item/mda_url": "@outputs('Get_Institution_By_ID')?['body/institution/url']",
+                                        "item/mda_logo": "@outputs('Get_Institution_By_ID')?['body/institution/logo']"
+                                      },
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "operationId": "CreateRecord",
+                                        "connectionName": "shared_commondataserviceforapps"
+                                      }
+                                    }
+                                  },
+                                  "Get_Institution_By_ID": {
+                                    "metadata": {
+                                      "operationMetadataId": "a0f6652d-03d5-4d98-b491-1074023023fe"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "parameters": {
+                                        "body/institution_id": "@outputs('Get_Token_Details')?['body/item/institution_id']",
+                                        "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                                        "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                                        "body/country_codes": [
+                                          "US",
+                                          "GB",
+                                          "ES",
+                                          "NL",
+                                          "FR",
+                                          "IE",
+                                          "CA",
+                                          "DE",
+                                          "IT",
+                                          "PL",
+                                          "DK",
+                                          "NO",
+                                          "SE",
+                                          "EE",
+                                          "LT",
+                                          "LV",
+                                          "PT",
+                                          "BE",
+                                          "AT",
+                                          "FI"
+                                        ],
+                                        "body/options/include_optional_metadata": true
+                                      },
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                                        "operationId": "GetInstitutionById",
+                                        "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0"
+                                      }
+                                    },
+                                    "runtimeConfiguration": {
+                                      "secureData": {
+                                        "properties": [
+                                          "inputs"
+                                        ]
+                                      }
+                                    }
+                                  }
+                                }
+                              },
+                              "expression": {
+                                "and": [
+                                  {
+                                    "not": {
+                                      "equals": [
+                                        "@length(outputs('Check_for_Existing_Institution_Store')?['body/value'])",
+                                        0
+                                      ]
+                                    }
+                                  }
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "abfc0d0d-3857-407a-b989-3db57863c2b9"
+                              },
+                              "type": "If"
+                            },
+                            "Get_Item's_Accounts": {
+                              "runAfter": {
+                                "Add_Item": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "2cab6e9c-01a3-4add-ad53-6e39341ef451"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "parameters": {
+                                  "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                                  "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                                  "body/access_token": "@outputs('Exchange_Token')?['body/access_token']"
+                                },
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                                  "operationId": "GetAccounts",
+                                  "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0"
+                                }
+                              },
+                              "runtimeConfiguration": {
+                                "secureData": {
+                                  "properties": [
+                                    "inputs"
+                                  ]
+                                }
+                              }
+                            },
+                            "Add_Item": {
+                              "runAfter": {
+                                "Institution_Exists": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "27d05e42-424d-4a9a-a500-0c0565bc2814"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "parameters": {
+                                  "entityName": "mda_accesstokens",
+                                  "x-ms-odata-metadata-full": true,
+                                  "item/mda_Institution@odata.bind": "@coalesce(outputs('Add_Institution_Store')?['body/@odata.id'],first(outputs('Check_for_Existing_Institution_Store')?['body/value'])?['@odata.id'])",
+                                  "item/mda_plaidaccessstatus": "@triggerBody()?['webhook_code']",
+                                  "item/mda_plaidaccesstoken": "@outputs('Exchange_Token')?['body/access_token']",
+                                  "item/mda_plaiditemid": "@replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(outputs('Get_Token_Details')?['body/item/item_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')",
+                                  "item/mda_Profile@odata.bind": "@first(outputs('Find_Role')?['body/value'])?['@odata.id']"
+                                },
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "operationId": "CreateRecord",
+                                  "connectionName": "shared_commondataserviceforapps"
+                                }
+                              }
+                            },
+                            "Trans_Sync_Prep_2": {
+                              "runAfter": {
+                                "Get_User_Guid": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "8be256c8-c7b2-4eec-9225-cc40479ea8ca"
+                              },
+                              "type": "Compose",
+                              "inputs": {
+                                "items": [
+                                  {
+                                    "mda_plaiditemid": "@replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(outputs('Get_Token_Details')?['body/item/item_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')"
+                                  }
+                                ]
+                              }
+                            },
+                            "Get_User_Guid": {
+                              "runAfter": {
+                                "For_Each_Account": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "7938e004-c13f-4aaa-93d4-1081204c5675"
+                              },
+                              "type": "OpenApiConnection",
+                              "inputs": {
+                                "parameters": {
+                                  "entityName": "systemusers",
+                                  "fetchXml": "<fetch>\n   <entity name='systemuser'>\n      <attribute name='azureactivedirectoryobjectid' />\n      <link-entity name='mda_role'\n         from='mda_userid'\n         to='systemuserid'\n         link-type='inner'\n         alias='mda_role'>\n         <filter type='and'>\n         <condition attribute='mda_lastplaidlinktoken'\n            operator='eq'\n            value='@{triggerBody()?['link_token']}' />\n      </filter>\n      </link-entity>\n   </entity>\n</fetch>",
+                                  "x-ms-odata-metadata-full": false
+                                },
+                                "host": {
+                                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                  "operationId": "ListRecords",
+                                  "connectionName": "shared_commondataserviceforapps"
+                                }
+                              }
+                            },
+                            "Transaction_Sync_2": {
+                              "runAfter": {
+                                "Trans_Sync_Prep_2": [
+                                  "Succeeded"
+                                ]
+                              },
+                              "metadata": {
+                                "operationMetadataId": "adf7bcf3-0ec9-4d95-9b3a-455175ec19b6"
+                              },
+                              "type": "Workflow",
+                              "inputs": {
+                                "host": {
+                                  "workflowReferenceName": "8fa4c5f9-6dab-ef11-8a69-00224809e341"
+                                },
+                                "body": {
+                                  "text": "@string(outputs('Trans_Sync_Prep_2'))",
+                                  "text_1": "@first(outputs('Get_User_Guid')?['body/value'])?['azureactivedirectoryobjectid']"
+                                }
+                              }
+                            }
+                          },
+                          "runAfter": {
+                            "Find_Item_or_Institution_Match": [
+                              "Succeeded"
+                            ]
+                          },
+                          "else": {
+                            "actions": {
+                              "Item_was_updated": {
+                                "actions": {
+                                  "Get_Accounts": {
+                                    "actions": {
+                                      "Get_Item's_Updated_Accounts": {
+                                        "metadata": {
+                                          "operationMetadataId": "2cab6e9c-01a3-4add-ad53-6e39341ef451"
+                                        },
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "parameters": {
+                                            "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                                            "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                                            "body/access_token": "@outputs('Exchange_Token')?['body/access_token']"
+                                          },
+                                          "host": {
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                                            "operationId": "GetAccounts",
+                                            "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0"
+                                          }
+                                        },
+                                        "runtimeConfiguration": {
+                                          "secureData": {
+                                            "properties": [
+                                              "inputs"
+                                            ]
+                                          }
+                                        }
+                                      },
+                                      "Get_Existing_Account_Data": {
+                                        "metadata": {
+                                          "operationMetadataId": "28abf836-d92b-457c-89b2-958cbac7c145"
+                                        },
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "parameters": {
+                                            "entityName": "mda_bankaccounts",
+                                            "$filter": "_mda_accesstoken_value eq '@{first(outputs('Find_Item_or_Institution_Match')?['body/value'])?['mda_accesstokenid']}'",
+                                            "x-ms-odata-metadata-full": false
+                                          },
+                                          "host": {
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                            "operationId": "ListRecords",
+                                            "connectionName": "shared_commondataserviceforapps"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "d3523eac-ead5-4bf5-857f-3485bfea3439"
+                                    },
+                                    "type": "Scope"
+                                  },
+                                  "Each_updated_account": {
+                                    "foreach": "@outputs('Get_Item''s_Updated_Accounts')?['body/accounts']",
+                                    "actions": {
+                                      "Account_is_new": {
+                                        "actions": {
+                                          "Add_updated_account": {
+                                            "metadata": {
+                                              "operationMetadataId": "f254a5ae-f9fc-4817-81f6-10c62c2dc35b"
+                                            },
+                                            "type": "OpenApiConnection",
+                                            "inputs": {
+                                              "parameters": {
+                                                "entityName": "mda_bankaccounts",
+                                                "x-ms-odata-metadata-full": false,
+                                                "item/mda_AccessToken@odata.bind": "@first(outputs('Find_Item_or_Institution_Match')?['body/value'])?['@odata.id']",
+                                                "item/mda_name": "@item()?['name']",
+                                                "item/mda_plaidaccountid": "@replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')",
+                                                "item/mda_type": "@item()?['type']",
+                                                "item/mda_currencycode": "@coalesce(item()?['balances/iso_currency_code'],item()?['balances/unofficial_currency_code'])",
+                                                "item/mda_limit": "@item()?['balances/limit']",
+                                                "item/mda_mask": "@item()?['mask']",
+                                                "item/mda_officialname": "@item()?['official_name']",
+                                                "item/mda_subtype": "@item()?['subtype']"
+                                              },
+                                              "host": {
+                                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                "operationId": "CreateRecord",
+                                                "connectionName": "shared_commondataserviceforapps"
+                                              }
+                                            }
+                                          },
+                                          "Set_added_accounts_variable": {
+                                            "runAfter": {
+                                              "Add_updated_account": [
+                                                "Succeeded"
+                                              ]
+                                            },
+                                            "metadata": {
+                                              "operationMetadataId": "78dda573-fc43-4598-8c15-6e94db2fb6d0"
+                                            },
+                                            "type": "SetVariable",
+                                            "inputs": {
+                                              "name": "AddedAccounts",
+                                              "value": true
+                                            }
+                                          }
+                                        },
+                                        "runAfter": {
+                                          "Find_matching_existing_account": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "else": {
+                                          "actions": {}
+                                        },
+                                        "expression": {
+                                          "and": [
+                                            {
+                                              "equals": [
+                                                "@empty(body('Find_matching_existing_account'))",
+                                                "@true"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "0ff7f425-1396-4b01-999f-f54eceddbe0e"
+                                        },
+                                        "type": "If"
+                                      },
+                                      "Find_matching_existing_account": {
+                                        "metadata": {
+                                          "operationMetadataId": "b83deb56-def1-4554-9b82-eddc3d0722f7"
+                                        },
+                                        "type": "Query",
+                                        "inputs": {
+                                          "from": "@outputs('Get_Existing_Account_Data')?['body/value']",
+                                          "where": "@equals(replace(item()?['mda_plaidaccountid'],'-',''),items('Each_updated_account')?['account_id'])"
+                                        }
+                                      }
+                                    },
+                                    "runAfter": {
+                                      "Get_Accounts": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "0d0232da-d7de-4b9c-8ed4-2bb51f5819e0"
+                                    },
+                                    "type": "Foreach"
+                                  },
+                                  "Each_existing_account": {
+                                    "foreach": "@outputs('Get_Existing_Account_Data')?['body/value']",
+                                    "actions": {
+                                      "Account_is_missing": {
+                                        "actions": {
+                                          "Soft_delete_account": {
+                                            "metadata": {
+                                              "operationMetadataId": "7f516367-a7e3-4b7e-84fd-32d28d781de5"
+                                            },
+                                            "type": "OpenApiConnection",
+                                            "inputs": {
+                                              "parameters": {
+                                                "entityName": "mda_bankaccounts",
+                                                "recordId": "@item()?['mda_bankaccountid']",
+                                                "x-ms-odata-metadata-full": false,
+                                                "item/statecode": 1
+                                              },
+                                              "host": {
+                                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                                "operationId": "UpdateOnlyRecord",
+                                                "connectionName": "shared_commondataserviceforapps"
+                                              }
+                                            }
+                                          }
+                                        },
+                                        "runAfter": {
+                                          "Find_matching_updated_account": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "else": {
+                                          "actions": {}
+                                        },
+                                        "expression": {
+                                          "and": [
+                                            {
+                                              "equals": [
+                                                "@empty(body('Find_matching_updated_account'))",
+                                                "@true"
+                                              ]
+                                            }
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "604224a4-34f4-46e7-b080-16a67ae27aa4"
+                                        },
+                                        "type": "If"
+                                      },
+                                      "Find_matching_updated_account": {
+                                        "metadata": {
+                                          "operationMetadataId": "ef1ed156-584b-4be9-9aed-606bfce1e2d2"
+                                        },
+                                        "type": "Query",
+                                        "inputs": {
+                                          "from": "@outputs('Get_Item''s_Updated_Accounts')?['body/accounts']",
+                                          "where": "@equals(item()?['account_id'],replace(items('Each_existing_account')?['mda_plaidaccountid'],'-',''))"
+                                        }
+                                      }
+                                    },
+                                    "runAfter": {
+                                      "Get_Accounts": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "1a95063b-e51c-431c-9450-3e8cde44b59b"
+                                    },
+                                    "type": "Foreach"
+                                  },
+                                  "Accounts_were_added": {
+                                    "actions": {
+                                      "Get_User_Guid_2": {
+                                        "metadata": {
+                                          "operationMetadataId": "7938e004-c13f-4aaa-93d4-1081204c5675"
+                                        },
+                                        "type": "OpenApiConnection",
+                                        "inputs": {
+                                          "parameters": {
+                                            "entityName": "systemusers",
+                                            "fetchXml": "<fetch>\n   <entity name='systemuser'>\n      <attribute name='azureactivedirectoryobjectid' />\n      <link-entity name='mda_role'\n         from='mda_userid'\n         to='systemuserid'\n         link-type='inner'\n         alias='mda_role'>\n         <filter type='and'>\n         <condition attribute='mda_lastplaidlinktoken'\n            operator='eq'\n            value='@{triggerBody()?['link_token']}' />\n      </filter>\n      </link-entity>\n   </entity>\n</fetch>",
+                                            "x-ms-odata-metadata-full": false
+                                          },
+                                          "host": {
+                                            "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                            "operationId": "ListRecords",
+                                            "connectionName": "shared_commondataserviceforapps"
+                                          }
+                                        }
+                                      },
+                                      "Trans_Sync_Prep_3": {
+                                        "runAfter": {
+                                          "Get_User_Guid_2": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "8be256c8-c7b2-4eec-9225-cc40479ea8ca"
+                                        },
+                                        "type": "Compose",
+                                        "inputs": {
+                                          "items": [
+                                            {
+                                              "mda_plaiditemid": "@replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(outputs('Get_Token_Details')?['body/item/item_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')"
+                                            }
+                                          ]
+                                        }
+                                      },
+                                      "Transaction_Sync_3": {
+                                        "runAfter": {
+                                          "Trans_Sync_Prep_3": [
+                                            "Succeeded"
+                                          ]
+                                        },
+                                        "metadata": {
+                                          "operationMetadataId": "adf7bcf3-0ec9-4d95-9b3a-455175ec19b6"
+                                        },
+                                        "type": "Workflow",
+                                        "inputs": {
+                                          "host": {
+                                            "workflowReferenceName": "8fa4c5f9-6dab-ef11-8a69-00224809e341"
+                                          },
+                                          "body": {
+                                            "text": "@string(outputs('Trans_Sync_Prep_3'))",
+                                            "text_1": "@first(outputs('Get_User_Guid_2')?['body/value'])?['azureactivedirectoryobjectid']"
+                                          }
+                                        }
+                                      }
+                                    },
+                                    "runAfter": {
+                                      "Each_updated_account": [
+                                        "Succeeded"
+                                      ]
+                                    },
+                                    "else": {
+                                      "actions": {}
+                                    },
+                                    "expression": {
+                                      "and": [
+                                        {
+                                          "equals": [
+                                            "@variables('AddedAccounts')",
+                                            "@true"
+                                          ]
+                                        }
+                                      ]
+                                    },
+                                    "metadata": {
+                                      "operationMetadataId": "ff94b700-04c7-4ecd-a97b-12ce9ce20ab3"
+                                    },
+                                    "type": "If"
+                                  },
+                                  "Update_item_status": {
+                                    "metadata": {
+                                      "operationMetadataId": "c52e9aa9-01cc-4424-9493-adda61517872"
+                                    },
+                                    "type": "OpenApiConnection",
+                                    "inputs": {
+                                      "parameters": {
+                                        "entityName": "mda_accesstokens",
+                                        "recordId": "@first(outputs('Find_Item_or_Institution_Match')?['body/value'])?['mda_accesstokenid']",
+                                        "x-ms-odata-metadata-full": false,
+                                        "item/mda_plaidaccessstatus": "@triggerBody()?['webhook_code']"
+                                      },
+                                      "host": {
+                                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                        "operationId": "UpdateOnlyRecord",
+                                        "connectionName": "shared_commondataserviceforapps"
+                                      }
+                                    }
+                                  }
+                                },
+                                "else": {
+                                  "actions": {
+                                    "Trash_duplicate_item": {
+                                      "metadata": {
+                                        "operationMetadataId": "b2b3d997-323a-46f1-9bae-ecef651b98a1"
+                                      },
+                                      "type": "OpenApiConnection",
+                                      "inputs": {
+                                        "parameters": {
+                                          "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                                          "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                                          "body/access_token": "@outputs('Exchange_Token')?['body/access_token']"
+                                        },
+                                        "host": {
+                                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                                          "operationId": "RemoveItem",
+                                          "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0"
+                                        }
+                                      },
+                                      "runtimeConfiguration": {
+                                        "secureData": {
+                                          "properties": [
+                                            "inputs"
+                                          ]
+                                        }
+                                      }
+                                    }
+                                  }
+                                },
+                                "expression": {
+                                  "and": [
+                                    {
+                                      "equals": [
+                                        "@replace(first(outputs('Find_Item_or_Institution_Match')?['body/value'])?['mda_plaiditemid'],'-','')",
+                                        "@outputs('Get_Token_Details')?['body/item/item_id']"
+                                      ]
+                                    }
+                                  ]
+                                },
+                                "metadata": {
+                                  "operationMetadataId": "dd389547-b2ca-4cc6-8b9d-f7bd37426874"
+                                },
+                                "type": "If"
+                              }
+                            }
+                          },
+                          "expression": {
+                            "and": [
+                              {
+                                "equals": [
+                                  "@empty(outputs('Find_Item_or_Institution_Match')?['body/value'])",
+                                  "@true"
+                                ]
+                              }
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "a33721e1-7164-40d9-ad45-c82f32c691b1"
+                          },
+                          "type": "If"
+                        },
+                        "Exchange_Token": {
+                          "metadata": {
+                            "operationMetadataId": "1cbf29c1-33ea-4b7f-bd89-4a835a2faa95"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                              "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                              "body/public_token": "@items('Apply_to_each_public_token')"
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                              "operationId": "ExchangeToken",
+                              "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0"
+                            }
+                          },
+                          "runtimeConfiguration": {
+                            "secureData": {
+                              "properties": [
+                                "inputs"
+                              ]
+                            }
+                          }
+                        },
+                        "Get_Token_Details": {
+                          "runAfter": {
+                            "Exchange_Token": [
+                              "Succeeded"
+                            ]
+                          },
+                          "metadata": {
+                            "operationMetadataId": "50fd434f-d4cd-4a90-b8a1-fe8e92593ad6"
+                          },
+                          "type": "OpenApiConnection",
+                          "inputs": {
+                            "parameters": {
+                              "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                              "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                              "body/access_token": "@outputs('Exchange_Token')?['body/access_token']"
+                            },
+                            "host": {
+                              "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                              "operationId": "GetItem",
+                              "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0"
+                            }
+                          },
+                          "runtimeConfiguration": {
+                            "secureData": {
+                              "properties": [
+                                "inputs"
+                              ]
+                            }
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Temp_Update_Link_Session": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "2da084de-f8ff-4231-a816-a653f8d56608"
+                      },
+                      "type": "Foreach"
+                    },
+                    "Update_Completed_Link_Session_-_Success": {
+                      "runAfter": {
+                        "Apply_to_each_public_token": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "ecada4f9-6601-4138-be0d-29667c0509b4"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "mda_roles",
+                          "recordId": "@first(outputs('Find_Role')?['body/value'])?['mda_roleid']",
+                          "item/mda_lastlinksessionstatus": "@triggerBody()?['status']"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "UpdateRecord",
+                          "connectionName": "shared_commondataserviceforapps"
+                        }
+                      }
+                    },
+                    "Update_Completed_Link_Session_-_Failure": {
+                      "runAfter": {
+                        "Apply_to_each_public_token": [
+                          "TimedOut",
+                          "Failed"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "ecada4f9-6601-4138-be0d-29667c0509b4"
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "mda_roles",
+                          "recordId": "@first(outputs('Find_Role')?['body/value'])?['mda_roleid']",
+                          "item/mda_lastlinksessionstatus": "Flow Error"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "UpdateRecord",
+                          "connectionName": "shared_commondataserviceforapps"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Find_Role": [
+                      "Succeeded"
+                    ]
+                  },
+                  "else": {
+                    "actions": {
+                      "Is_valid_Link_session": {
+                        "actions": {
+                          "Update_Link_Session": {
+                            "metadata": {
+                              "operationMetadataId": "ecada4f9-6601-4138-be0d-29667c0509b4"
+                            },
+                            "type": "OpenApiConnection",
+                            "inputs": {
+                              "parameters": {
+                                "entityName": "mda_roles",
+                                "recordId": "@first(outputs('Find_Role')?['body/value'])?['mda_roleid']",
+                                "x-ms-odata-metadata-full": false,
+                                "item/mda_lastlinksessionstatus": "Exited"
+                              },
+                              "host": {
+                                "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                                "operationId": "UpdateRecord",
+                                "connectionName": "shared_commondataserviceforapps"
+                              }
+                            }
+                          }
+                        },
+                        "else": {
+                          "actions": {}
+                        },
+                        "expression": {
+                          "and": [
+                            {
+                              "equals": [
+                                "@empty(first(outputs('Find_Role')?['body/value']))",
+                                "@false"
+                              ]
+                            },
+                            {
+                              "greaterOrEquals": [
+                                "@parseDateTime(first(outputs('Find_Role')?['body/value'])?['mda_linktokenexpiration'])",
+                                "@parseDateTime(utcNow())"
+                              ]
+                            },
+                            {
+                              "equals": [
+                                "@toLower(first(outputs('Find_Role')?['body/value'])?['mda_lastlinksessionstatus'])",
+                                "active"
+                              ]
+                            }
+                          ]
+                        },
+                        "metadata": {
+                          "operationMetadataId": "9f87a788-3518-4751-8729-b64affdfaef6"
+                        },
+                        "type": "If"
+                      }
+                    }
+                  },
+                  "expression": {
+                    "and": [
+                      {
+                        "equals": [
+                          "@empty(outputs('Find_Role')?['body/value'])",
+                          "@false"
+                        ]
+                      },
+                      {
+                        "greaterOrEquals": [
+                          "@parseDateTime(first(outputs('Find_Role')?['body/value'])?['mda_linktokenexpiration'])",
+                          "@parseDateTime(utcNow())"
+                        ]
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@toLower(first(outputs('Find_Role')?['body/value'])?['mda_lastlinksessionstatus'])",
+                            "success"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@toLower(first(outputs('Find_Role')?['body/value'])?['mda_lastlinksessionstatus'])",
+                            "processing"
+                          ]
+                        }
+                      },
+                      {
+                        "not": {
+                          "equals": [
+                            "@toLower(first(outputs('Find_Role')?['body/value'])?['mda_lastlinksessionstatus'])",
+                            "cancelled"
+                          ]
+                        }
+                      },
+                      {
+                        "equals": [
+                          "@toLower(triggerBody()?['status'])",
+                          "success"
+                        ]
+                      }
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "1ffa4dd5-5e60-4761-9260-f8ce7942f050"
+                  },
+                  "type": "If"
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@triggerBody()?['webhook_code']",
+                      "SESSION_FINISHED"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@triggerBody()?['webhook_type']",
+                      "LINK"
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "4eece0ab-1eee-4d63-80ec-1346fa128fe4"
+              },
+              "type": "If"
+            },
+            "Error_Webhook": {
+              "actions": {
+                "Access_Token_Status_Error": {
+                  "metadata": {
+                    "operationMetadataId": "91c3714f-c336-4c8b-8cdf-157102fe6ebb"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "request/method": "POST",
+                      "request/url": "/api/data/v9.2/$batch",
+                      "request/headers": {
+                        "OData-MaxVersion": "4.0",
+                        "OData-Version": "4.0",
+                        "If-None-Match": "@{string('null')}",
+                        "Accept": "application/json",
+                        "Content-Type": "multipart/mixed;boundary=@{string('\"batch_body\"')}"
+                      },
+                      "request/body": "POST [Organization Uri]/api/data/v9.2/$batch HTTP/1.1\nOData-MaxVersion: 4.0\nOData-Version: 4.0\nIf-None-Match: null\nAccept: application/json\nContent-Type: multipart/mixed; boundary=\"batch_body\"\n\n--batch_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(triggerBody()?['item_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPATCH /api/data/v9.2/mda_accesstokens(mda_plaiditemid='@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(triggerBody()?['item_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"mda_plaidaccessstatus\": \"@{triggerBody()?['error']?['error_code']}\"\n}\n\n--batch_body--\n\n\n"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_webcontents",
+                      "operationId": "InvokeHttp",
+                      "connectionName": "shared_webcontents"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@triggerBody()?['webhook_code']",
+                      "ERROR"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@triggerBody()?['webhook_type']",
+                      "ITEM"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@triggerBody()?['error']?['error_code']",
+                      "ITEM_LOGIN_REQUIRED"
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "f9161f94-85ce-4345-9d80-8c45525330a8"
+              },
+              "type": "If"
+            },
+            "Access_Token_Status": {
+              "actions": {
+                "Update_Access_Token_Status": {
+                  "metadata": {
+                    "operationMetadataId": "98129193-3853-45e3-8bc2-d8820914456a"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "request/method": "POST",
+                      "request/url": "/api/data/v9.2/$batch",
+                      "request/headers": {
+                        "OData-MaxVersion": "4.0",
+                        "OData-Version": "4.0",
+                        "If-None-Match": "@{string('null')}",
+                        "Accept": "application/json",
+                        "Content-Type": "multipart/mixed;boundary=@{string('\"batch_body\"')}"
+                      },
+                      "request/body": "POST [Organization Uri]/api/data/v9.2/$batch HTTP/1.1\nOData-MaxVersion: 4.0\nOData-Version: 4.0\nIf-None-Match: null\nAccept: application/json\nContent-Type: multipart/mixed; boundary=\"batch_body\"\n\n--batch_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(triggerBody()?['item_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPATCH /api/data/v9.2/mda_accesstokens(mda_plaiditemid='@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(triggerBody()?['item_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"mda_plaidaccessstatus\": \"@{triggerBody()?['webhook_code']}\"\n}\n\n--batch_body--\n\n\n"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_webcontents",
+                      "operationId": "InvokeHttp",
+                      "connectionName": "shared_webcontents"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@triggerBody()?['webhook_type']",
+                      "ITEM"
+                    ]
+                  },
+                  {
+                    "or": [
+                      {
+                        "equals": [
+                          "@triggerBody()?['webhook_code']",
+                          "PENDING_DISCONNECT"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@triggerBody()?['webhook_code']",
+                          "PENDING_EXPIRATION"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@triggerBody()?['webhook_code']",
+                          "USER_PERMISSION_REVOKED"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@triggerBody()?['webhook_code']",
+                          "LOGIN_REPAIRED"
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "39d14ab4-70e1-4efe-aa63-0c150fefe7e7"
+              },
+              "type": "If"
+            },
+            "Transactions_Available": {
+              "actions": {
+                "Trans_Sync_Prep": {
+                  "metadata": {
+                    "operationMetadataId": "8be256c8-c7b2-4eec-9225-cc40479ea8ca"
+                  },
+                  "type": "Compose",
+                  "inputs": {
+                    "items": [
+                      {
+                        "mda_plaiditemid": "@replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(triggerBody()?['item_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')"
+                      }
+                    ]
+                  }
+                },
+                "Transactions_Sync": {
+                  "runAfter": {
+                    "Trans_Sync_Prep": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "67e0e2aa-d98e-44c6-b964-161a4e1166e6"
+                  },
+                  "type": "Workflow",
+                  "inputs": {
+                    "host": {
+                      "workflowReferenceName": "8fa4c5f9-6dab-ef11-8a69-00224809e341"
+                    },
+                    "body": {
+                      "text": "@string(outputs('Trans_Sync_Prep'))"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@triggerBody()?['webhook_type']",
+                      "TRANSACTIONS"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@triggerBody()?['webhook_code']",
+                      "SYNC_UPDATES_AVAILABLE"
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "f8c963f8-d336-4413-b963-4bdb2820324b"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {
+            "Initialize_added_accounts_variable": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "3f2322af-e3e8-43ee-ad84-aea4a190f736"
+          },
+          "type": "Scope"
+        },
+        "On_failure": {
+          "actions": {
+            "Flow_run_metadata": {
+              "metadata": {
+                "operationMetadataId": "2e7f2cb6-e958-4c03-96e6-7b6379327a18"
+              },
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Terminate_on_Error": {
+              "runAfter": {
+                "Log_error": [
+                  "Succeeded",
+                  "Failed",
+                  "TimedOut"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "33513984-64fb-4095-9e05-225fa375364a"
+              },
+              "type": "Terminate",
+              "inputs": {
+                "runStatus": "Failed"
+              }
+            },
+            "Log_error": {
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "1cd7287c-3fdc-4492-be56-1366572c1315"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "Universal_Container": [
+              "TimedOut",
+              "Failed",
+              "Skipped"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "596fa008-c6f2-43a0-b62f-b672f9edaf39"
+          },
+          "type": "Scope"
+        },
+        "JWT_Verification": {
+          "actions": {
+            "Get_Plaid_Secret_Key": {
+              "metadata": {
+                "operationMetadataId": "5d08febc-6a53-4c7a-9ca5-675b798bc4b7"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "actionName": "RetrieveEnvironmentVariableSecretValue",
+                  "item/EnvironmentVariableName": "mda_PlaidSecretKeyVault"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "PerformUnboundAction",
+                  "connectionName": "shared_commondataserviceforapps"
+                }
+              },
+              "runtimeConfiguration": {
+                "secureData": {
+                  "properties": [
+                    "outputs"
+                  ]
+                }
+              }
+            },
+            "Webhook_Verification": {
+              "runAfter": {
+                "Get_Plaid_Secret_Key": [
+                  "Succeeded",
+                  "Failed"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "66841c3f-f59d-47ee-a98f-9f599da8ecc0"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                  "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                  "body/key_id": "@json(base64ToString(\r\n  replace(\r\n    replace(\r\n      first(split(triggerOutputs()?['headers']?['plaid-verification'],'.')),\r\n      '-',\r\n      '+'),\r\n    '_',\r\n    '/'\r\n  )\r\n))?['kid']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                  "operationId": "WebhookVerification",
+                  "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0"
+                }
+              },
+              "runtimeConfiguration": {
+                "secureData": {
+                  "properties": [
+                    "inputs"
+                  ]
+                }
+              }
+            },
+            "Crypto_enabled": {
+              "actions": {
+                "Azure_Function": {
+                  "metadata": {
+                    "operationMetadataId": "326022a6-6919-45d6-bd3c-faaf51ce77a5"
+                  },
+                  "type": "Http",
+                  "inputs": {
+                    "uri": "@parameters('Additional Webhook Security Enabled (mda_WebhookSecurityEnabled)')",
+                    "method": "POST",
+                    "headers": {
+                      "Content-Type": "application/json"
+                    },
+                    "body": {
+                      "jwt": "@{triggerOutputs()?['headers']?['plaid-verification']}",
+                      "publicKey": "@{base64(outputs('Webhook_Verification')?['body/key'])}",
+                      "rawBody": "@{base64(triggerBody())}"
+                    },
+                    "retryPolicy": {
+                      "type": "none"
+                    }
+                  },
+                  "runtimeConfiguration": {
+                    "contentTransfer": {
+                      "transferMode": "Chunked"
+                    }
+                  }
+                },
+                "Crypto_failure": {
+                  "actions": {
+                    "invalid_crypto": {
+                      "metadata": {
+                        "operationMetadataId": "f84fc4b9-ac12-4d2c-b101-fb254db20c77"
+                      },
+                      "type": "Response",
+                      "kind": "Http",
+                      "inputs": {
+                        "statusCode": 401
+                      }
+                    },
+                    "Successful_security_3": {
+                      "runAfter": {
+                        "invalid_crypto": [
+                          "Succeeded"
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "e5c2232d-f099-4960-bb41-70e44c120a57"
+                      },
+                      "type": "Terminate",
+                      "inputs": {
+                        "runStatus": "Cancelled"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Azure_Function": [
+                      "Failed"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "01b93654-9e59-4513-aae7-ef580975262b"
+                  },
+                  "type": "Scope"
+                }
+              },
+              "runAfter": {
+                "Webhook_verification_failure": [
+                  "Skipped"
+                ]
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(parameters('Additional Webhook Security Enabled (mda_WebhookSecurityEnabled)'))",
+                      "@false"
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "b5f69bde-43a6-4cd5-b752-c6e5d025c54c"
+              },
+              "type": "If"
+            },
+            "Webhook_verification_failure": {
+              "actions": {
+                "invalid_plaid-verification": {
+                  "metadata": {
+                    "operationMetadataId": "271709a8-be58-4961-8df5-5fad15501a8f"
+                  },
+                  "type": "Response",
+                  "kind": "Http",
+                  "inputs": {
+                    "statusCode": 401
+                  }
+                },
+                "Successful_security_2": {
+                  "runAfter": {
+                    "invalid_plaid-verification": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "39026723-35ad-4562-acf0-72a6d2af3903"
+                  },
+                  "type": "Terminate",
+                  "inputs": {
+                    "runStatus": "Cancelled"
+                  }
+                }
+              },
+              "runAfter": {
+                "Webhook_Verification": [
+                  "Failed"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "42fc1f40-4205-4350-93ba-7abb330ce95d"
+              },
+              "type": "Scope"
+            }
+          },
+          "runAfter": {
+            "plaid-verification_exists": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "90a13f5e-ea9a-4cd4-8b9c-04c60201da9d"
+          },
+          "type": "Scope"
+        },
+        "plaid-verification_exists": {
+          "actions": {},
+          "runAfter": {},
+          "else": {
+            "actions": {
+              "null_plaid-verification_response": {
+                "metadata": {
+                  "operationMetadataId": "cbe6f4fb-50bb-4eac-b75e-170506e6d094"
+                },
+                "type": "Response",
+                "kind": "Http",
+                "inputs": {
+                  "statusCode": 401
+                }
+              },
+              "Successful_security_1": {
+                "runAfter": {
+                  "null_plaid-verification_response": [
+                    "Succeeded"
+                  ]
+                },
+                "metadata": {
+                  "operationMetadataId": "be122250-ddf9-4dea-b6ec-fba1fc7e5ca6"
+                },
+                "type": "Terminate",
+                "inputs": {
+                  "runStatus": "Cancelled"
+                }
+              }
+            }
+          },
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@empty(triggerOutputs()?['headers']?['plaid-verification'])",
+                  "@false"
+                ]
+              }
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "b95df49a-49bd-4a4e-a68f-f7218385cbd3"
+          },
+          "type": "If"
+        },
+        "successful_webhook_receipt": {
+          "runAfter": {
+            "JWT_Verification": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "ca610e7e-c0da-46df-b0b9-a8672656b9ce"
+          },
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 202
+          }
+        },
+        "Initialize_added_accounts_variable": {
+          "runAfter": {
+            "successful_webhook_receipt": [
+              "Succeeded",
+              "TimedOut",
+              "Failed"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "5ae96274-de1c-4344-8992-59da91ae7085"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "AddedAccounts",
+                "type": "boolean",
+                "value": false
+              }
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

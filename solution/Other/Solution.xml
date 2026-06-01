@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ImportExportXml version="9.2.26054.129" SolutionPackageVersion="9.2" languagecode="1033" generatedBy="CrmLive" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26054.129" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26054.00129">
+  <SolutionManifest>
+    <UniqueName>Riata</UniqueName>
+    <LocalizedNames>
+      <LocalizedName description="Riata" languagecode="1033" />
+    </LocalizedNames>
+    <Descriptions />
+    <Version>1.5.20260529.0</Version>
+    <Managed>1</Managed>
+    <Publisher>
+      <UniqueName>Mitchell</UniqueName>
+      <LocalizedNames>
+        <LocalizedName description="Mitchell" languagecode="1033" />
+      </LocalizedNames>
+      <Descriptions />
+      <EMailAddress xsi:nil="true"></EMailAddress>
+      <SupportingWebsiteUrl xsi:nil="true"></SupportingWebsiteUrl>
+      <CustomizationPrefix>mda</CustomizationPrefix>
+      <CustomizationOptionValuePrefix>86170</CustomizationOptionValuePrefix>
+      <Addresses>
+        <Address>
+          <AddressNumber>1</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+        <Address>
+          <AddressNumber>2</AddressNumber>
+          <AddressTypeCode>1</AddressTypeCode>
+          <City xsi:nil="true"></City>
+          <County xsi:nil="true"></County>
+          <Country xsi:nil="true"></Country>
+          <Fax xsi:nil="true"></Fax>
+          <FreightTermsCode xsi:nil="true"></FreightTermsCode>
+          <ImportSequenceNumber xsi:nil="true"></ImportSequenceNumber>
+          <Latitude xsi:nil="true"></Latitude>
+          <Line1 xsi:nil="true"></Line1>
+          <Line2 xsi:nil="true"></Line2>
+          <Line3 xsi:nil="true"></Line3>
+          <Longitude xsi:nil="true"></Longitude>
+          <Name xsi:nil="true"></Name>
+          <PostalCode xsi:nil="true"></PostalCode>
+          <PostOfficeBox xsi:nil="true"></PostOfficeBox>
+          <PrimaryContactName xsi:nil="true"></PrimaryContactName>
+          <ShippingMethodCode>1</ShippingMethodCode>
+          <StateOrProvince xsi:nil="true"></StateOrProvince>
+          <Telephone1 xsi:nil="true"></Telephone1>
+          <Telephone2 xsi:nil="true"></Telephone2>
+          <Telephone3 xsi:nil="true"></Telephone3>
+          <TimeZoneRuleVersionNumber xsi:nil="true"></TimeZoneRuleVersionNumber>
+          <UPSZone xsi:nil="true"></UPSZone>
+          <UTCOffset xsi:nil="true"></UTCOffset>
+          <UTCConversionTimeZoneCode xsi:nil="true"></UTCConversionTimeZoneCode>
+        </Address>
+      </Addresses>
+    </Publisher>
+    <RootComponents>
+      <RootComponent type="1" schemaName="ian_license" behavior="0" />
+      <RootComponent type="1" schemaName="mda_accesstoken" behavior="0" />
+      <RootComponent type="1" schemaName="mda_bankaccount" behavior="0" />
+      <RootComponent type="1" schemaName="mda_budget" behavior="0" />
+      <RootComponent type="1" schemaName="mda_budgetentry" behavior="0" />
+      <RootComponent type="1" schemaName="mda_institution" behavior="0" />
+      <RootComponent type="1" schemaName="mda_message" behavior="0" />
+      <RootComponent type="1" schemaName="mda_profile" behavior="0" />
+      <RootComponent type="1" schemaName="mda_role" behavior="0" />
+      <RootComponent type="1" schemaName="mda_transaction" behavior="0" />
+      <RootComponent type="1" schemaName="mda_transactioncategory" behavior="0" />
+      <RootComponent type="1" schemaName="mda_transactionsplit" behavior="0" />
+      <RootComponent type="20" id="{ae6db9e8-b03c-f011-8779-6045bd06e3b2}" behavior="0" />
+      <RootComponent type="29" id="{04a9b885-77d7-f011-8406-7ced8d7125fe}" behavior="0" />
+      <RootComponent type="29" id="{0550ddd1-4f9d-f011-bbd2-6045bd02d262}" behavior="0" />
+      <RootComponent type="29" id="{0f32c3bd-d7ad-f011-bbd2-6045bd07a400}" behavior="0" />
+      <RootComponent type="29" id="{1586be94-ddd5-f011-8543-00224809248b}" behavior="0" />
+      <RootComponent type="29" id="{3695ec40-8eba-f011-bbd2-7ced8d3d9571}" behavior="0" />
+      <RootComponent type="29" id="{625c6d05-d5ec-f011-8406-7c1e528d2918}" behavior="0" />
+      <RootComponent type="29" id="{6606827a-72f8-f011-8407-000d3a3169b2}" behavior="0" />
+      <RootComponent type="29" id="{8168bb8c-50c5-f011-8543-00224809113c}" behavior="0" />
+      <RootComponent type="29" id="{81a00e3e-1fc4-f011-8543-000d3a351437}" behavior="0" />
+      <RootComponent type="29" id="{877271cf-12bf-f011-bbd2-000d3a5d055d}" behavior="0" />
+      <RootComponent type="29" id="{8fa4c5f9-6dab-ef11-8a69-00224809e341}" behavior="0" />
+      <RootComponent type="29" id="{9672b41e-d08b-ef11-ac21-000d3a30960d}" behavior="0" />
+      <RootComponent type="29" id="{ad5e2182-40f5-ef11-be20-6045bd036a1a}" behavior="0" />
+      <RootComponent type="29" id="{ae7cee1b-69d0-f011-8543-000d3a594ddd}" behavior="0" />
+      <RootComponent type="29" id="{ba3b1a08-0abf-f011-bbd2-000d3a5d055d}" behavior="0" />
+      <RootComponent type="29" id="{be7fe93e-f3c6-f011-8543-000d3a5a16fa}" behavior="0" />
+      <RootComponent type="29" id="{d43bf1f5-43c9-f011-8543-0022480ba0ca}" behavior="0" />
+      <RootComponent type="29" id="{d83ec5a0-4a70-ef11-a670-0022480483d3}" behavior="0" />
+      <RootComponent type="29" id="{e43eda19-1aea-ef11-be1f-000d3a59da07}" behavior="0" />
+      <RootComponent type="29" id="{f42368da-37d1-f011-8543-000d3a594ddd}" behavior="0" />
+      <RootComponent type="300" schemaName="mda_riata_72562" behavior="0" />
+      <RootComponent type="372" id="{1d09983a-10bc-4c40-b7c9-c82bcefcc87e}" schemaName="mda_plaid" behavior="0" />
+      <RootComponent type="70" id="{2fae993b-935a-f011-877a-000d3a36d7e0}" behavior="0" />
+      <RootComponent type="9" schemaName="mda_plaidlanguages" behavior="0" />
+      <RootComponent type="9" schemaName="mda_plaidsupportedcountries" behavior="0" />
+      <RootComponent type="9" schemaName="mda_recurrence" behavior="0" />
+      <RootComponent type="9" schemaName="mda_roles" behavior="0" />
+      <RootComponent type="9" schemaName="mda_transactiontypes" behavior="0" />
+      <RootComponent type="91" id="{ca5ecd1d-91be-4293-b313-113dfce5e0f8}" schemaName="RecursiveIndexing, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1221135c6f67971d" behavior="0" />
+      <RootComponent type="92" id="{09f186a6-b8b9-f011-bbd2-000d3a5c19f8}" behavior="0" />
+      <RootComponent type="92" id="{160e9edd-b8b9-f011-bbd2-000d3a5c19f8}" behavior="0" />
+      <RootComponent type="92" id="{359e47bc-b8b9-f011-bbd2-000d3a5c19f8}" behavior="0" />
+      <RootComponent type="92" id="{469211cc-b7b9-f011-bbd2-000d3a5c19f8}" behavior="0" />
+      <RootComponent type="92" id="{b5ad4771-b8b9-f011-bbd2-000d3a5c19f8}" behavior="0" />
+      <RootComponent type="92" id="{c0256251-b8b9-f011-bbd2-000d3a5c19f8}" behavior="0" />
+      <RootComponent type="92" id="{caebddca-b8b9-f011-bbd2-000d3a5c19f8}" behavior="0" />
+      <RootComponent type="92" id="{e5063a90-b8b9-f011-bbd2-000d3a5c19f8}" behavior="0" />
+    </RootComponents>
+    <MissingDependencies>
+      <MissingDependency>
+        <Required type="1" schemaName="environmentvariablevalue" displayName="Environment Variable Value" solution="EnvironmentVariables (1.0.2406.4)">
+          <package appName="EnvironmentVariables" version="1.0.2406.4">EnvironmentVariablesSolutionAnchor (1.0.2406.4)</package>
+        </Required>
+        <Dependent type="300" schemaName="mda_riata_72562" displayName="Riata" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="1" schemaName="ian_license" displayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="2" schemaName="createdby" displayName="Created By" parentSchemaName="ian_license" parentDisplayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="2" schemaName="createdonbehalfby" displayName="Created By (Delegate)" parentSchemaName="ian_license" parentDisplayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="2" schemaName="modifiedby" displayName="Modified By" parentSchemaName="ian_license" parentDisplayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="2" schemaName="modifiedonbehalfby" displayName="Modified By (Delegate)" parentSchemaName="ian_license" parentDisplayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="2" schemaName="ownerid" displayName="Owner" parentSchemaName="ian_license" parentDisplayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="2" schemaName="owningbusinessunit" displayName="Owning Business Unit" parentSchemaName="ian_license" parentDisplayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="2" schemaName="owningteam" displayName="Owning Team" parentSchemaName="ian_license" parentDisplayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="2" schemaName="owninguser" displayName="Owning User" parentSchemaName="ian_license" parentDisplayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="2" schemaName="versionnumber" displayName="Version Number" parentSchemaName="ian_license" parentDisplayName="License" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="300" schemaName="mda_riata_72562" displayName="Riata" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="1" schemaName="ian_license" displayName="License" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="50" schemaName="ian_license:RibbonDiffXml" displayName="ian_license:RibbonDiffXml" parentSchemaName="ribboncustomization" parentDisplayName="Application Ribbons" />
+      </MissingDependency>
+      <MissingDependency>
+        <Required type="66" schemaName="ian_Ianua.IanusCanvas" displayName="ian_Ianua.IanusCanvas" solution="IanusGuard (1.0.0.6)">
+          <package appName="Ianus Guard" version="1.0.0.6">IanusGuard (1.0.0.6)</package>
+        </Required>
+        <Dependent type="300" schemaName="mda_riata_72562" displayName="Riata" />
+      </MissingDependency>
+    </MissingDependencies>
+  </SolutionManifest>
+</ImportExportXml>

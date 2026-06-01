@@ -1,0 +1,1444 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0-1": {
+        "api": {
+          "name": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+          "logicalName": "mda_plaid"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Plaid"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_commondataserviceforapps-1": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_webcontents": {
+        "api": {
+          "name": "shared_webcontents"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_BatchPatch"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_powerappsnotification-1": {
+        "api": {
+          "name": "shared_powerappsnotification"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_PushNotification"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        },
+        "Plaid Client Id (mda_PlaidClientId)": {
+          "defaultValue": "N/A",
+          "type": "String",
+          "metadata": {
+            "schemaName": "mda_PlaidClientId",
+            "description": "This is your Plaid client identifier. Provided by Plaid."
+          }
+        },
+        "Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)": {
+          "defaultValue": "N/A",
+          "type": "String",
+          "metadata": {
+            "schemaName": "mda_PlaidSecretKeyPlainText",
+            "description": "In case you'd rather not configure an Azure Key Vault, this will be used instead. If a valid Azure Key Vault reference is provided, that will be used in lieu of this."
+          }
+        }
+      },
+      "triggers": {
+        "manual": {
+          "metadata": {
+            "operationMetadataId": "560eba68-a2d0-4480-b104-0ddabb86d345"
+          },
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "text": {
+                  "description": "items array",
+                  "title": "items array",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_1": {
+                  "description": "GUID",
+                  "title": "UserId",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text"
+              ]
+            }
+          }
+        }
+      },
+      "actions": {
+        "For_each_item_sync": {
+          "foreach": "@body('Parse_JSON')?['items']",
+          "actions": {
+            "Get_Transactions_Until": {
+              "actions": {
+                "Set_Next_Cursor": {
+                  "runAfter": {
+                    "Transactions_Sync": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "7e996c33-2609-46ae-8b7e-84eac8961341"
+                  },
+                  "type": "SetVariable",
+                  "inputs": {
+                    "name": "Next Cursor",
+                    "value": "@outputs('Transactions_Sync')?['body/next_cursor']"
+                  }
+                },
+                "For_Each_Add": {
+                  "foreach": "@outputs('Transactions_Sync')?['body/added']",
+                  "actions": {
+                    "Append_Adds_to_Batch_Patch_Body": {
+                      "metadata": {
+                        "operationMetadataId": "19b1d761-a273-4f4f-99ef-eb24c15d948e"
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "Batch Patch Body",
+                        "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['transaction_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPOST /api/data/v9.2/mda_transactions HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"mda_amount\": @{item()?['amount']},\n  \"mda_currencycode\": \"@{coalesce(item()?['iso_currency_code'],item()?['unofficial_currency_code'])}\",\n  \"mda_date\": \"@{item()?['date']}\",\n  \"mda_description\": \"@{coalesce(item()?['original_description'],item()?['merchant_name'],item()?['name'])}\",\n  \"mda_pending\": @{toLower(string(item()?['pending']))},\n  \"mda_BankAccount@odata.bind\": \"/mda_bankaccounts(mda_plaidaccountid='@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}')\",\n  \"mda_plaidtransactionid\": \"@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['transaction_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\",\n  \"mda_authorizeddate\": @{if(empty(item()?['authorized_date']),'null',concat('\"',item()?['authorized_date'],'\"'))},\n  \"mda_checknumber\": \"@{item()?['check_number']}\",\n  \"mda_financecategoryconfidencelevel\": \"@{item()?['personal_finance_category/confidence_level']}\",\n  \"mda_financecategorydetailed\": \"@{item()?['personal_finance_category/detailed']}\",\n  \"mda_financecategoryprimary\": \"@{item()?['personal_finance_category/primary']}\",\n  \"mda_financecategoryurl\": \"@{item()?['personal_finance_category_icon_url']}\",\n  \"mda_logourl\": \"@{item()?['logo_url']}\",\n  \"mda_merchantname\": \"@{coalesce(item()?['merchant_name'],item()?['name'])}\",\n  \"mda_paymentchannel\": \"@{item()?['payment_channel']}\",\n  \"mda_website\": \"@{item()?['website']}\",\n  \"mda_latitude\": @{coalesce(item()?['location/lat'],'null')},\n  \"mda_longitude\": @{coalesce(item()?['location/lon'],'null')},\n  \"mda_address\": \"@{concat(item()?['location/address'],';',item()?['location/city'],';',item()?['location/region'],';',item()?['location/postal_code'])}\",\n  \"mda_randomamount\": @{if(equals(rand(0,2),0),\nmul(item()?['amount'],div(rand(1,100),100.00)),\ndiv(item()?['amount'],div(rand(1,100),100.00))\n)},\n  \"mda_hassplits\": false\n}"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Transactions_Sync": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "6bbf1211-5f8b-451f-8ea9-d201e0c37096"
+                  },
+                  "type": "Foreach"
+                },
+                "For_Each_Modified": {
+                  "foreach": "@outputs('Transactions_Sync')?['body/modified']",
+                  "actions": {
+                    "Append_Modifieds_to_Batch_Patch_Body": {
+                      "metadata": {
+                        "operationMetadataId": "e1f3da33-90a5-4df5-bd80-fab6ed7b1dcb"
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "Batch Patch Body",
+                        "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['transaction_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPATCH /api/data/v9.2/mda_transactions(mda_plaidtransactionid='@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['transaction_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"mda_amount\": @{item()?['amount']},\n  \"mda_currencycode\": \"@{coalesce(item()?['iso_currency_code'],item()?['unofficial_currency_code'])}\",\n  \"mda_date\": \"@{item()?['date']}\",\n  \"mda_description\": \"@{coalesce(item()?['original_description'],item()?['merchant_name'],item()?['name'])}\",\n  \"mda_pending\": @{toLower(string(item()?['pending']))},\n  \"mda_BankAccount@odata.bind\": \"/mda_bankaccounts(mda_plaidaccountid='@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}')\",\n  \"mda_plaidtransactionid\": \"@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['transaction_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\",\n  \"mda_authorizeddate\": @{if(empty(item()?['authorized_date']),'null',concat('\"',item()?['authorized_date'],'\"'))},\n  \"mda_checknumber\": \"@{item()?['check_number']}\",\n  \"mda_financecategoryconfidencelevel\": \"@{item()?['personal_finance_category/confidence_level']}\",\n  \"mda_financecategorydetailed\": \"@{item()?['personal_finance_category/detailed']}\",\n  \"mda_financecategoryprimary\": \"@{item()?['personal_finance_category/primary']}\",\n  \"mda_financecategoryurl\": \"@{item()?['personal_finance_category_icon_url']}\",\n  \"mda_logourl\": \"@{item()?['logo_url']}\",\n  \"mda_merchantname\": \"@{coalesce(item()?['merchant_name'],item()?['name'])}\",\n  \"mda_paymentchannel\": \"@{item()?['payment_channel']}\",\n  \"mda_website\": \"@{item()?['website']}\",\n  \"mda_latitude\": @{coalesce(item()?['location/lat'],'null')},\n  \"mda_longitude\": @{coalesce(item()?['location/lon'],'null')},\n  \"mda_address\": \"@{concat(item()?['location/address'],';',item()?['location/city'],';',item()?['location/region'],';',item()?['location/postal_code'])}\",\n  \"mda_randomamount\": @{if(equals(rand(0,2),0),\r\nmul(item()?['amount'],div(rand(1,100),100.00)),\r\ndiv(item()?['amount'],div(rand(1,100),100.00))\r\n)}\n}"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "For_Each_Add": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "b2967102-a995-4394-9bb7-1d372f10dd84"
+                  },
+                  "type": "Foreach"
+                },
+                "For_Each_Remove": {
+                  "foreach": "@outputs('Transactions_Sync')?['body/removed']",
+                  "actions": {
+                    "Append_Removes_to_Batch_Patch_Body": {
+                      "metadata": {
+                        "operationMetadataId": "3d85d2ff-adda-4681-8fa4-4c81120512b1"
+                      },
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "Batch Patch Body",
+                        "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['transaction_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nDELETE /api/data/v9.2/mda_transactions(mda_plaidtransactionid='@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['transaction_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}') HTTP/1.1\nContent-Type: application/json; type=entry"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "For_Each_Modified": [
+                      "Succeeded"
+                    ]
+                  },
+                  "metadata": {
+                    "operationMetadataId": "4c5551bd-c889-4c0c-91d1-86db70e545be"
+                  },
+                  "type": "Foreach"
+                },
+                "Transactions_Sync": {
+                  "metadata": {
+                    "operationMetadataId": "340ffc74-abb8-4fb5-98bf-5671c0bb42ce"
+                  },
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                      "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                      "body/access_token": "@first(body('Get_item_metadata'))?['mda_plaidaccesstoken']",
+                      "body/cursor": "@variables('Next Cursor')",
+                      "body/options/include_original_description": true
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                      "operationId": "TransactionsSync",
+                      "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0-1"
+                    }
+                  },
+                  "runtimeConfiguration": {
+                    "secureData": {
+                      "properties": [
+                        "inputs"
+                      ]
+                    }
+                  }
+                },
+                "Validation_Loop": {
+                  "foreach": "@outputs('Get_New_Account_Data')?['body/accounts']",
+                  "actions": {
+                    "Filter_Validation_Array": {
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@variables('AmountValidationArray')",
+                        "where": "@equals(item()?['account_id'],items('Validation_Loop')?['account_id'])"
+                      }
+                    },
+                    "Validation_Item_Exists": {
+                      "actions": {
+                        "Update_validation_array": {
+                          "runAfter": {
+                            "replace_validation_record_in_array": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "SetVariable",
+                          "inputs": {
+                            "name": "AmountValidationArray",
+                            "value": "@outputs('replace_validation_record_in_array')"
+                          }
+                        },
+                        "replace_validation_record_in_array": {
+                          "runAfter": {
+                            "validation_record_property_updates": [
+                              "Succeeded"
+                            ]
+                          },
+                          "type": "Compose",
+                          "inputs": "@union(\r\n    union(\r\n        take(\r\n          variables('AmountValidationArray'),\r\n          first(body('Filter_Validation_Array'))?['index']\r\n        ),\r\n        createArray(\r\n            outputs('validation_record_property_updates')\r\n        )\r\n    ),\r\n    skip(\r\n        variables('AmountValidationArray'),\r\n        add(\r\n          first(body('Filter_Validation_Array'))?['index'], \r\n          1\r\n        )\r\n    )\r\n)"
+                        },
+                        "validation_record_property_updates": {
+                          "type": "Compose",
+                          "inputs": {
+                            "index": "@first(body('Filter_Validation_Array'))?['index']",
+                            "account_id": "@{first(body('Filter_Validation_Array'))?['account_id']}",
+                            "new_current_balance": "@first(body('Filter_Validation_Array'))?['new_current_balance']",
+                            "prior_current_balance": "@first(body('Filter_Validation_Array'))?['prior_current_balance']",
+                            "added_sum": "@add(decimal(formatNumber(xpath(\r\n  xml(json(concat(\r\n    '{\"root\":{\"added\":',\r\n    body('Transactions_Sync')?['added'],\r\n    '}}'\r\n  ))),\r\n  concat(\r\n    'sum(/root/added[normalize-space(account_id)=''',item()?['account_id'],\r\n    '''and normalize-space(pending)=''false'']/amount)'\r\n  )\r\n),'0.00')),\r\nfirst(body('Filter_Validation_Array'))?['added_sum']\r\n)",
+                            "new_modified_sum": "@add(decimal(formatNumber(xpath(\r\n  xml(json(concat(\r\n    '{\"root\":{\"modified\":',\r\n    body('Transactions_Sync')?['modified'],\r\n    '}}'\r\n  ))),\r\n  concat(\r\n    'sum(/root/modified[normalize-space(account_id)=''',item()?['account_id'],\r\n    '''and normalize-space(pending)=''false'']/amount)'\r\n  )\r\n),'0.00')),\r\nfirst(body('Filter_Validation_Array'))?['new_modified_sum']\r\n)",
+                            "prior_modified_sum": "@add(if(\r\n  empty(body('Find_aggregate_modifieds')),\r\n  0,\r\n  body('Find_aggregate_modifieds')?['total_amount']\r\n),\r\nfirst(body('Filter_Validation_Array'))?['prior_modified_sum']\r\n)",
+                            "removed_sum": "@add(if(\r\n  empty(body('Find_aggregate_removes')),\r\n  0,\r\n  body('Find_aggregate_removes')?['total_amount']\r\n),\r\nfirst(body('Filter_Validation_Array'))?['removed_sum']\r\n)",
+                            "validation_formula": "prior_current_balance - added_sum - ( new_modified_sum - prior_modified_sum ) + removed_sum = new_current_balance"
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Find_aggregate_removes": [
+                          "Succeeded"
+                        ]
+                      },
+                      "else": {
+                        "actions": {
+                          "Increment_Index": {
+                            "runAfter": {
+                              "Append_to_Validation_Array": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "IncrementVariable",
+                            "inputs": {
+                              "name": "Index"
+                            }
+                          },
+                          "Find_prior_account_balance": {
+                            "type": "Query",
+                            "inputs": {
+                              "from": "@outputs('Get_Existing_Account_Data')?['body/value']",
+                              "where": "@equals(replace(item()?['mda_plaidaccountid'],'-',''),items('Validation_Loop')?['account_id'])"
+                            }
+                          },
+                          "Append_to_Validation_Array": {
+                            "runAfter": {
+                              "Find_prior_account_balance": [
+                                "Succeeded"
+                              ]
+                            },
+                            "type": "AppendToArrayVariable",
+                            "inputs": {
+                              "name": "AmountValidationArray",
+                              "value": {
+                                "index": "@variables('Index')",
+                                "account_id": "@{item()?['account_id']}",
+                                "new_current_balance": "@if(\r\n  equals(item()?['type'],'credit'),\r\n  mul(item()?['balances/current'],-1),\r\n  item()?['balances/current']\r\n)",
+                                "prior_current_balance": "@if(\r\n  and(\r\n    equals(item()?['type'],'credit'),\r\n    not(equals(first(body('Find_prior_account_balance'))?['mda_currentbalance'],null))\r\n  ),\r\n  mul(first(body('Find_prior_account_balance'))?['mda_currentbalance'],-1),\r\n  first(body('Find_prior_account_balance'))?['mda_currentbalance']\r\n)",
+                                "added_sum": "@decimal(formatNumber(xpath(\r\n  xml(json(concat(\r\n    '{\"root\":{\"added\":',\r\n    body('Transactions_Sync')?['added'],\r\n    '}}'\r\n  ))),\r\n  concat(\r\n    'sum(/root/added[normalize-space(account_id)=''',item()?['account_id'],\r\n    '''and normalize-space(pending)=''false'']/amount)'\r\n  )\r\n),'0.00'))",
+                                "new_modified_sum": "@decimal(formatNumber(xpath(\r\n  xml(json(concat(\r\n    '{\"root\":{\"modified\":',\r\n    body('Transactions_Sync')?['modified'],\r\n    '}}'\r\n  ))),\r\n  concat(\r\n    'sum(/root/modified[normalize-space(account_id)=''',item()?['account_id'],\r\n    '''and normalize-space(pending)=''false'']/amount)'\r\n  )\r\n),\r\n'0.00'\r\n))",
+                                "prior_modified_sum": "@if(\r\n  empty(body('Find_aggregate_modifieds')),\r\n  0,\r\n  first(body('Find_aggregate_modifieds'))?['total_amount']\r\n)",
+                                "removed_sum": "@if(\r\n  empty(body('Find_aggregate_removes')),\r\n  0,\r\n  first(body('Find_aggregate_removes'))?['total_amount']\r\n)",
+                                "validation_formula": "prior_current_balance - added_sum - ( new_modified_sum - prior_modified_sum ) + removed_sum = new_current_balance"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@not(empty(body('Filter_Validation_Array')))",
+                              "@true"
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    },
+                    "Find_aggregate_modifieds": {
+                      "runAfter": {
+                        "Filter_Validation_Array": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@outputs('Aggregate_modifieds')?['body/value']",
+                        "where": "@equals(replace(item()?['mda_plaidaccountid'],'-',''),items('Validation_Loop')?['account_id'])"
+                      }
+                    },
+                    "Find_aggregate_removes": {
+                      "runAfter": {
+                        "Find_aggregate_modifieds": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@outputs('Aggregate_removes')?['body/value']",
+                        "where": "@equals(replace(item()?['mda_plaidaccountid'],'-',''),items('Validation_Loop')?['account_id'])"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Modified_and_removed_retrievals": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                },
+                "Modified_and_removed_retrievals": {
+                  "actions": {
+                    "Select_modifieds": {
+                      "type": "Select",
+                      "inputs": {
+                        "from": "@outputs('Transactions_Sync')?['body/modified']",
+                        "select": {
+                          "transaction_id": "@replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['transaction_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')"
+                        }
+                      }
+                    },
+                    "Select_removes": {
+                      "type": "Select",
+                      "inputs": {
+                        "from": "@outputs('Transactions_Sync')?['body/removed']",
+                        "select": {
+                          "transaction_id": "@replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['transaction_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')"
+                        }
+                      }
+                    },
+                    "Aggregate_removes": {
+                      "runAfter": {
+                        "Select_removes": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "mda_transactions",
+                          "fetchXml": "<fetch aggregate=\"true\">\n  <entity name=\"mda_transaction\">\n    <attribute name=\"mda_amount\"\n               alias=\"total_amount\"\n               aggregate=\"sum\" />\n    <attribute name=\"mda_bankaccount\"\n               alias=\"account_id\"\n               groupby=\"true\" />\n   <filter type='and'>\n<condition attribute='mda_plaidtransactionid' operator='in'>\n@{replace(replace(\r\n  replace(\r\n    replace(\r\n      replace(\r\n        string(body('Select_removes')),\r\n        '[',\r\n        ''\r\n      ),\r\n      ']',\r\n      ''\r\n    ),\r\n    ',',\r\n    ''\r\n  ),\r\n  '{\"transaction_id\":\"',\r\n  '<value>'\r\n),\r\n'\"}',\r\n'</value>'\r\n)}\n<value>0</value>\n   </condition>\n<condition attribute='mda_pending'\n   operator='eq'\n   value='0' />\n</filter>\n    <link-entity name=\"mda_bankaccount\"\n                 from=\"mda_bankaccountid\"\n                 to=\"mda_bankaccount\"\n                 link-type=\"inner\"\n                 alias=\"bank_account\">\n      <attribute name=\"mda_plaidaccountid\"\n                 alias=\"mda_plaidaccountid\"\n                 groupby=\"true\" />\n    </link-entity>\n  </entity>\n</fetch>",
+                          "x-ms-odata-metadata-full": false
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "ListRecords",
+                          "connectionName": "shared_commondataserviceforapps-1"
+                        }
+                      }
+                    },
+                    "Aggregate_modifieds": {
+                      "runAfter": {
+                        "Select_modifieds": [
+                          "Succeeded"
+                        ]
+                      },
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "mda_transactions",
+                          "fetchXml": "<fetch aggregate=\"true\">\n  <entity name=\"mda_transaction\">\n    <attribute name=\"mda_amount\"\n               alias=\"total_amount\"\n               aggregate=\"sum\" />\n    <attribute name=\"mda_bankaccount\"\n               alias=\"account_id\"\n               groupby=\"true\" />\n   <filter type='and'>\n<condition attribute='mda_plaidtransactionid' operator='in'>\n@{replace(\r\n  replace(\r\n  replace(\r\n    replace(\r\n      replace(\r\n        string(body('Select_modifieds')),\r\n        '[',\r\n        ''\r\n      ),\r\n      ']',\r\n      ''\r\n    ),\r\n    ',',\r\n    ''\r\n  ),\r\n  '{\"transaction_id\":\"',\r\n  '<value>'\r\n),\r\n'\"}',\r\n'</value>'\r\n)}\n<value>0</value>\n   </condition>\n<condition attribute='mda_pending'\n   operator='eq'\n   value='0' />\n</filter>\n    <link-entity name=\"mda_bankaccount\"\n                 from=\"mda_bankaccountid\"\n                 to=\"mda_bankaccount\"\n                 link-type=\"inner\"\n                 alias=\"bank_account\">\n      <attribute name=\"mda_plaidaccountid\"\n                 alias=\"mda_plaidaccountid\"\n                 groupby=\"true\" />\n    </link-entity>\n  </entity>\n</fetch>",
+                          "x-ms-odata-metadata-full": false
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "ListRecords",
+                          "connectionName": "shared_commondataserviceforapps-1"
+                        }
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Transactions_Sync": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Scope"
+                }
+              },
+              "runAfter": {
+                "Clear_Index": [
+                  "Succeeded"
+                ]
+              },
+              "expression": "@equals(outputs('Transactions_Sync')?['body/has_more'],false)",
+              "limit": {
+                "timeout": "PT1H"
+              },
+              "metadata": {
+                "operationMetadataId": "ee0061be-cb22-4f10-96f0-fb2c98c75dac"
+              },
+              "type": "Until"
+            },
+            "Update_Saved_Cursor": {
+              "runAfter": {
+                "Batch_Patch_Transactions_and_Accounts": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "c43483f9-27c9-403c-8442-c7d0316ea1ae"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_accesstokens",
+                  "recordId": "@first(body('Get_item_metadata'))?['mda_accesstokenid']",
+                  "item/mda_plaidtransactionscursor": "@outputs('Transactions_Sync')?['body/next_cursor']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "UpdateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            },
+            "DEBUG_BATCH_OBJECT_SYNC": {
+              "runAfter": {
+                "Get_Transactions_Until": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "eceea324-3e08-401b-9ba0-cec5c9b4c6ce"
+              },
+              "type": "Compose",
+              "inputs": "@variables('Batch Patch Body')"
+            },
+            "Batch_Patch_Transactions_and_Accounts": {
+              "runAfter": {
+                "DEBUG_BATCH_OBJECT_SYNC": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "request/method": "POST",
+                  "request/url": "/api/data/v9.2/$batch",
+                  "request/headers": {
+                    "OData-MaxVersion": "4.0",
+                    "OData-Version": "4.0",
+                    "If-None-Match": "@{string('null')}",
+                    "Accept": "application/json",
+                    "Content-Type": "multipart/mixed;boundary=@{string('\"batch_body\"')}"
+                  },
+                  "request/body": "POST [Organization Uri]/api/data/v9.2/$batch HTTP/1.1\nOData-MaxVersion: 4.0\nOData-Version: 4.0\nIf-None-Match: null\nAccept: application/json\nContent-Type: multipart/mixed; boundary=\"batch_body\"\n\n--batch_body\nContent-Type: multipart/mixed; boundary=\"changeset_body\"\n@{variables('Batch Patch Body')}\n\n\n--changeset_body--\n\n\n--batch_body--\n\n\n"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_webcontents",
+                  "operationId": "InvokeHttp",
+                  "connectionName": "shared_webcontents"
+                }
+              }
+            },
+            "Patch_Trans_Status_to_Item": {
+              "runAfter": {
+                "Batch_Patch_Transactions_and_Accounts": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "request/method": "POST",
+                  "request/url": "/api/data/v9.2/$batch",
+                  "request/headers": {
+                    "OData-MaxVersion": "4.0",
+                    "OData-Version": "4.0",
+                    "If-None-Match": "@{string('null')}",
+                    "Accept": "application/json",
+                    "Content-Type": "multipart/mixed;boundary=@{string('\"batch_body\"')}"
+                  },
+                  "request/body": "POST [Organization Uri]/api/data/v9.2/$batch HTTP/1.1\nOData-MaxVersion: 4.0\nOData-Version: 4.0\nIf-None-Match: null\nAccept: application/json\nContent-Type: multipart/mixed; boundary=\"batch_body\"\n\n--batch_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{item()?['mda_plaiditemid']}\n\nPATCH /api/data/v9.2/mda_accesstokens(mda_plaiditemid='@{item()?['mda_plaiditemid']}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"mda_transactionupdatestatus\": \"@{outputs('Transactions_Sync')?['body/transactions_update_status']}\"\n}\n\n--batch_body--\n\n\n"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_webcontents",
+                  "operationId": "InvokeHttp",
+                  "connectionName": "shared_webcontents"
+                }
+              }
+            },
+            "Set_Next_Cursor_to_Last_Saved_Cursor": {
+              "runAfter": {
+                "Patch_Account_Data": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "3fd4fcee-bf74-40d0-bea9-1ffb1cf20874"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "Next Cursor",
+                "value": "@first(body('Get_item_metadata'))?['mda_plaidtransactionscursor']"
+              }
+            },
+            "Patch_Account_Data": {
+              "actions": {
+                "For_each_new_account": {
+                  "foreach": "@outputs('Get_New_Account_Data')?['body/accounts']",
+                  "actions": {
+                    "Append_to_Batch_Patch_Body_accounts": {
+                      "type": "AppendToStringVariable",
+                      "inputs": {
+                        "name": "Batch Patch Body",
+                        "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPATCH /api/data/v9.2/mda_bankaccounts(mda_plaidaccountid='@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"mda_availablebalance\": @{coalesce(item()?['balances/available'],'null')},\n  \"mda_currencycode\": \"@{coalesce(item()?['balances/iso_currency_code'],item()?['balances/unofficial_currency_code'])}\",\n  \"mda_currentbalance\": @{coalesce(item()?['balances/current'],'null')},\n  \"mda_limit\": @{coalesce(item()?['balances/limit'],'null')},\n  \"mda_mask\": \"@{item()?['mask']}\",\n  \"mda_name\": \"@{item()?['name']}\",\n  \"mda_officialname\": \"@{item()?['official_name']}\",\n  \"mda_subtype\": \"@{item()?['subtype']}\",\n  \"mda_type\": \"@{item()?['type']}\"\n}"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Account_Data": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                },
+                "Account_Data": {
+                  "actions": {
+                    "Get_Existing_Account_Data": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "mda_bankaccounts",
+                          "$select": "mda_availablebalance,mda_currentbalance,mda_plaidaccountid",
+                          "$filter": "_mda_accesstoken_value eq '@{first(body('Get_item_metadata'))?['mda_accesstokenid']}'",
+                          "x-ms-odata-metadata-full": false
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "ListRecords",
+                          "connectionName": "shared_commondataserviceforapps-1"
+                        }
+                      }
+                    },
+                    "Get_New_Account_Data": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "body/client_id": "@parameters('Plaid Client Id (mda_PlaidClientId)')",
+                          "body/secret": "@coalesce(outputs('Get_Plaid_Secret_Key')?['body/EnvironmentVariableSecretValue'],parameters('Plaid Secret Key (Plain Text) (mda_PlaidSecretKeyPlainText)'))",
+                          "body/access_token": "@first(body('Get_item_metadata'))?['mda_plaidaccesstoken']"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0",
+                          "operationId": "GetAccounts",
+                          "connectionName": "shared_plaid-5f9e73ede31213e95a-5f77db087877e794a0-1"
+                        }
+                      },
+                      "runtimeConfiguration": {
+                        "secureData": {
+                          "properties": [
+                            "inputs"
+                          ]
+                        }
+                      }
+                    }
+                  },
+                  "type": "Scope"
+                },
+                "For_each_existing_account": {
+                  "foreach": "@outputs('Get_Existing_Account_Data')?['body/value']",
+                  "actions": {
+                    "Find_matching_new_account": {
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@outputs('Get_New_Account_Data')?['body/accounts']",
+                        "where": "@equals(item()?['account_id'],replace(items('For_each_existing_account')?['mda_plaidaccountid'],'-',''))"
+                      }
+                    },
+                    "Account_is_missing": {
+                      "actions": {
+                        "Append_to_Batch_Patch_Body_inactive_accounts": {
+                          "type": "AppendToStringVariable",
+                          "inputs": {
+                            "name": "Batch Patch Body",
+                            "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPATCH /api/data/v9.2/mda_bankaccounts(mda_bankaccountid='@{item()?['mda_bankaccountid']}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"statecode\": 1\n}"
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Find_matching_new_account": [
+                          "Succeeded"
+                        ]
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@empty(body('Find_matching_new_account'))",
+                              "@true"
+                            ]
+                          }
+                        ]
+                      },
+                      "metadata": {
+                        "operationMetadataId": "604224a4-34f4-46e7-b080-16a67ae27aa4"
+                      },
+                      "type": "If"
+                    }
+                  },
+                  "runAfter": {
+                    "For_each_new_account": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
+                }
+              },
+              "runAfter": {
+                "Clear_Batch_Patch_Body": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Scope"
+            },
+            "Get_item_metadata": {
+              "type": "Query",
+              "inputs": {
+                "from": "@outputs('Get_item_meta')?['body/value']",
+                "where": "@equals(item()?['mda_plaiditemid'],items('For_each_item_sync')?['mda_plaiditemid'])"
+              }
+            },
+            "Clear_Index": {
+              "runAfter": {
+                "Set_Next_Cursor_to_Last_Saved_Cursor": [
+                  "Succeeded"
+                ]
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "Index",
+                "value": 0
+              }
+            },
+            "For_each_account_validation": {
+              "foreach": "@variables('AmountValidationArray')",
+              "actions": {
+                "Transactions_Sync_adds_up_to_new_account_balance": {
+                  "actions": {},
+                  "else": {
+                    "actions": {
+                      "Append_to_array_variable": {
+                        "type": "AppendToArrayVariable",
+                        "inputs": {
+                          "name": "Transaction Validation Failure Array",
+                          "value": "@item()"
+                        }
+                      }
+                    }
+                  },
+                  "expression": {
+                    "or": [
+                      {
+                        "equals": [
+                          "@equals(\r\n  add(\r\n    sub(\r\n      sub(\r\n        coalesce(item()?['prior_current_balance'],0),\r\n        item()?['added_sum']\r\n      ),\r\n      sub(\r\n        item()?['new_modified_sum'],\r\n        item()?['prior_modified_sum']\r\n      )\r\n    ),\r\n    item()?['removed_sum']\r\n  ),\r\nitem()?['new_current_balance']\r\n)",
+                          "@true"
+                        ]
+                      },
+                      {
+                        "equals": [
+                          "@item()?['prior_current_balance']",
+                          "@null"
+                        ]
+                      }
+                    ]
+                  },
+                  "type": "If"
+                }
+              },
+              "runAfter": {
+                "Batch_Patch_Transactions_and_Accounts": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
+            },
+            "Clear_Batch_Patch_Body": {
+              "runAfter": {
+                "Get_item_metadata": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6f80891c-1cbe-4e87-8956-7731ca4b6050"
+              },
+              "type": "SetVariable",
+              "inputs": {
+                "name": "Batch Patch Body",
+                "value": "@null"
+              }
+            }
+          },
+          "runAfter": {
+            "Initialize_Index": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "0e190b7d-bb2f-4996-8d44-777486363303"
+          },
+          "type": "Foreach"
+        },
+        "Initialize_Next_Cursor": {
+          "runAfter": {
+            "Initialize_Batch_Patch_Body": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "19c0ece6-dd0f-4d9f-86cf-7a832b8d5404"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Next Cursor",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "Initialize_Batch_Patch_Body": {
+          "runAfter": {
+            "Get_Plaid_Secret_Key": [
+              "Succeeded",
+              "Failed"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "58dc5c18-b6ff-4bd3-943e-98024f566e28"
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Batch Patch Body",
+                "type": "string"
+              }
+            ]
+          }
+        },
+        "User_Guid_was_provided": {
+          "actions": {
+            "Send_Push_on_Success": {
+              "metadata": {
+                "operationMetadataId": "e3eba70b-00da-463a-92db-0d93886352e6"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "payload/recipients": [
+                    "@triggerBody()?['text_1']"
+                  ],
+                  "payload/message": "Transactions synced",
+                  "payload/openApp": true
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                  "operationId": "SendPushNotification",
+                  "connectionName": "shared_powerappsnotification-1"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "Validation_failures": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {}
+          },
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@empty(triggerBody()?['text_1'])",
+                  "@false"
+                ]
+              }
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "a75f4a21-2d8f-4b31-9fa7-6022b580a04d"
+          },
+          "type": "If"
+        },
+        "Terminate_on_Error": {
+          "runAfter": {
+            "On_failure": [
+              "TimedOut",
+              "Failed",
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "7b285f81-cb41-4f97-8085-72e156987f2c"
+          },
+          "type": "Terminate",
+          "inputs": {
+            "runStatus": "Failed"
+          }
+        },
+        "License_check": {
+          "actions": {
+            "Check_for_license": {
+              "metadata": {
+                "operationMetadataId": "d5e28c8e-1e6f-4182-a096-12d47f83cec0"
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "actionName": "ian_IanusLicenseValidation",
+                  "item/PublisherId": "bc2bd1f6-d301-446e-bc31-7324d15e89eb",
+                  "item/PublicKeys": [
+                    "@'-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsVbi3L74u0xMwBBsPcQ0\r\nC5oCEbGVybP+XE/zCPbQPb5qf/9BtElaPUyTTcDXNqYoACgQMQ7wEYsw+ZA6wNpi\r\nTbGNyAfs/ZqPWv8SF2UMPJSvajZftgXJKZx8WpE52+gt/cKOewwWUd9S380FbLk8\r\nGrI99OrY07XWgneV1VwGPP4LW9wi3E2Kyms5uG8bTa80fau3z8ZBCk7gCYJsMVn8\r\nSH6kBF7nvNjHkN5lyrwV2Sphzrxuwc/B1jVeGu6RK1xJNKaNvMCUCcO9qlrD1+Yi\r\njrLCHK7li93gWVU7DHn2xd8U8yrZK5vAqOeEZKUp1QrijBWDL8i4/8RE+TCpXX0B\r\n8QIDAQAB\r\n-----END PUBLIC KEY-----'"
+                  ],
+                  "item/ProductId": "6c27ac1c-e7e8-429c-b0f2-42ea8cce3066"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "PerformUnboundAction",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            },
+            "License_is_Valid": {
+              "actions": {},
+              "runAfter": {
+                "Check_for_license": [
+                  "Succeeded"
+                ]
+              },
+              "else": {
+                "actions": {
+                  "Unlicensed_Failure": {
+                    "runAfter": {
+                      "Unlicensed_Response": [
+                        "Succeeded"
+                      ]
+                    },
+                    "metadata": {
+                      "operationMetadataId": "ff5cac30-171a-4f5f-bc44-2ae5427576d6"
+                    },
+                    "type": "Terminate",
+                    "inputs": {
+                      "runStatus": "Failed",
+                      "runError": {
+                        "message": "Unlicensed"
+                      }
+                    }
+                  },
+                  "Unlicensed_Response": {
+                    "type": "Response",
+                    "kind": "Http",
+                    "inputs": {
+                      "statusCode": 400,
+                      "body": {
+                        "message": "Riata is missing its proper license."
+                      },
+                      "schema": {
+                        "type": "object",
+                        "properties": {
+                          "message": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@outputs('Check_for_license')?['body/IsValid']",
+                      "@true"
+                    ]
+                  }
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "6923beac-75f8-4fc8-b562-dacd96170a03"
+              },
+              "type": "If"
+            }
+          },
+          "runAfter": {},
+          "metadata": {
+            "operationMetadataId": "486438a8-fcb6-4caf-ae65-b8a21e31cce2"
+          },
+          "type": "Scope"
+        },
+        "On_failure": {
+          "actions": {
+            "Flow_run_metadata": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "User_Guid_was_provided_(failure)": {
+              "actions": {
+                "Send_push_on_failure": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "payload/recipients": [
+                        "@triggerBody()?['text_1']"
+                      ],
+                      "payload/message": "Errror: Transaction sync failed",
+                      "payload/openApp": false
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_powerappsnotification",
+                      "operationId": "SendPushNotification",
+                      "connectionName": "shared_powerappsnotification-1"
+                    }
+                  }
+                }
+              },
+              "else": {
+                "actions": {}
+              },
+              "expression": {
+                "and": [
+                  {
+                    "equals": [
+                      "@empty(triggerBody()?['text_1'])",
+                      "@false"
+                    ]
+                  }
+                ]
+              },
+              "type": "If"
+            },
+            "Log_Error": {
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0,
+                  "item/mda_title": "Transaction Sync Error"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "User_Guid_was_provided": [
+              "Failed",
+              "TimedOut",
+              "Skipped"
+            ]
+          },
+          "type": "Scope"
+        },
+        "Get_item_meta": {
+          "runAfter": {
+            "Get_Profile_Guid": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "mda_accesstokens",
+              "$select": "mda_accesstokenid,mda_plaiditemid,mda_plaidtransactionscursor,mda_plaidaccesstoken",
+              "$filter": "_mda_profile_value eq '@{first(outputs('Get_Profile_Guid')?['body/value'])?['_mda_profile_value']}'",
+              "x-ms-odata-metadata-full": false
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          }
+        },
+        "Parse_JSON": {
+          "runAfter": {
+            "License_check": [
+              "Succeeded"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "c6857d77-7da5-45c9-a345-81ea296a1961"
+          },
+          "type": "ParseJson",
+          "inputs": {
+            "content": "@triggerBody()?['text']",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "items": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "mda_plaiditemid": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "mda_plaiditemid"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "Get_Profile_Guid": {
+          "runAfter": {
+            "Async_Response": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "mda_accesstokens",
+              "$select": "_mda_profile_value",
+              "$filter": "mda_plaiditemid eq '@{first(body('Parse_JSON')?['items'])?['mda_plaiditemid']}'",
+              "$top": 1,
+              "x-ms-odata-metadata-full": false
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "ListRecords",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          }
+        },
+        "Get_Plaid_Secret_Key": {
+          "runAfter": {
+            "Get_item_meta": [
+              "Succeeded"
+            ]
+          },
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "actionName": "RetrieveEnvironmentVariableSecretValue",
+              "item/EnvironmentVariableName": "mda_PlaidSecretKeyVault"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "PerformUnboundAction",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runtimeConfiguration": {
+            "secureData": {
+              "properties": [
+                "outputs"
+              ]
+            }
+          }
+        },
+        "Initialize_Amount_Validation_Array": {
+          "runAfter": {
+            "Initialize_Next_Cursor": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "AmountValidationArray",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "Initialize_Index": {
+          "runAfter": {
+            "Initialize_Transaction_Validation_Failure_Array": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Index",
+                "type": "integer"
+              }
+            ]
+          }
+        },
+        "Initialize_Transaction_Validation_Failure_Array": {
+          "runAfter": {
+            "Initialize_Amount_Validation_Array": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Transaction Validation Failure Array",
+                "type": "array"
+              }
+            ]
+          }
+        },
+        "Validation_failures": {
+          "actions": {
+            "Flow_run_metadata_for_validation_errors": {
+              "runAfter": {
+                "Create_CSV_table": [
+                  "Succeeded"
+                ]
+              },
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "Create_CSV_table": {
+              "type": "Table",
+              "inputs": {
+                "from": "@variables('Transaction Validation Failure Array')",
+                "format": "CSV"
+              }
+            },
+            "Log_Message": {
+              "runAfter": {
+                "Flow_run_metadata_for_validation_errors": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">There has been a validation failure for a transaction sync run. The results are attached. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata_for_validation_errors')?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0,
+                  "item/mda_title": "Transaction Validation Failure"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            },
+            "Upload_Attachment": {
+              "runAfter": {
+                "Log_Message": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "annotations",
+                  "x-ms-odata-metadata-full": false,
+                  "item/subject": "Validation Results.csv",
+                  "item/isdocument": true,
+                  "item/documentbody": "@body('Create_CSV_table')",
+                  "item/filename": "Validation Results.csv",
+                  "item/objectid_mda_message@odata.bind": "/mda_messages(@{outputs('Log_Message')?['body/mda_messageid']})"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "For_each_item_sync": [
+              "Succeeded"
+            ]
+          },
+          "else": {
+            "actions": {}
+          },
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@empty(variables('Transaction Validation Failure Array'))",
+                  "@false"
+                ]
+              }
+            ]
+          },
+          "type": "If"
+        },
+        "Async_Response": {
+          "runAfter": {
+            "Parse_JSON": [
+              "Succeeded"
+            ]
+          },
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 202
+          }
+        },
+        "Parse_Error_Response": {
+          "runAfter": {
+            "Parse_JSON": [
+              "Failed"
+            ]
+          },
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 400,
+            "body": {
+              "message": "A minimum of one mda_plaiditemid is required."
+            },
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

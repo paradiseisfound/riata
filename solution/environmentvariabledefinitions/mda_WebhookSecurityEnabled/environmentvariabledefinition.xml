@@ -1,0 +1,14 @@
+<environmentvariabledefinition schemaname="mda_WebhookSecurityEnabled">
+  <defaultvalue>N/A</defaultvalue>
+  <description default="If yes, provide the Azure Function Url or custom Url here. If not, leave this blank.">
+    <label description="If yes, provide the Azure Function Url or custom Url here. If not, leave this blank." languagecode="1033" />
+  </description>
+  <displayname default="Additional Webhook Security Enabled">
+    <label description="Additional Webhook Security Enabled" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.4.3.2</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>

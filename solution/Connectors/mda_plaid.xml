@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Connector xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <connectorid>1d09983a-10bc-4c40-b7c9-c82bcefcc87e</connectorid>
+  <description>This is an abbreviated collection of select Plaid endpoints. https://plaid.com/docs/api/</description>
+  <displayname>Plaid</displayname>
+  <iconbrandcolor>#007ee5</iconbrandcolor>
+  <name>mda_plaid</name>
+  <connectortype>1</connectortype>
+  <openapidefinition>/Connector/mda_plaid_openapidefinition.json</openapidefinition>
+  <connectionparameters>/Connector/mda_plaid_connectionparameters.json</connectionparameters>
+  <policytemplateinstances>/Connector/mda_plaid_policytemplateinstances.json</policytemplateinstances>
+  <iconblob>/Connector/mda_plaid_iconblob.Jpeg</iconblob>
+</Connector>

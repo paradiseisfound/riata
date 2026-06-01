@@ -1,0 +1,366 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_commondataserviceforapps-1": {
+        "api": {
+          "name": "shared_commondataserviceforapps"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "mda_Dataverse"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "manual": {
+          "type": "Request",
+          "kind": "PowerAppV2",
+          "inputs": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "boolean": {
+                  "description": "true or false",
+                  "title": "HasSplits",
+                  "type": "boolean",
+                  "x-ms-content-hint": "BOOLEAN",
+                  "x-ms-dynamically-added": true
+                },
+                "text": {
+                  "description": "Transaction Guid",
+                  "title": "TransactionGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                },
+                "text_1": {
+                  "description": "Category Guid (can be null)",
+                  "title": "CategoryGuid",
+                  "type": "string",
+                  "x-ms-content-hint": "TEXT",
+                  "x-ms-dynamically-added": true
+                }
+              },
+              "required": [
+                "text"
+              ]
+            }
+          },
+          "metadata": {
+            "operationMetadataId": "9de267ce-e506-436a-afcf-d9081a4a2bc2"
+          }
+        }
+      },
+      "actions": {
+        "On_failure": {
+          "type": "Scope",
+          "actions": {
+            "Flow_run_metadata": {
+              "type": "ParseJson",
+              "inputs": {
+                "content": "@workflow()",
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "string"
+                    },
+                    "location": {
+                      "type": "string"
+                    },
+                    "tags": {
+                      "type": "object",
+                      "properties": {
+                        "flowDisplayName": {
+                          "type": "string"
+                        },
+                        "environmentName": {
+                          "type": "string"
+                        },
+                        "logicAppName": {
+                          "type": "string"
+                        },
+                        "environmentFlowSuspensionReason": {
+                          "type": "string"
+                        },
+                        "sharingType": {
+                          "type": "string"
+                        },
+                        "state": {
+                          "type": "string"
+                        },
+                        "createdTime": {
+                          "type": "string"
+                        },
+                        "lastModifiedTime": {
+                          "type": "string"
+                        },
+                        "createdBy": {
+                          "type": "string"
+                        },
+                        "triggerType": {
+                          "type": "string"
+                        },
+                        "createdByUserId": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "run": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string"
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "type": {
+                          "type": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "metadata": {
+                "operationMetadataId": "2e7f2cb6-e958-4c03-96e6-7b6379327a18"
+              }
+            },
+            "Terminate_on_Error": {
+              "type": "Terminate",
+              "inputs": {
+                "runStatus": "Failed"
+              },
+              "runAfter": {
+                "Log_error": [
+                  "Succeeded",
+                  "Failed",
+                  "TimedOut"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "33513984-64fb-4095-9e05-225fa375364a"
+              }
+            },
+            "Log_error": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": false,
+                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_type": 0
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              },
+              "runAfter": {
+                "Flow_run_metadata": [
+                  "Succeeded"
+                ]
+              },
+              "metadata": {
+                "operationMetadataId": "1cd7287c-3fdc-4492-be56-1366572c1315"
+              }
+            },
+            "Failed_Response": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 500
+              }
+            }
+          },
+          "runAfter": {
+            "Response": [
+              "TimedOut",
+              "Skipped",
+              "Failed"
+            ]
+          },
+          "metadata": {
+            "operationMetadataId": "596fa008-c6f2-43a0-b62f-b672f9edaf39"
+          }
+        },
+        "Data_is_missing": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@contains(triggerBody(),'text_1')",
+                  "@false"
+                ]
+              },
+              {
+                "or": [
+                  {
+                    "equals": [
+                      "@contains(triggerBody(),'boolean')",
+                      "@false"
+                    ]
+                  },
+                  {
+                    "equals": [
+                      "@triggerBody()?['boolean']",
+                      "@null"
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Need_more_info_response": {
+              "type": "Response",
+              "kind": "Http",
+              "inputs": {
+                "statusCode": 400,
+                "body": {
+                  "message": "please provide either a category guid or a 'hassplits' boolean."
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {}
+        },
+        "Both_parameters_provided": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "equals": [
+                  "@contains(triggerBody(),'text_1')",
+                  "@true"
+                ]
+              },
+              {
+                "equals": [
+                  "@contains(triggerBody(),'boolean')",
+                  "@true"
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Update_transaction_with_both": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_transactions",
+                  "recordId": "@triggerBody()?['text']",
+                  "item/mda_hassplits": "@triggerBody()?['boolean']",
+                  "item/mda_Category@odata.bind": "@if(\r\n  or(\r\n    empty(triggerBody()?['text_1']),\r\n    equals(triggerBody()?['text_1'],'null')\r\n  ),\r\n  null,\r\n  concat(\r\n    '/mda_transactioncategories(',\r\n    triggerBody()?['text_1'],\r\n    ')'\r\n  )\r\n)"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "UpdateOnlyRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {
+              "Boolean_provided": {
+                "type": "If",
+                "expression": {
+                  "and": [
+                    {
+                      "equals": [
+                        "@contains(triggerBody(),'boolean')",
+                        "@true"
+                      ]
+                    }
+                  ]
+                },
+                "actions": {
+                  "Update_transaction_with_boolean": {
+                    "type": "OpenApiConnection",
+                    "inputs": {
+                      "parameters": {
+                        "entityName": "mda_transactions",
+                        "recordId": "@triggerBody()?['text']",
+                        "item/mda_hassplits": "@triggerBody()?['boolean']"
+                      },
+                      "host": {
+                        "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                        "operationId": "UpdateOnlyRecord",
+                        "connectionName": "shared_commondataserviceforapps-1"
+                      }
+                    }
+                  }
+                },
+                "else": {
+                  "actions": {
+                    "Update_transaction_with_category": {
+                      "type": "OpenApiConnection",
+                      "inputs": {
+                        "parameters": {
+                          "entityName": "mda_transactions",
+                          "recordId": "@triggerBody()?['text']",
+                          "item/mda_Category@odata.bind": "@if(\r\n  or(\r\n    empty(triggerBody()?['text_1']),\r\n    equals(triggerBody()?['text_1'],'null')\r\n  ),\r\n  null,\r\n  concat(\r\n    '/mda_transactioncategories(',\r\n    triggerBody()?['text_1'],\r\n    ')'\r\n  )\r\n)"
+                        },
+                        "host": {
+                          "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                          "operationId": "UpdateOnlyRecord",
+                          "connectionName": "shared_commondataserviceforapps-1"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "Data_is_missing": [
+              "Succeeded"
+            ]
+          }
+        },
+        "Response": {
+          "type": "Response",
+          "kind": "Http",
+          "inputs": {
+            "statusCode": 200
+          },
+          "runAfter": {
+            "Both_parameters_provided": [
+              "Succeeded"
+            ]
+          }
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

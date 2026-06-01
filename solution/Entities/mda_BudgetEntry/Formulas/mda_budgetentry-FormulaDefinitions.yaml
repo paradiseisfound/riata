@@ -1,0 +1,3 @@
+mda_amount: =mda_Budget.mda_amount
+mda_categoryname: =mda_Budget.mda_Category.mda_name
+mda_name: =mda_Budget.mda_name

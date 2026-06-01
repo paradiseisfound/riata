@@ -1,0 +1,2 @@
+mda_categorylabel: =mda_Category.mda_name
+mda_profileguid: =Text(mda_BankAccount.mda_AccessToken.mda_Profile.mda_profileid)

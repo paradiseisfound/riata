@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<SdkMessageProcessingStep Name="Riata_RecursiveIndexing_TransactionCategory_PreOp_UpdateSingle" SdkMessageProcessingStepId="{b5ad4771-b8b9-f011-bbd2-000d3a5c19f8}" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <SdkMessageId>20bebb1b-ea3e-db11-86a7-000a3a5473e8</SdkMessageId>
+  <PluginTypeName>Riata.RecursiveIndexing, RecursiveIndexing, Version=1.0.0.0, Culture=neutral, PublicKeyToken=1221135c6f67971d</PluginTypeName>
+  <PluginTypeId>3e6ad140-5e5a-4a3d-ac19-dd8ddf706e1b</PluginTypeId>
+  <PrimaryEntity>mda_transactioncategory</PrimaryEntity>
+  <AsyncAutoDelete>0</AsyncAutoDelete>
+  <FilteringAttributes>mda_name,mda_parent,mda_profile</FilteringAttributes>
+  <InvocationSource>1</InvocationSource>
+  <Mode>0</Mode>
+  <Rank>1</Rank>
+  <EventHandlerTypeCode>4602</EventHandlerTypeCode>
+  <Stage>20</Stage>
+  <IsCustomizable>0</IsCustomizable>
+  <IsHidden>0</IsHidden>
+  <SupportedDeployment>0</SupportedDeployment>
+  <IntroducedVersion>1.0</IntroducedVersion>
+  <SdkMessageProcessingStepImages />
+</SdkMessageProcessingStep>

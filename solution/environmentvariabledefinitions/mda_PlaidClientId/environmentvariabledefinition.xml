@@ -1,0 +1,14 @@
+<environmentvariabledefinition schemaname="mda_PlaidClientId">
+  <defaultvalue>N/A</defaultvalue>
+  <description default="This is your Plaid client identifier. Provided by Plaid.">
+    <label description="This is your Plaid client identifier. Provided by Plaid." languagecode="1033" />
+  </description>
+  <displayname default="Plaid Client Id">
+    <label description="Plaid Client Id" languagecode="1033" />
+  </displayname>
+  <introducedversion>1.0.0.0</introducedversion>
+  <iscustomizable>1</iscustomizable>
+  <isrequired>0</isrequired>
+  <secretstore>0</secretstore>
+  <type>100000000</type>
+</environmentvariabledefinition>
