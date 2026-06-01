@@ -28,7 +28,8 @@ Though Riata can stand on its own two-feet, its also designed with extensibility
 - Custom security role and column security profile
 - [Mobile-first canvas app](/demo/TransactionScreen.png) that can be used on any device (desktop included)
 - Multiple plug-and-play cloud flows
-- Multi-country, multi-currency support (US, CA, [most of Europe]((https://plaid.com/docs/institutions/europe/)) )
+- Multi-country, multi-currency support (US, CA, [most of Europe](https://plaid.com/docs/institutions/europe/) )
+- Power BI report
 - [Installation guide](/InstallationGuide.md)
 
 ## Security
