@@ -29,7 +29,7 @@ Though Riata can stand on its own two-feet, its also designed with extensibility
 - [Mobile-first canvas app](/demo/TransactionScreen.png) that can be used on any device (desktop included)
 - Multiple plug-and-play cloud flows
 - Multi-country, multi-currency support (US, CA, [most of Europe](https://plaid.com/docs/institutions/europe/) )
-- Power BI report
+- Power BI template
 - [Installation guide](/InstallationGuide.md)
 
 ## Security
