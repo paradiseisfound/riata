@@ -535,7 +535,7 @@ Screens:
                                                     Gallery,
                                                     {
                                                         Description: TrimEnds(Gallery.SplitDescriptionInput5.Text),
-                                                        Amount: Value(Gallery.SplitAmountInput5.Text),
+                                                        Amount: -Value(Gallery.SplitAmountInput5.Text),
                                                         Category: If(
                                                             Or(
                                                                 And(

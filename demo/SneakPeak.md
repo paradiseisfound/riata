@@ -5,7 +5,7 @@
 ![Transaction Screen](/demo/TransactionScreen.png)
 ![Transaction Detail Screen](/demo/TransactionDetailsScreen.png)
 ![Filter Screen](/demo/FilterScreen.png)
-![Downloads Screen](/demo/DownloadsScreen.png)
+![Messagess Screen](/demo/MessagesScreen.png)
 ![Generating Report Screen](/demo/GeneratingReportScreen.png)
 ![Report Screen](/demo/ReportsScreen.png)
 ![Categories Screen](/demo/CategoriesScreen.png)

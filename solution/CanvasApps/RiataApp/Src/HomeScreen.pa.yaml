@@ -468,10 +468,10 @@ Screens:
                                     0
                                 )
                               Height: =Parent.Height
-                              Image: =download_500dp_7B5E57_FILL0_wght500_GRAD0_opsz48
+                              Image: =mail_500dp_7B5E57_FILL0_wght500_GRAD0_opsz48
                               OnSelect: |-
                                 =Navigate(
-                                    FileScreen,
+                                    MessagesScreen,
                                     ScreenTransition.Fade
                                 )
                               PaddingBottom: =Self.Width/6
@@ -482,7 +482,7 @@ Screens:
                               RadiusBottomRight: =Parent.RadiusBottomRight
                               RadiusTopLeft: =Parent.RadiusTopLeft
                               RadiusTopRight: =Parent.RadiusTopRight
-                              Tooltip: ="Downloads"
+                              Tooltip: ="Messages"
                               Width: =Parent.Width
                   - SyncTransactionsContainer:
                       Control: GroupContainer@1.5.0
@@ -621,7 +621,7 @@ Screens:
                                         )
                                     ),
                                     IfError(
-                                        'Attachments/ExportsCleanup'.Run({text: User().EntraObjectId}),
+                                        AttachmentsCleanup.Run({text: User().EntraObjectId}),
                                         Notify(
                                             "There was an error cleaning up files.",
                                             NotificationType.Error

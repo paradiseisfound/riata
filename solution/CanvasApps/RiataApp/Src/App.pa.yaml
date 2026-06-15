@@ -126,14 +126,6 @@ App:
                       Value
                   ) = "yes"
               ),
-              Set(
-                  envarEnvDomain,
-                  LookUp(
-                      'Environment Variable Values',
-                      'Schema Name' = "mda_EnvironmentDomain",
-                      Value
-                  )
-              ),
               ClearCollect(
                   colLanguages,
                   [
@@ -389,6 +381,7 @@ App:
               ),
               AppLaunchError.Run(
                   User().FullName,
+                  gvarProfile.Guid,
                   {text_1: JSON(FirstError)}
               )
           )

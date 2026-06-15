@@ -1074,8 +1074,9 @@
                   "entityName": "mda_messages",
                   "x-ms-odata-metadata-full": false,
                   "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
-                  "item/mda_type": 0,
-                  "item/mda_title": "Transaction Sync Error"
+                  "item/mda_Profile@odata.bind": "@first(outputs('Get_Profile_Guid')?['body/value'])?['@odata.id']",
+                  "item/mda_title": "@{body('Flow_run_metadata')?['tags']?['flowDisplayName']} Error",
+                  "item/mda_type": 0
                 },
                 "host": {
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
@@ -1162,7 +1163,7 @@
               "$select": "_mda_profile_value",
               "$filter": "mda_plaiditemid eq '@{first(body('Parse_JSON')?['items'])?['mda_plaiditemid']}'",
               "$top": 1,
-              "x-ms-odata-metadata-full": false
+              "x-ms-odata-metadata-full": true
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
@@ -1334,28 +1335,6 @@
                 "format": "CSV"
               }
             },
-            "Log_Message": {
-              "runAfter": {
-                "Flow_run_metadata_for_validation_errors": [
-                  "Succeeded"
-                ]
-              },
-              "type": "OpenApiConnection",
-              "inputs": {
-                "parameters": {
-                  "entityName": "mda_messages",
-                  "x-ms-odata-metadata-full": false,
-                  "item/mda_description": "<p class=\"editor-paragraph\">There has been a validation failure for a transaction sync run. The results are attached. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata_for_validation_errors')?['name']}\" class=\"editor-link\">here</a>.</p>",
-                  "item/mda_type": 0,
-                  "item/mda_title": "Transaction Validation Failure"
-                },
-                "host": {
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
-                  "operationId": "CreateRecord",
-                  "connectionName": "shared_commondataserviceforapps-1"
-                }
-              }
-            },
             "Upload_Attachment": {
               "runAfter": {
                 "Log_Message": [
@@ -1369,9 +1348,33 @@
                   "x-ms-odata-metadata-full": false,
                   "item/subject": "Validation Results.csv",
                   "item/isdocument": true,
-                  "item/documentbody": "@body('Create_CSV_table')",
+                  "item/documentbody": "@base64(body('Create_CSV_table'))",
                   "item/filename": "Validation Results.csv",
-                  "item/objectid_mda_message@odata.bind": "/mda_messages(@{outputs('Log_Message')?['body/mda_messageid']})"
+                  "item/mimetype": "text/csv",
+                  "item/objectid_mda_message@odata.bind": "@outputs('Log_Message')?['body/@odata.id']"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+                  "operationId": "CreateRecord",
+                  "connectionName": "shared_commondataserviceforapps-1"
+                }
+              }
+            },
+            "Log_Message": {
+              "runAfter": {
+                "Flow_run_metadata_for_validation_errors": [
+                  "Succeeded"
+                ]
+              },
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "entityName": "mda_messages",
+                  "x-ms-odata-metadata-full": true,
+                  "item/mda_description": "<p class=\"editor-paragraph\">There has been a validation failure for a transaction sync run. The results are attached. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata_for_validation_errors')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_Profile@odata.bind": "@first(outputs('Get_Profile_Guid')?['body/value'])?['@odata.id']",
+                  "item/mda_title": "Transaction Validation Failure",
+                  "item/mda_type": 0
                 },
                 "host": {
                   "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",

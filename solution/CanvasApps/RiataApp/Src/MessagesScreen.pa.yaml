@@ -7,15 +7,15 @@
 # For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
 # ************************************************************************************************
 Screens:
-  FileScreen:
+  MessagesScreen:
     Properties:
       Fill: =RGBA(224, 224, 224, 1)
       Height: =App.Height
       LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
-      OnVisible: =Refresh(Notes)
+      OnVisible: =Refresh(Messages)
       Width: =App.Width
     Children:
-      - ContainerFs:
+      - ContainerMs:
           Control: GroupContainer@1.5.0
           Variant: ManualLayout
           Properties:
@@ -35,7 +35,7 @@ Screens:
               )
             X: =Parent.Width/2 - Self.Width/2
           Children:
-            - FilesGallery:
+            - MessagesGallery:
                 Control: Gallery@2.15.0
                 Variant: VariableHeight
                 Properties:
@@ -46,7 +46,7 @@ Screens:
                     =Sum(
                         Parent.Height,
                         -Self.Y,
-                        -ActionContainerFs.Height
+                        -ActionContainerMs.Height
                     )
                   Items: |-
                     =If(
@@ -54,18 +54,20 @@ Screens:
                         Sort(
                             Search(
                                 Filter(
-                                    Notes,
-                                    'Is Document',
-                                    Regarding = gvarProfile,
+                                    Messages,
                                     'Created On' >= varFilter.FirstDate,
                                     'Created On' <= DateAdd(
                                         varFilter.SecondDate,
                                         1,
                                         TimeUnit.Days
-                                    )
+                                    ),
+                                    Type in varFilter.Types,
+                                    Status in varFilter.MessageRead,
+                                    Profile.Guid = gvarProfile.Guid
                                 ),
-                                TrimEnds(SearchInputFs.Text),
-                                'File Name'
+                                TrimEnds(SearchInputMs.Text),
+                                Title,
+                                Description
                             ),
                             'Created On',
                             SortOrder.Descending
@@ -73,12 +75,12 @@ Screens:
                         Sort(
                             Search(
                                 Filter(
-                                    Notes,
-                                    'Is Document',
-                                    Regarding = gvarProfile
+                                    Messages,
+                                    Profile.Guid = gvarProfile.Guid
                                 ),
-                                TrimEnds(SearchInputFs.Text),
-                                'File Name'
+                                TrimEnds(SearchInputMs.Text),
+                                Title,
+                                Description
                             ),
                             'Created On',
                             SortOrder.Descending
@@ -90,12 +92,12 @@ Screens:
                   Width: =Parent.Width
                   Y: |-
                     =Sum(
-                        ScreenHeaderFs.Height,
-                        SearchContainerFs.Height,
+                        ScreenHeaderMs.Height,
+                        SearchContainerMs.Height,
                         50
                     )
                 Children:
-                  - BackgroundFs:
+                  - BackgroundMs:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
@@ -110,7 +112,7 @@ Screens:
                         RadiusTopRight: =0
                         Visible: =ThisItem.IsSelected
                         Width: =Parent.Width
-                  - DividingLineFs:
+                  - DividingLineMs:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
@@ -126,14 +128,48 @@ Screens:
                         Width: =Parent.Width - Self.X*2
                         X: =40
                         Y: =120
-                  - FileImageFs:
+                  - MessageImageMs:
                       Control: Image@2.2.3
                       Properties:
                         BorderColor: =RGBA(0, 0, 0, 0)
                         BorderStyle: =BorderStyle.None
-                        Fill: =RGBA(74, 101, 114, 1)
+                        DisplayMode: =DisplayMode.View
+                        Fill: |-
+                          =Switch(
+                              ThisItem.Type,
+                              'Type (Messages)'.Export,
+                              RGBA(
+                                  74,
+                                  101,
+                                  114,
+                                  1
+                              ),
+                              'Type (Messages)'.Error,
+                              RGBA(
+                                  161,
+                                  78,
+                                  58,
+                                  1
+                              ),
+                              'Type (Messages)'.Information,
+                              RGBA(
+                                  183,
+                                  159,
+                                  144,
+                                  1
+                              )
+                          )
                         Height: =80
-                        Image: =draft_500dp_FFFFFF_FILL0_wght500_GRAD0_opsz48
+                        Image: |-
+                          =Switch(
+                              ThisItem.Type,
+                              'Type (Messages)'.Export,
+                              draft_500dp_FFFFFF_FILL0_wght500_GRAD0_opsz48,
+                              'Type (Messages)'.Error,
+                              warning_500dp_FFFFFF_FILL0_wght500_GRAD0_opsz48,
+                              'Type (Messages)'.Information,
+                              info_i_500dp_FFFFFF_FILL0_wght500_GRAD0_opsz48
+                          )
                         OnSelect: =Select(Parent)
                         PaddingBottom: =15
                         PaddingLeft: =15
@@ -146,7 +182,25 @@ Screens:
                         Width: =80
                         X: =50
                         Y: =20
-                  - FileCreatedOnLabelFs:
+                  - NewMessageLabel:
+                      Control: ModernButton@1.0.0
+                      Properties:
+                        Align: =Align.Right
+                        Appearance: =ButtonAppearance.Transparent
+                        DisplayMode: =DisplayMode.View
+                        FontWeight: =FontWeight.Normal
+                        Height: =50
+                        Icon: ="Star"
+                        IconStyle: =IconStyle.Filled
+                        Italic: =true
+                        Layout: =ButtonLayout.IconAfter
+                        OnSelect: =Select(Parent)
+                        Text: ="New"
+                        Visible: =ThisItem.Status = 'Status (Messages)'.Active
+                        Width: =150
+                        X: =Parent.Width - Self.Width - 40
+                        Y: =60
+                  - CreatedOnLabelMs:
                       Control: Label@2.5.1
                       Properties:
                         BorderColor: =RGBA(0, 18, 107, 1)
@@ -164,24 +218,29 @@ Screens:
                         Wrap: =false
                         Y: |+
                           =60
-                  - FileNameLabelFs:
+                  - MessageTitleMs:
                       Control: Label@2.5.1
                       Properties:
                         BorderColor: =RGBA(0, 18, 107, 1)
                         Font: =Font.'Open Sans'
-                        FontWeight: =FontWeight.Semibold
+                        FontWeight: |-
+                          =If(
+                              ThisItem.Status = 'Status (Messages)'.Active,
+                              FontWeight.Semibold,
+                              FontWeight.Normal
+                          )
                         Height: =110
                         OnSelect: =
                         PaddingBottom: =20
                         PaddingLeft: =150
                         PaddingRight: =20
                         PaddingTop: =20
-                        Text: =ThisItem.'File Name'
+                        Text: =ThisItem.Title
                         Tooltip: =Self.Text
                         VerticalAlign: =VerticalAlign.Top
                         Width: =Parent.TemplateWidth - Parent.TemplatePadding*2
                         Wrap: =false
-            - NoItemsLabelFs:
+            - NoItemsLabelMs:
                 Control: Label@2.5.1
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
@@ -194,17 +253,17 @@ Screens:
                   PaddingLeft: =50
                   PaddingRight: =50
                   PaddingTop: =40
-                  Text: ="No downloads found"
+                  Text: ="No messages found"
                   VerticalAlign: =VerticalAlign.Top
-                  Visible: =FilesGallery.AllItemsCount = 0
+                  Visible: =MessagesGallery.AllItemsCount = 0
                   Width: =Parent.Width
                   Y: |-
                     =Sum(
-                        SearchContainerFs.Height,
-                        SearchContainerFs.Y,
+                        SearchContainerMs.Height,
+                        SearchContainerMs.Y,
                         25
                     )
-            - ActionContainerFs:
+            - ActionContainerMs:
                 Control: GroupContainer@1.5.0
                 Variant: AutoLayout
                 Properties:
@@ -231,7 +290,7 @@ Screens:
                         -Self.Height
                     )
                 Children:
-                  - BackContainerFs:
+                  - BackContainerMs:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
@@ -251,7 +310,7 @@ Screens:
                         RadiusTopRight: =Self.Height/3
                         Width: =Self.Height
                       Children:
-                        - BackIconFs:
+                        - BackIconMs:
                             Control: Image@2.2.3
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -262,8 +321,8 @@ Screens:
                               Image: =chevron_left_500dp_7B5E57_FILL0_wght500_GRAD0_opsz48
                               OnSelect: |-
                                 =Concurrent(
-                                    Reset(SearchInputFs),
-                                    Reset(FilesGallery)
+                                    Reset(SearchInputMs),
+                                    Reset(MessagesGallery)
                                 );
                                 Back(ScreenTransition.Fade)
                               RadiusBottomLeft: =Parent.RadiusBottomLeft
@@ -272,7 +331,7 @@ Screens:
                               RadiusTopRight: =Parent.RadiusTopRight
                               Tooltip: ="Back"
                               Width: =Parent.Width
-                  - RefreshContainerFs:
+                  - RefreshContainerMs:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
@@ -292,7 +351,7 @@ Screens:
                         RadiusTopRight: =Self.Height/3
                         Width: =Self.Height
                       Children:
-                        - RefreshIconFs:
+                        - RefreshIconMs:
                             Control: Image@2.2.3
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -301,7 +360,18 @@ Screens:
                               DisabledFill: =RGBA(224, 224, 224, 1)
                               Height: =Parent.Height
                               Image: =refresh_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
-                              OnSelect: =Refresh(Notes)
+                              OnSelect: |-
+                                =IfError(
+                                    Refresh(Messages),
+                                    Notify(
+                                        "There was an error refreshing messages.",
+                                        NotificationType.Error
+                                    ),
+                                    Notify(
+                                        "Messages refreshed.",
+                                        NotificationType.Success
+                                    )
+                                )
                               PaddingBottom: =Parent.Height/9
                               PaddingLeft: =Parent.Height/9
                               PaddingRight: =Parent.Height/9
@@ -312,7 +382,7 @@ Screens:
                               RadiusTopRight: =Parent.RadiusTopRight
                               Tooltip: ="Refresh"
                               Width: =Parent.Width
-                  - DownloadConatinerFs:
+                  - ReadUnreadContainerMs:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
@@ -332,7 +402,116 @@ Screens:
                         RadiusTopRight: =Self.Height/3
                         Width: =Self.Height
                       Children:
-                        - DownloadIconFs:
+                        - ReadUnreadMessageIconMs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              DisplayMode: |-
+                                =If(
+                                    IsBlank(MessagesGallery.Selected),
+                                    DisplayMode.Disabled,
+                                    DisplayMode.Edit
+                                )
+                              Height: =Parent.Height
+                              Image: |-
+                                =If(
+                                    MessagesGallery.Selected.Status = 'Status (Messages)'.Inactive,
+                                    mark_email_unread_500dp_4A6572_FILL0_wght500_GRAD0_opsz48,
+                                    mark_email_read_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                                )
+                              OnSelect: |-
+                                =Patch(
+                                    Messages,
+                                    MessagesGallery.Selected,
+                                    {
+                                        Status: If(
+                                            MessagesGallery.Selected.Status = 'Status (Messages)'.Active,
+                                            'Status (Messages)'.Inactive,
+                                            'Status (Messages)'.Active
+                                        )
+                                    }
+                                )
+                              PaddingBottom: =Parent.Height/9
+                              PaddingLeft: =Parent.Height/9
+                              PaddingRight: =Parent.Height/9
+                              PaddingTop: =Parent.Height/9
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Refresh"
+                              Width: =Parent.Width
+                  - OpenMessageContainerMs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(74, 101, 114, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - OpenMessageIconMs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              DisplayMode: |-
+                                =If(
+                                    IsBlank(MessagesGallery.Selected),
+                                    DisplayMode.Disabled,
+                                    DisplayMode.Edit
+                                )
+                              Height: =Parent.Height
+                              Image: =drafts_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =UpdateContext({varMessage: MessagesGallery.Selected})
+                              PaddingBottom: =Parent.Height/9
+                              PaddingLeft: =Parent.Height/9
+                              PaddingRight: =Parent.Height/9
+                              PaddingTop: =Parent.Height/9
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Refresh"
+                              Width: =Parent.Width
+                  - DeleteConatinerMs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(161, 78, 58, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - DeleteIconMs:
                             Control: Image@2.2.3
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -347,101 +526,25 @@ Screens:
                                     )
                               DisplayMode: |-
                                 =If(
-                                    IsBlank(FilesGallery.Selected),
+                                    IsBlank(MessagesGallery.Selected),
                                     DisplayMode.Disabled,
                                     DisplayMode.Edit
                                 )
                               Height: =Parent.Height
-                              Image: =download_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
-                              PaddingBottom: =Parent.Height/12
-                              PaddingLeft: =Parent.Height/12
-                              PaddingRight: =Parent.Height/12
-                              PaddingTop: =Parent.Height/12
+                              Image: =delete_500dp_A14E3A_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =UpdateContext({varDeleteMessage: MessagesGallery.Selected})
+                              PaddingBottom: =Parent.Height/9
+                              PaddingLeft: =Parent.Height/9
+                              PaddingRight: =Parent.Height/9
+                              PaddingTop: =Parent.Height/9
                               RadiusBottomLeft: =Parent.RadiusBottomLeft
                               RadiusBottomRight: =Parent.RadiusBottomRight
                               RadiusTopLeft: =Parent.RadiusTopLeft
                               RadiusTopRight: =Parent.RadiusTopRight
                               Tooltip: =
                               Width: =Parent.Width
-                        - AttachmentCardFs:
-                            Control: Attachments@2.3.0
-                            Properties:
-                              AccessibleLabel: =
-                              AddAttachmentColor: =RGBA(0, 0, 0, 0)
-                              AddAttachmentText: =
-                              AddedItemColor: =RGBA(0, 0, 0, 0)
-                              AddedItemFill: =RGBA(0, 0, 0, 0)
-                              BorderColor: =RGBA(0, 0, 0, 0)
-                              BorderThickness: =0
-                              Color: =RGBA(0, 0, 0, 0)
-                              ContentLanguage: =
-                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
-                              DisabledColor: =RGBA(0, 0, 0, 0)
-                              DisabledFill: =RGBA(0, 0, 0, 0)
-                              DisplayMode: |-
-                                =If(
-                                    IsBlank(FilesGallery.Selected),
-                                    DisplayMode.Disabled,
-                                    DisplayMode.Edit
-                                )
-                              DropTargetBackgroundColor: =RGBA(0, 0, 0, 0)
-                              DropTargetBorderColor: =RGBA(0, 0, 0, 0)
-                              DropTargetTextColor: =RGBA(0, 0, 0, 0)
-                              Fill: =RGBA(0, 0, 0, 0)
-                              FocusedBorderThickness: =0
-                              Font: =Font.'Open Sans'
-                              Height: =Parent.Height
-                              HoverBorderColor: =RGBA(0, 0, 0, 0)
-                              HoverColor: =RGBA(0, 0, 0, 0)
-                              HoverFill: =RGBA(0, 0, 0, 0)
-                              ItemColor: =RGBA(0, 0, 0, 0)
-                              ItemDisabledColor: =RGBA(0, 0, 0, 0)
-                              ItemDisabledFill: =RGBA(0, 0, 0, 0)
-                              ItemErrorColor: =RGBA(0, 0, 0, 0)
-                              ItemErrorFill: =RGBA(0, 0, 0, 0)
-                              ItemFill: =RGBA(0, 0, 0, 0)
-                              ItemHoverColor: =RGBA(0, 0, 0, 0)
-                              ItemHoverFill: =RGBA(0, 0, 0, 0)
-                              ItemPressedColor: =RGBA(0, 0, 0, 0)
-                              ItemPressedFill: =RGBA(0, 0, 0, 0)
-                              Items: |-
-                                ={
-                                    DisplayName: FilesGallery.Selected.'File Name',
-                                    Id: FilesGallery.Selected.Note,
-                                    AbsoluteUri: Concatenate(
-                                        "https://",
-                                        envarEnvDomain,
-                                        "/api/data/v9.0/annotations%28",
-                                        FilesGallery.Selected.Note,
-                                        "%29?%24select=documentbody%2Cmimetype"
-                                    ),
-                                    Value: Concatenate(
-                                        "appres://datasources/Profiles/table/mda_profile/rows/",
-                                        gvarProfile.Guid,
-                                        "/attachment/https:%2F%2F",
-                                        envarEnvDomain,
-                                        "%2Fapi%2Fdata%2Fv9.0%2Fannotations%2528",
-                                        FilesGallery.Selected.Note,
-                                        "%2529%3F%2524select=documentbody%252Cmimetype"
-                                    )
-                                }
-                              Items.Name: =AbsoluteUri
-                              Items.Value: =Value
-                              MaxAttachmentSize: =1
-                              MaxAttachments: =1
-                              MaxAttachmentsColor: =RGBA(0, 0, 0, 0)
-                              MaxAttachmentsText: =
-                              NoAttachmentsColor: =RGBA(0, 0, 0, 0)
-                              NoAttachmentsText: =
-                              PressedBorderColor: =RGBA(0, 0, 0, 0)
-                              PressedColor: =RGBA(0, 0, 0, 0)
-                              PressedFill: =RGBA(0, 0, 0, 0)
-                              RemovedItemColor: =RGBA(0, 0, 0, 0)
-                              RemovedItemFill: =RGBA(0, 0, 0, 0)
-                              Size: =Self.Height/2
-                              Tooltip: ="Download"
-                              Width: =Parent.Width*4
-            - FilterIconFs:
+            - FilterIconMs:
                 Control: Classic/Icon@2.5.0
                 Properties:
                   BorderColor: =RGBA(0, 0, 0, 0)
@@ -465,15 +568,15 @@ Screens:
                                 Applied: varFilter.Applied,
                                 DateChecked: varFilter.DateChecked,
                                 FirstDate: varFilter.FirstDate,
-                                SecondDate: varFilter.SecondDate
+                                SecondDate: varFilter.SecondDate,
+                                TypeChecked: varFilter.TypeChecked,
+                                Types: varFilter.Types,
+                                ReadChecked: varFilter.ReadChecked,
+                                MessageRead: varFilter.MessageRead
                             },
                             varFilterType: {
                                 Date: Coalesce(
                                     varFilterType.Date,
-                                    "Equal To"
-                                ),
-                                Amount: Coalesce(
-                                    varFilterType.Amount,
                                     "Equal To"
                                 )
                             }
@@ -486,10 +589,10 @@ Screens:
                   X: =Sum(Parent.Width, -Self.Width, -50 )
                   Y: |-
                     =Sum(
-                        ScreenHeaderFs.Height,
+                        ScreenHeaderMs.Height,
                         25
                     )
-            - ScreenHeaderFs:
+            - ScreenHeaderMs:
                 Control: Label@2.5.1
                 Properties:
                   Align: =Align.Center
@@ -508,9 +611,9 @@ Screens:
                   PaddingRight: =0
                   PaddingTop: =0
                   Size: =Self.Height/3
-                  Text: ="Downloads"
+                  Text: ="Messages"
                   Width: =Parent.Width
-            - RiataLogoFs:
+            - RiataLogoMs:
                 Control: Image@2.2.3
                 Properties:
                   BorderColor: =RGBA(0, 18, 107, 1)
@@ -522,8 +625,9 @@ Screens:
                   Image: ='Riata Hat'
                   OnSelect: |-
                     =Concurrent(
-                        Reset(SearchInputFs),
-                        Reset(FilesGallery)
+                        Reset(SearchInputMs),
+                        Reset(MessagesGallery),
+                        Select(ClearFilterButtonMs)
                     );
                     Navigate(
                         HomeScreen,
@@ -531,7 +635,7 @@ Screens:
                     )
                   Tooltip: ="Home"
                   Width: =Self.Height*1.5
-            - SearchContainerFs:
+            - SearchContainerMs:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
@@ -542,15 +646,15 @@ Screens:
                   RadiusBottomRight: =25
                   RadiusTopLeft: =25
                   RadiusTopRight: =25
-                  Width: =Sum(Parent.Width, -Self.X*2, -FilterIconFs.Width, -30)
+                  Width: =Sum(Parent.Width, -Self.X*2, -FilterIconMs.Width, -30)
                   X: =50
                   Y: |-
                     =Sum(
-                        ScreenHeaderFs.Height,
+                        ScreenHeaderMs.Height,
                         25
                     )
                 Children:
-                  - SearchIconFs:
+                  - SearchIconMs:
                       Control: Classic/Icon@2.5.0
                       Properties:
                         BorderColor: =RGBA(0, 0, 0, 0)
@@ -568,7 +672,7 @@ Screens:
                         PaddingTop: =10
                         Width: =Parent.Height
                         X: =10
-                  - SearchInputFs:
+                  - SearchInputMs:
                       Control: Classic/TextInput@2.3.2
                       Properties:
                         BorderColor: =RGBA(0, 0, 0, 0)
@@ -592,8 +696,317 @@ Screens:
                         RadiusTopLeft: =0
                         Size: =Self.Height/3
                         Width: =Sum(Parent.Width, -Self.X, -20)
-                        X: =SearchIconFs.X + SearchIconFs.Width
-            - FilterContainerFs:
+                        X: =SearchIconMs.X + SearchIconMs.Width
+            - ModalContainerMs:
+                Control: GroupContainer@1.5.0
+                Variant: ManualLayout
+                Properties:
+                  BorderColor: =Self.Fill
+                  BorderStyle: =BorderStyle.None
+                  DropShadow: =DropShadow.None
+                  Fill: =RGBA(224, 224, 224, 0.9)
+                  Height: =Parent.Height
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Visible: |-
+                    =Or(
+                        Not(IsBlank(varMessage)),
+                        Not(IsBlank(varDeleteMessage))
+                    )
+                  Width: =Parent.Width
+                Children:
+                  - ModalMs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(139, 154, 159, 1)
+                        BorderThickness: =2
+                        DropShadow: =DropShadow.ExtraBold
+                        Fill: =RGBA(255, 255, 255, 1)
+                        Height: |-
+                          =If(
+                              Not(IsBlank(varDeleteMessage)),
+                              Sum(
+                                  CancelButtonMs.Y,
+                                  CancelButtonMs.Height,
+                                  CancelButtonMs.X
+                              ),
+                              Not(IsBlank(varMessage)),
+                              Sum(
+                                  MessageContentsContainerMs.Height,
+                                  CancelModalIconMs.Height * 2,
+                                  If(
+                                      CountRows(varMessage.Attachments) > 0,
+                                      MessageAttachmentsFormMs.Height,
+                                      0
+                                  )
+                              )
+                          )
+                        RadiusBottomLeft: =40
+                        RadiusBottomRight: =40
+                        RadiusTopLeft: =40
+                        RadiusTopRight: =40
+                        Width: |-
+                          =Min(
+                              Parent.Width / 1.3,
+                              If(
+                                  Not(IsBlank(varDeleteMessage)),
+                                  600,
+                                  Parent.Width / 1.3
+                              )
+                          )
+                        X: =Parent.Width/2 - Self.Width/2
+                        Y: =Parent.Height/2 - Self.Height/2
+                      Children:
+                        - ConfirmTextMs:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Center
+                              AutoHeight: =true
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              PaddingBottom: =0
+                              PaddingLeft: =CancelButtonMs.X
+                              PaddingRight: =CancelButtonMs.X
+                              PaddingTop: =CancelButtonMs.X
+                              Size: =25
+                              Text: ="Are you sure you want to delete this message?"
+                              Visible: =Not(IsBlank(varDeleteMessage))
+                              Width: =Parent.Width
+                        - ConfirmButtonMs:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =Self.Color
+                              BorderThickness: =5
+                              Color: |-
+                                =If(
+                                    Not(IsBlank(varDeleteMessage)),
+                                    RGBA(
+                                        161,
+                                        78,
+                                        58,
+                                        1
+                                    ),
+                                    RGBA(
+                                        74,
+                                        101,
+                                        114,
+                                        1
+                                    )
+                                )
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =RGBA(0, 0, 0, 0)
+                              Font: =Font.'Open Sans'
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: |-
+                                =IfError(
+                                    Remove(
+                                        Messages,
+                                        varDeleteMessage
+                                    ),
+                                    Notify(
+                                        "There was an error deleting the message.",
+                                        NotificationType.Error
+                                    ),
+                                    Select(CancelButtonMs)
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              PressedBorderColor: =Self.BorderColor
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =30
+                              RadiusBottomRight: =30
+                              RadiusTopLeft: =30
+                              RadiusTopRight: =30
+                              Size: =22
+                              Text: ="Delete"
+                              Visible: =Not(IsBlank(varDeleteMessage))
+                              Width: =175
+                              X: =CancelButtonMs.Width + CancelButtonMs.X*2
+                              Y: |-
+                                =Sum(
+                                    ConfirmTextMs.Height,
+                                    CancelButtonMs.X
+                                )
+                        - CancelButtonMs:
+                            Control: Classic/Button@2.2.0
+                            Properties:
+                              BorderColor: =Self.Fill
+                              BorderThickness: =5
+                              Color: =RGBA(255, 255, 255, 1)
+                              DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                              Fill: =RGBA(123, 94, 87, 1)
+                              Font: =Font.'Open Sans'
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: |-
+                                =UpdateContext(
+                                    {
+                                        varMessage: Blank(),
+                                        varDeleteMessage: Blank()
+                                    }
+                                )
+                              PaddingBottom: =0
+                              PaddingLeft: =0
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              PressedBorderColor: =Self.BorderColor
+                              PressedColor: =Self.Fill
+                              PressedFill: =Self.Color
+                              RadiusBottomLeft: =30
+                              RadiusBottomRight: =30
+                              RadiusTopLeft: =30
+                              RadiusTopRight: =30
+                              Size: =22
+                              Text: ="Cancel"
+                              Visible: =Not(IsBlank(varDeleteMessage))
+                              Width: =175
+                              X: =(Parent.Width - Self.Width*2)/3
+                              Y: |-
+                                =Sum(
+                                    ConfirmTextMs.Height,
+                                    Self.X
+                                )
+                        - CancelModalIconMs:
+                            Control: Classic/Icon@2.5.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              Color: =RGBA(161, 78, 58, 1)
+                              FocusedBorderThickness: =0
+                              Height: =80
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              Icon: =Icon.CancelBadge
+                              OnSelect: |-
+                                =UpdateContext({varMessage: Blank()})
+                              PaddingBottom: =10
+                              PaddingLeft: =10
+                              PaddingRight: =20
+                              PaddingTop: =20
+                              Visible: =Not(IsBlank(varMessage))
+                              Width: =80
+                              X: =Sum(Parent.Width, -Self.Width)
+                        - MessageAttachmentsFormMs:
+                            Control: Form@2.4.4
+                            Variant: Classic
+                            Layout: Vertical
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DataSource: =Messages
+                              DefaultMode: =FormMode.View
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Height: |-
+                                =Sum(
+                                    Min(
+                                        CountRows(varMessage.Attachments),
+                                        4
+                                    ) * 75,
+                                    12
+                                )
+                              Item: =varMessage
+                              Visible: =CountRows(varMessage.Attachments) > 0
+                              Width: =Parent.Width * (10/12)
+                              X: =Parent.Width/12
+                              Y: |-
+                                =Sum(
+                                    MessageContentsContainerMs.Height,
+                                    CancelModalIconMs.Height
+                                )
+                            Children:
+                              - MessageAttachmentsCardMs:
+                                  Control: TypedDataCard@1.0.7
+                                  Variant: ClassicAttachmentsEdit
+                                  Properties:
+                                    BorderColor: =RGBA(0, 0, 0, 0)
+                                    BorderStyle: =BorderStyle.None
+                                    DataField: ="{Attachments}"
+                                    Default: =ThisItem.Attachments
+                                    Height: =Parent.Height
+                                    Required: =false
+                                    Update: =MessageAttachmentsMs.Attachments
+                                    Width: =Parent.Width
+                                    X: =0
+                                    Y: =0
+                                  Children:
+                                    - MessageAttachmentsMs:
+                                        Control: Attachments@2.3.0
+                                        MetadataKey: FieldValue
+                                        Properties:
+                                          BorderColor: =
+                                          BorderStyle: =BorderStyle.None
+                                          BorderThickness: =0
+                                          DisplayMode: =Parent.DisplayMode
+                                          Font: =Font.'Open Sans'
+                                          Height: |-
+                                            =Sum(
+                                                Min(
+                                                    CountRows(varMessage.Attachments),
+                                                    4
+                                                ) * 75,
+                                                12
+                                            )
+                                          HoverFill: =RGBA(186, 202, 226, 1)
+                                          ItemColor: =RGBA(255, 255, 255, 1)
+                                          ItemFill: =RGBA(56, 96, 178, 1)
+                                          ItemHoverFill: =RGBA(186, 202, 226, 1)
+                                          Items: =Parent.Default
+                                          MaxAttachments: =10
+                                          PaddingBottom: =5
+                                          PaddingLeft: =5
+                                          PaddingRight: =5
+                                          PaddingTop: =5
+                                          PressedColor: =RGBA(255, 255, 255, 1)
+                                          PressedFill: =RGBA(0, 18, 107, 1)
+                                          Size: =20
+                                          Tooltip: =Parent.DisplayName
+                                          Width: =Parent.Width
+                        - MessageContentsContainerMs:
+                            Control: GroupContainer@1.5.0
+                            Variant: ManualLayout
+                            Properties:
+                              BorderColor: =RGBA(139, 154, 159, 1)
+                              BorderThickness: =1.5
+                              DropShadow: =DropShadow.None
+                              Fill: =RGBA(252, 252, 252, 1)
+                              Height: |-
+                                =Max(
+                                    MessageContentsMs.Height,
+                                    100
+                                )
+                              RadiusBottomLeft: =40
+                              RadiusBottomRight: =40
+                              RadiusTopLeft: =40
+                              RadiusTopRight: =40
+                              Visible: =Not(IsBlank(varMessage))
+                              Width: =Parent.Width*(10/12)
+                              X: =Parent.Width/12
+                              Y: =80
+                            Children:
+                              - MessageContentsMs:
+                                  Control: HtmlViewer@2.1.0
+                                  Properties:
+                                    AutoHeight: =true
+                                    Font: =Font.'Open Sans'
+                                    Height: =0
+                                    HtmlText: =varMessage.Description
+                                    PaddingBottom: =0
+                                    PaddingLeft: =40
+                                    PaddingRight: =40
+                                    PaddingTop: =0
+                                    Size: =20
+                                    Width: =Parent.Width
+            - FilterContainerMs:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
@@ -609,7 +1022,7 @@ Screens:
                   Visible: =varFilter.Visible
                   Width: =Parent.Width
                 Children:
-                  - FilterModalFs:
+                  - FilterModalMs:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
@@ -621,7 +1034,7 @@ Screens:
                           =If(
                               Not(IsBlank(varFilterType.Field)),
                               550,
-                              400
+                              710
                           )
                         RadiusBottomLeft: =40
                         RadiusBottomRight: =40
@@ -631,7 +1044,7 @@ Screens:
                         X: =Parent.Width/2 - Self.Width/2
                         Y: =Parent.Height/2 - Self.Height/2
                       Children:
-                        - ClearFilterButtonFs:
+                        - ClearFilterButtonMs:
                             Control: Classic/Button@2.2.0
                             Properties:
                               BorderColor: =Self.Color
@@ -644,14 +1057,18 @@ Screens:
                               HoverColor: =Self.Color
                               HoverFill: =Self.Fill
                               OnSelect: |-
-                                =UpdateContext(
-                                    {
-                                        varReset: true,
-                                        varFilter: {
-                                            Visible: false,
-                                            Applied: false
+                                =Concurrent(
+                                    UpdateContext(
+                                        {
+                                            varReset: true,
+                                            varFilter: {
+                                                Visible: false,
+                                                Applied: false
+                                            },
+                                            varFilterType: {Date: "Equal To"}
                                         }
-                                    }
+                                    ),
+                                    Reset(ReadFilterInputMs)
                                 );
                                 UpdateContext({varReset: false})
                               PaddingBottom: =0
@@ -669,7 +1086,7 @@ Screens:
                               Width: =Parent.Width/3
                               X: =Parent.Width/9
                               Y: =Parent.Height - Self.Height - Parent.Width/9
-                        - ApplyFilterButtonFs:
+                        - ApplyFilterButtonMs:
                             Control: Classic/Button@2.2.0
                             Properties:
                               BorderColor: =Self.Fill
@@ -685,20 +1102,24 @@ Screens:
                                 =UpdateContext(
                                     {
                                         varDateError: And(
-                                            DateFilterCheckboxFs.Value,
+                                            DateFilterCheckboxMs.Value,
                                             Or(
                                                 And(
                                                     varFilterType.Date <> "Between",
-                                                    IsBlank(FirstDateFilterInputFs.SelectedDate)
+                                                    IsBlank(FirstDateFilterInputMs.SelectedDate)
                                                 ),
                                                 And(
                                                     varFilterType.Date = "Between",
                                                     Or(
-                                                        IsBlank(SecondDateFilterInputFs.SelectedDate),
-                                                        IsBlank(FirstDateFilterInputFs.SelectedDate)
+                                                        IsBlank(SecondDateFilterInputMs.SelectedDate),
+                                                        IsBlank(FirstDateFilterInputMs.SelectedDate)
                                                     )
                                                 )
                                             )
+                                        ),
+                                        varTypeError: And(
+                                            TypeFilterCheckboxMs.Value,
+                                            IsEmpty(TypeFilterInputMs.SelectedItems)
                                         )
                                     }
                                 );
@@ -708,21 +1129,30 @@ Screens:
                                         "Please provide a date filter",
                                         NotificationType.Warning
                                     ),
-                                    DateFilterCheckboxFs.Value,
+                                    varTypeError,
+                                    Notify(
+                                        "Please select one or more types.",
+                                        NotificationType.Warning
+                                    ),
+                                    Or(
+                                        DateFilterCheckboxMs.Value,
+                                        TypeFilterCheckboxMs.Value,
+                                        ReadFilterCheckboxMs.Value
+                                    ),
                                     UpdateContext(
                                         {
                                             varFilter: {
                                                 Visible: false,
                                                 Applied: true,
-                                                DateChecked: DateFilterCheckboxFs.Value,
+                                                DateChecked: DateFilterCheckboxMs.Value,
                                                 FirstDate: If(
-                                                    DateFilterCheckboxFs.Value,
+                                                    DateFilterCheckboxMs.Value,
                                                     Switch(
                                                         varFilterType.Date,
                                                         "Equal To",
-                                                        FirstDateFilterInputFs.SelectedDate,
+                                                        FirstDateFilterInputMs.SelectedDate,
                                                         "Greater Than or Equal",
-                                                        FirstDateFilterInputFs.SelectedDate,
+                                                        FirstDateFilterInputMs.SelectedDate,
                                                         "Less Than or Equal",
                                                         Date(
                                                             2019,
@@ -731,8 +1161,8 @@ Screens:
                                                         ),//This is an arbitrary date. Assuming no files will be before this date.
                                                         "Between",
                                                         Min(
-                                                            FirstDateFilterInputFs.SelectedDate,
-                                                            SecondDateFilterInputFs.SelectedDate
+                                                            FirstDateFilterInputMs.SelectedDate,
+                                                            SecondDateFilterInputMs.SelectedDate
                                                         )
                                                     ),
                                                     Date(
@@ -742,27 +1172,51 @@ Screens:
                                                     )//This is an arbitrary date. Assuming no files will be before this date.
                                                 ),
                                                 SecondDate: If(
-                                                    DateFilterCheckboxFs.Value,
+                                                    DateFilterCheckboxMs.Value,
                                                     Switch(
                                                         varFilterType.Date,
                                                         "Equal To",
-                                                        FirstDateFilterInputFs.SelectedDate,
+                                                        FirstDateFilterInputMs.SelectedDate,
                                                         "Greater Than or Equal",
                                                         Today(),
                                                         "Less Than or Equal",
-                                                        FirstDateFilterInputFs.SelectedDate,
+                                                        FirstDateFilterInputMs.SelectedDate,
                                                         "Between",
                                                         Max(
-                                                            FirstDateFilterInputFs.SelectedDate,
-                                                            SecondDateFilterInputFs.SelectedDate
+                                                            FirstDateFilterInputMs.SelectedDate,
+                                                            SecondDateFilterInputMs.SelectedDate
                                                         )
                                                     ),
                                                     Today()
+                                                ),
+                                                TypeChecked: TypeFilterCheckboxMs.Value,
+                                                Types: Table(
+                                                    ForAll(
+                                                        ParseJSON(
+                                                            JSON(
+                                                                If(
+                                                                    TypeFilterCheckboxMs.Value,
+                                                                    TypeFilterInputMs.SelectedItems,
+                                                                    Choices('Type (Messages)')
+                                                                )
+                                                            )
+                                                        ),
+                                                        {Value: Value(ThisRecord.Value)}
+                                                    )
+                                                ),
+                                                ReadChecked: ReadFilterCheckboxMs.Value,
+                                                MessageRead: If(
+                                                    ReadFilterCheckboxMs.Value,
+                                                    [Value(ReadFilterInputMs.Checked)],
+                                                    [
+                                                        0,
+                                                        1
+                                                    ]
                                                 )
                                             }
                                         }
                                     ),
-                                    Select(ClearFilterButtonFs)
+                                    Select(ClearFilterButtonMs)
                                 )
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -779,7 +1233,7 @@ Screens:
                               Width: =Parent.Width/3
                               X: =Parent.Width - Self.Width - Parent.Width/9
                               Y: =Parent.Height - Self.Height - Parent.Width/9
-                        - CancelFilterIconFs:
+                        - CancelFilterIconMs:
                             Control: Classic/Icon@2.5.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -808,7 +1262,7 @@ Screens:
                               PaddingTop: =20
                               Width: =80
                               X: =Sum(Parent.Width, -Self.Width)
-                        - DateFilterCheckboxFs:
+                        - DateFilterCheckboxMs:
                             Control: Classic/CheckBox@2.1.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -830,7 +1284,7 @@ Screens:
                               Text: =
                               Width: =90
                               Y: =80
-                        - DateFilterLabelFs:
+                        - DateFilterLabelMs:
                             Control: Label@2.5.1
                             Properties:
                               BorderColor: =RGBA(0, 18, 107, 1)
@@ -842,7 +1296,7 @@ Screens:
                               Width: =Parent.Width - Self.X*2
                               X: =90
                               Y: =80
-                        - DateFilterTypeFs:
+                        - DateFilterTypeMs:
                             Control: Button@0.0.45
                             Properties:
                               Align: =Align.Left
@@ -881,7 +1335,7 @@ Screens:
                                 )
                               X: =160
                               Y: =87
-                        - SecondDateFilterInputFs:
+                        - SecondDateFilterInputMs:
                             Control: Classic/DatePicker@2.6.0
                             Properties:
                               BorderColor: |-
@@ -889,7 +1343,7 @@ Screens:
                                     And(
                                         varDateError,
                                         IsBlank(Self.SelectedDate),
-                                        DateFilterCheckboxFs.Value
+                                        DateFilterCheckboxMs.Value
                                     ),
                                     RGBA(
                                         196,
@@ -941,7 +1395,7 @@ Screens:
                               Width: =215
                               X: =305
                               Y: =140
-                        - FirstDateFilterInputFs:
+                        - FirstDateFilterInputMs:
                             Control: Classic/DatePicker@2.6.0
                             Properties:
                               BorderColor: |-
@@ -949,7 +1403,7 @@ Screens:
                                     And(
                                         varDateError,
                                         IsBlank(Self.SelectedDate),
-                                        DateFilterCheckboxFs.Value
+                                        DateFilterCheckboxMs.Value
                                     ),
                                     RGBA(
                                         196,
@@ -1000,7 +1454,149 @@ Screens:
                               Width: =215
                               X: =90
                               Y: =140
-                        - FilterTypeGalleryContainerFs:
+                        - TypeFilterInputMs:
+                            Control: Classic/ComboBox@2.4.0
+                            Properties:
+                              BorderColor: |-
+                                =If(
+                                    And(
+                                        varTypeError,
+                                        IsEmpty(Self.SelectedItems),
+                                        TypeFilterCheckboxMs.Value
+                                    ),
+                                    RGBA(
+                                        196,
+                                        154,
+                                        90,
+                                        1
+                                    ),
+                                    RGBA(
+                                        166,
+                                        166,
+                                        166,
+                                        1
+                                    )
+                                )
+                              ChevronBackground: =RGBA(0, 0, 0, 0)
+                              ChevronFill: =RGBA(0, 0, 0, 0)
+                              ChevronHoverBackground: =Self.ChevronBackground
+                              ChevronHoverFill: =RGBA(255, 255, 255, 1)
+                              DefaultSelectedItems: |-
+                                =If(
+                                    varFilter.TypeChecked,
+                                    Filter(
+                                        Choices('Type (Messages)'),
+                                        Value in varFilter.Types
+                                    )
+                                )
+                              DisplayFields: =["Value"]
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              IsSearchable: =false
+                              Items: =Choices('Type (Messages)')
+                              PressedColor: =Self.Color
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              SearchFields: =["Value"]
+                              SelectionColor: =Self.HoverColor
+                              SelectionFill: =Self.HoverFill
+                              Width: =430
+                              X: =90
+                              Y: =295
+                        - TypeFilterCheckboxMs:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              CheckboxBorderColor: =RGBA(79, 90, 94, 1)
+                              CheckboxSize: =50
+                              CheckmarkFill: =RGBA(123, 94, 87, 1)
+                              Default: =varFilter.TypeChecked
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: =
+                              PaddingLeft: =20
+                              PressedBorderColor: =Self.BorderColor
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              Text: =
+                              Width: =90
+                              Y: =235
+                        - TypeFilterLabelMs:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =60
+                              Size: =20
+                              Text: ="Type"
+                              Width: =Parent.Width - Self.X*2
+                              X: =90
+                              Y: =235
+                        - ReadFilterInputMs:
+                            Control: Toggle@1.1.5
+                            Properties:
+                              Checked: |-
+                                =If(
+                                    varFilter.ReadChecked,
+                                    Boolean(First(varFilter.MessageRead).Value)
+                                )
+                              FontSize: =30
+                              Height: =60
+                              Label: =
+                              LabelPosition: ='Toggle.LabelPosition'.After
+                              ToggleSize: =80
+                              Width: =100
+                              X: =90
+                              Y: =450
+                        - ReadFilterCheckboxMs:
+                            Control: Classic/CheckBox@2.1.0
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              CheckboxBorderColor: =RGBA(79, 90, 94, 1)
+                              CheckboxSize: =50
+                              CheckmarkFill: =RGBA(123, 94, 87, 1)
+                              Default: =varFilter.ReadChecked
+                              FocusedBorderThickness: =Self.BorderThickness
+                              Font: =Font.'Open Sans'
+                              Height: =60
+                              HoverBorderColor: =Self.BorderColor
+                              HoverColor: =Self.Color
+                              HoverFill: =Self.Fill
+                              OnSelect: =
+                              PaddingLeft: =20
+                              PressedBorderColor: =Self.BorderColor
+                              PressedFill: =Self.Fill
+                              Reset: =varReset
+                              Text: =
+                              Width: =90
+                              Y: =390
+                        - ReadFilterLabelMs:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 18, 107, 1)
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              Height: =60
+                              Size: =20
+                              Text: |-
+                                =If(
+                                    ReadFilterInputMs.Checked,
+                                    "Read",
+                                    "Unread"
+                                )
+                              Width: =Parent.Width - Self.X*2
+                              X: =90
+                              Y: =390
+                        - FilterTypeGalleryContainerMs:
                             Control: GroupContainer@1.5.0
                             Variant: ManualLayout
                             Properties:
@@ -1015,7 +1611,7 @@ Screens:
                               Visible: =Not(IsBlank(varFilterType.Field))
                               Width: =Parent.Width
                             Children:
-                              - FilterTypeGalleryFs:
+                              - FilterTypeGalleryMs:
                                   Control: Gallery@2.15.0
                                   Variant: Vertical
                                   Properties:
@@ -1051,7 +1647,7 @@ Screens:
                                     X: =Parent.Width / 2 - Self.Width/2
                                     Y: =Parent.Height /2 - Self.Height /2
                                   Children:
-                                    - FilterTypeContainerFs:
+                                    - FilterTypeContainerMs:
                                         Control: GroupContainer@1.5.0
                                         Variant: ManualLayout
                                         Properties:
@@ -1083,7 +1679,7 @@ Screens:
                                           X: =25
                                           Y: =25
                                         Children:
-                                          - FilterTypeLabelFs:
+                                          - FilterTypeLabelMs:
                                               Control: Label@2.5.1
                                               Properties:
                                                 Align: =Align.Center

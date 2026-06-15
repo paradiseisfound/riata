@@ -884,7 +884,7 @@ Screens:
                                     LookUp(
                                         Transactions,
                                         Guid = TransactionsGallery.Selected.Guid
-                                    )
+                                    ) // improve performance by eliminating the lookup
                                 );
                                 Navigate(
                                     TransactionDetailScreen,
@@ -1250,7 +1250,14 @@ Screens:
                                                     false
                                                 ]
                                             ),
-                                            Accounts: AccountFilterInput.SelectedItems,
+                                            Accounts: If(
+                                                AccountFilterCheckbox.Value,
+                                                AccountFilterInput.SelectedItems,
+                                                Filter(
+                                                    BankAccounts,
+                                                    AccessToken.Profile.Guid = gvarSelectedRole.Profile.Guid
+                                                )
+                                            ),
                                             FirstAmount: If(
                                                 AmountFilterCheckbox.Value,
                                                 Switch(

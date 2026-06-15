@@ -214,6 +214,8 @@
                   "entityName": "mda_messages",
                   "x-ms-odata-metadata-full": false,
                   "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_Profile@odata.bind": "/mda_profiles(@{triggerBody()?['text_3']})",
+                  "item/mda_title": "@{body('Flow_run_metadata')?['tags']?['flowDisplayName']} Error",
                   "item/mda_type": 0
                 },
                 "host": {
@@ -345,7 +347,30 @@
               "item/documentbody": "@base64(body('Create_CSV_table'))",
               "item/filename": "Budget Entries Export.csv",
               "item/mimetype": "text/csv",
-              "item/objectid_mda_profile@odata.bind": "/mda_profiles(@{triggerBody()?['text_3']})"
+              "item/objectid_mda_message@odata.bind": "@outputs('Create_Message')?['body/@odata.id']"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
+              "operationId": "CreateRecord",
+              "connectionName": "shared_commondataserviceforapps-1"
+            }
+          },
+          "runAfter": {
+            "Create_Message": [
+              "SUCCEEDED"
+            ]
+          }
+        },
+        "Create_Message": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "entityName": "mda_messages",
+              "x-ms-odata-metadata-full": true,
+              "item/mda_description": "Attached is your export file.",
+              "item/mda_Profile@odata.bind": "/mda_profiles(@{triggerBody()?['text_3']})",
+              "item/mda_title": "Budget Entries Export",
+              "item/mda_type": 2
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",

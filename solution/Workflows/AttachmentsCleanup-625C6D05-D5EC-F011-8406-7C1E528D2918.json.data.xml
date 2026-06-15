@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Workflow WorkflowId="{625c6d05-d5ec-f011-8406-7c1e528d2918}" Name="Attachments/Exports Cleanup" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-  <JsonFileName>/Workflows/AttachmentsExportsCleanup-625C6D05-D5EC-F011-8406-7C1E528D2918.json</JsonFileName>
+<Workflow WorkflowId="{625c6d05-d5ec-f011-8406-7c1e528d2918}" Name="Attachments Cleanup" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <JsonFileName>/Workflows/AttachmentsCleanup-625C6D05-D5EC-F011-8406-7C1E528D2918.json</JsonFileName>
   <Type>1</Type>
   <Subprocess>0</Subprocess>
   <Category>5</Category>
@@ -22,6 +22,6 @@
   <ModernFlowType>0</ModernFlowType>
   <PrimaryEntity>none</PrimaryEntity>
   <LocalizedNames>
-    <LocalizedName languagecode="1033" description="Attachments/Exports Cleanup" />
+    <LocalizedName languagecode="1033" description="Attachments Cleanup" />
   </LocalizedNames>
 </Workflow>

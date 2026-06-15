@@ -370,7 +370,8 @@ Screens:
                                     UpdateContext(
                                         {
                                             varSplitEdit: false,
-                                            varSplitAmountSumError: false
+                                            varSplitAmountSumError: false,
+                                            varReset: true
                                         }
                                     ),
                                     ClearCollect(
@@ -380,7 +381,8 @@ Screens:
                                             Transaction.Guid = gvarTransaction.Guid
                                         )
                                     )
-                                )
+                                );
+                                UpdateContext({varReset: false})
                               PaddingBottom: =Self.Width/9
                               PaddingLeft: =Self.Width/9
                               PaddingRight: =Self.Width/9
@@ -1482,6 +1484,7 @@ Screens:
                               RadiusBottomRight: =Self.Height/3
                               RadiusTopLeft: =Self.Height/3
                               RadiusTopRight: =Self.Height/3
+                              Reset: =varReset
                               Size: =20
                               Width: =175
                               X: =Parent.Width - Parent.TemplatePadding*2 - Self.Width - RemoveSpitIcon5.Width - 20
@@ -1516,6 +1519,7 @@ Screens:
                               RadiusBottomRight: =Self.Height/3
                               RadiusTopLeft: =Self.Height/3
                               RadiusTopRight: =Self.Height/3
+                              Reset: =varReset
                               Size: =20
                               Width: |-
                                 =Sum(

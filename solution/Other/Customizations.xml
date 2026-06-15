@@ -1,23 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ImportExportXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26054.129" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26054.00129">
+<ImportExportXml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" OrganizationVersion="9.2.26061.133" OrganizationSchemaType="Standard" CRMServerServiceabilityVersion="9.2.26062.00135">
   <Entities />
   <Roles />
   <Workflows />
   <FieldSecurityProfiles />
   <Templates />
-  <EntityImageConfigs>
-    <EntityImageConfig>
-      <parententitylogicalname>mda_institution</parententitylogicalname>
-      <primaryimageattribute>mda_logo</primaryimageattribute>
-    </EntityImageConfig>
-  </EntityImageConfigs>
-  <AttributeImageConfigs>
-    <AttributeImageConfig>
-      <attributelogicalname>mda_logo</attributelogicalname>
-      <parententitylogicalname>mda_institution</parententitylogicalname>
-      <canstorefullimage>1</canstorefullimage>
-    </AttributeImageConfig>
-  </AttributeImageConfigs>
+  <EntityImageConfigs />
+  <AttributeImageConfigs />
   <EntityMaps />
   <EntityRelationships />
   <OrganizationSettings />

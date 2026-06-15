@@ -169,6 +169,8 @@
                   "entityName": "mda_messages",
                   "x-ms-odata-metadata-full": false,
                   "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_Profile@odata.bind": "/mda_profiles(@{triggerBody()?['text_1']})",
+                  "item/mda_title": "@{body('Flow_run_metadata')?['tags']?['flowDisplayName']} Error",
                   "item/mda_type": 0
                 },
                 "host": {

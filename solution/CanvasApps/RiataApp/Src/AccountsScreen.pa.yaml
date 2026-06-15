@@ -812,7 +812,7 @@ Screens:
                         PaddingTop: =10
                         Width: =Parent.Height
                         X: =10
-            - FilterContainer2:
+            - FilterContainerAs:
                 Control: GroupContainer@1.5.0
                 Variant: ManualLayout
                 Properties:
@@ -828,7 +828,7 @@ Screens:
                   Visible: =gvarAccountsFilter.Visible
                   Width: =Parent.Width
                 Children:
-                  - FilterModal2:
+                  - FilterModalAs:
                       Control: GroupContainer@1.5.0
                       Variant: ManualLayout
                       Properties:
@@ -845,7 +845,7 @@ Screens:
                         X: =Parent.Width/2 - Self.Width/2
                         Y: =Parent.Height/2 - Self.Height/2
                       Children:
-                        - ClearFilterButton2:
+                        - ClearFilterButtonAs:
                             Control: Classic/Button@2.2.0
                             Properties:
                               BorderColor: =Self.Color
@@ -889,7 +889,7 @@ Screens:
                               Width: =Parent.Width/3
                               X: =Parent.Width/9
                               Y: =Parent.Height - Self.Height - Parent.Width/9
-                        - ApplyFilterButton2:
+                        - ApplyFilterButtonAs:
                             Control: Classic/Button@2.2.0
                             Properties:
                               BorderColor: =Self.Fill
@@ -905,10 +905,10 @@ Screens:
                                 =UpdateContext(
                                     {
                                         varAccessTokenError: And(
-                                            AccessTokenFilterCheckbox2.Value,
+                                            AccessTokenFilterCheckboxAs.Value,
                                             Or(
-                                                IsEmpty(AccessTokenFilterInput2.SelectedItems),
-                                                IsBlank(AccessTokenFilterInput2.SelectedItems)
+                                                IsEmpty(AccessTokenFilterInputAs.SelectedItems),
+                                                IsBlank(AccessTokenFilterInputAs.SelectedItems)
                                             )
                                         )
                                     }
@@ -919,17 +919,24 @@ Screens:
                                         "Select an institution before applying the filter",
                                         NotificationType.Warning
                                     ),
-                                    AccessTokenFilterCheckbox2.Value,
+                                    AccessTokenFilterCheckboxAs.Value,
                                     Set(
                                         gvarAccountsFilter,
                                         {
                                             Visible: false,
                                             Applied: true,
-                                            AccessTokenChecked: AccessTokenFilterCheckbox2.Value,
-                                            AccessTokens: AccessTokenFilterInput2.SelectedItems
+                                            AccessTokenChecked: AccessTokenFilterCheckboxAs.Value,
+                                            AccessTokens: If(
+                                                AccessTokenFilterCheckboxAs.Value,
+                                                AccessTokenFilterInputAs.SelectedItems,
+                                                Filter(
+                                                    BankAccounts,
+                                                    AccessToken.Profile.Guid = gvarSelectedRole.Profile.Guid
+                                                )
+                                            )
                                         }
                                     ),
-                                    Select(ClearFilterButton2)
+                                    Select(ClearFilterButtonAs)
                                 )
                               PaddingBottom: =0
                               PaddingLeft: =0
@@ -946,7 +953,7 @@ Screens:
                               Width: =Parent.Width/3
                               X: =Parent.Width - Self.Width - Parent.Width/9
                               Y: =Parent.Height - Self.Height - Parent.Width/9
-                        - CancelFilterIcon2:
+                        - CancelFilterIconAs:
                             Control: Classic/Icon@2.5.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -976,7 +983,7 @@ Screens:
                               PaddingTop: =20
                               Width: =80
                               X: =Sum(Parent.Width, -Self.Width)
-                        - AccessTokenFilterInput2:
+                        - AccessTokenFilterInputAs:
                             Control: Classic/ComboBox@2.4.0
                             Properties:
                               BorderColor: |-
@@ -1036,7 +1043,7 @@ Screens:
                               Width: =430
                               X: =90
                               Y: =140
-                        - AccessTokenFilterCheckbox2:
+                        - AccessTokenFilterCheckboxAs:
                             Control: Classic/CheckBox@2.1.0
                             Properties:
                               BorderColor: =RGBA(0, 0, 0, 0)
@@ -1058,7 +1065,7 @@ Screens:
                               Text: =
                               Width: =90
                               Y: =80
-                        - AccessTokenFilterLabel2:
+                        - AccessTokenFilterLabelAs:
                             Control: Label@2.5.1
                             Properties:
                               BorderColor: =RGBA(0, 18, 107, 1)

@@ -41,6 +41,7 @@
   <EntityRelationship Name="mda_bankaccount_mda_accesstoken" />
   <EntityRelationship Name="mda_budget_profile" />
   <EntityRelationship Name="mda_budgetentry_budget" />
+  <EntityRelationship Name="mda_message_mda_profile" />
   <EntityRelationship Name="mda_role_mda_profile" />
   <EntityRelationship Name="mda_role_UserId_systemuser" />
   <EntityRelationship Name="mda_transaction_category" />

@@ -17,4 +17,4 @@ EditorState:
     - BudgetDetailScreen
     - ReportsScreen
     - CategoriesScreen
-    - FileScreen
+    - MessagesScreen

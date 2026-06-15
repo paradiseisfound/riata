@@ -154,7 +154,6 @@
                       "x-ms-odata-metadata-full": false,
                       "item/mda_name": "@outputs('Get_Institution_By_ID')?['body/institution/name']",
                       "item/mda_primarycolor": "@outputs('Get_Institution_By_ID')?['body/institution/primary_color']",
-                      "item/mda_routingnumbers": "@join(outputs('Get_Institution_By_ID')?['body/institution/routing_numbers'],';')",
                       "item/mda_url": "@outputs('Get_Institution_By_ID')?['body/institution/url']",
                       "item/mda_logo": "@outputs('Get_Institution_By_ID')?['body/institution/logo']"
                     },
@@ -261,102 +260,6 @@
         },
         "On_failure": {
           "actions": {
-            "Flow_run_metadata": {
-              "type": "ParseJson",
-              "inputs": {
-                "content": "@workflow()",
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "type": {
-                      "type": "string"
-                    },
-                    "location": {
-                      "type": "string"
-                    },
-                    "tags": {
-                      "type": "object",
-                      "properties": {
-                        "flowDisplayName": {
-                          "type": "string"
-                        },
-                        "environmentName": {
-                          "type": "string"
-                        },
-                        "logicAppName": {
-                          "type": "string"
-                        },
-                        "environmentFlowSuspensionReason": {
-                          "type": "string"
-                        },
-                        "sharingType": {
-                          "type": "string"
-                        },
-                        "state": {
-                          "type": "string"
-                        },
-                        "createdTime": {
-                          "type": "string"
-                        },
-                        "lastModifiedTime": {
-                          "type": "string"
-                        },
-                        "createdBy": {
-                          "type": "string"
-                        },
-                        "triggerType": {
-                          "type": "string"
-                        },
-                        "createdByUserId": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "run": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "Log_error": {
-              "runAfter": {
-                "Flow_run_metadata": [
-                  "Succeeded"
-                ]
-              },
-              "type": "OpenApiConnection",
-              "inputs": {
-                "parameters": {
-                  "entityName": "mda_messages",
-                  "x-ms-odata-metadata-full": false,
-                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
-                  "item/mda_type": 0
-                },
-                "host": {
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
-                  "operationId": "CreateRecord",
-                  "connectionName": "shared_commondataserviceforapps-1"
-                }
-              }
-            },
             "User_Guid_was_provided_(failure)": {
               "actions": {
                 "Send_push_on_failure": {

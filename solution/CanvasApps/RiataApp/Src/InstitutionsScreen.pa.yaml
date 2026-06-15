@@ -906,7 +906,10 @@ Screens:
                               HoverColor: =Self.Color
                               HoverFill: =Self.Fill
                               OnSelect: |-
-                                =CancelledLinkSessionfromApp.Run(gvarSelectedRole.Guid);
+                                =CancelledLinkSessionfromApp.Run(
+                                    gvarSelectedRole.Guid,
+                                    gvarProfile.Guid
+                                );
                                 UpdateContext(
                                     {
                                         varLink: Blank(),

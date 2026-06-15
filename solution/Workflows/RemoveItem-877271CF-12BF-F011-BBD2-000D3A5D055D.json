@@ -332,6 +332,8 @@
                   "entityName": "mda_messages",
                   "x-ms-odata-metadata-full": false,
                   "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
+                  "item/mda_Profile@odata.bind": "@first(outputs('Get_Access_Token')?['body/value'])?['mda_Profile']?['@odata.id']",
+                  "item/mda_title": "@{body('Flow_run_metadata')?['tags']?['flowDisplayName']} Error",
                   "item/mda_type": 0
                 },
                 "host": {
@@ -403,7 +405,8 @@
               "$select": "mda_accesstokenid,mda_plaidaccesstoken",
               "$filter": "mda_plaiditemid eq '@{triggerBody()?['text']}'",
               "$top": 1,
-              "x-ms-odata-metadata-full": false
+              "x-ms-odata-metadata-full": false,
+              "$expand": "mda_Profile($select=mda_profileid)"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",

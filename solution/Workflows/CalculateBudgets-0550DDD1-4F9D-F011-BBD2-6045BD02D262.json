@@ -593,7 +593,7 @@
                     },
                     "runAfter": {
                       "Unlicensed_Response": [
-                        "SUCCEEDED"
+                        "Succeeded"
                       ]
                     },
                     "metadata": {
@@ -638,102 +638,6 @@
         "On_failure": {
           "type": "Scope",
           "actions": {
-            "Flow_run_metadata": {
-              "type": "ParseJson",
-              "inputs": {
-                "content": "@workflow()",
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "type": {
-                      "type": "string"
-                    },
-                    "location": {
-                      "type": "string"
-                    },
-                    "tags": {
-                      "type": "object",
-                      "properties": {
-                        "flowDisplayName": {
-                          "type": "string"
-                        },
-                        "environmentName": {
-                          "type": "string"
-                        },
-                        "logicAppName": {
-                          "type": "string"
-                        },
-                        "environmentFlowSuspensionReason": {
-                          "type": "string"
-                        },
-                        "sharingType": {
-                          "type": "string"
-                        },
-                        "state": {
-                          "type": "string"
-                        },
-                        "createdTime": {
-                          "type": "string"
-                        },
-                        "lastModifiedTime": {
-                          "type": "string"
-                        },
-                        "createdBy": {
-                          "type": "string"
-                        },
-                        "triggerType": {
-                          "type": "string"
-                        },
-                        "createdByUserId": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "run": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "string"
-                        },
-                        "name": {
-                          "type": "string"
-                        },
-                        "type": {
-                          "type": "string"
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "Log_error": {
-              "type": "OpenApiConnection",
-              "inputs": {
-                "parameters": {
-                  "entityName": "mda_messages",
-                  "x-ms-odata-metadata-full": false,
-                  "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
-                  "item/mda_type": 0
-                },
-                "host": {
-                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
-                  "operationId": "CreateRecord",
-                  "connectionName": "shared_commondataserviceforapps-1"
-                }
-              },
-              "runAfter": {
-                "Flow_run_metadata": [
-                  "Succeeded"
-                ]
-              }
-            },
             "User_Guid_was_provided_(failure)": {
               "type": "If",
               "expression": {

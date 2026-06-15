@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<AttributeImageConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <attributelogicalname>mda_logo</attributelogicalname>
+  <parententitylogicalname>mda_institution</parententitylogicalname>
+  <canstorefullimage>1</canstorefullimage>
+</AttributeImageConfig>

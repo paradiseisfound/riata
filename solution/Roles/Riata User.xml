@@ -24,6 +24,7 @@
     <RolePrivilege name="prvCreateSharePointData" level="Global" />
     <RolePrivilege name="prvDeletemda_Budget" level="Global" />
     <RolePrivilege name="prvDeletemda_BudgetEntry" level="Global" />
+    <RolePrivilege name="prvDeletemda_Message" level="Global" />
     <RolePrivilege name="prvDeletemda_TransactionCategory" level="Global" />
     <RolePrivilege name="prvDeletemda_TransactionSplit" level="Global" />
     <RolePrivilege name="prvReadian_License" level="Global" />
@@ -32,6 +33,7 @@
     <RolePrivilege name="prvReadmda_Budget" level="Global" />
     <RolePrivilege name="prvReadmda_BudgetEntry" level="Global" />
     <RolePrivilege name="prvReadmda_Institution" level="Global" />
+    <RolePrivilege name="prvReadmda_Message" level="Global" />
     <RolePrivilege name="prvReadmda_Profile" level="Global" />
     <RolePrivilege name="prvReadmda_Role" level="Global" />
     <RolePrivilege name="prvReadmda_Transaction" level="Global" />
