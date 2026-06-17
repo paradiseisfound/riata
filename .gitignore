@@ -1,5 +1,7 @@
 .vscode/
 
-solution/CanvasApps/RiataApp/**
-!solution/CanvasApps/RiataApp/**/
-!solution/CanvasApps/RiataApp/**/*.yaml
+solution/CanvasApps/*/**
+!solution/CanvasApps/*/Src
+!solution/CanvasApps/*/Src/*.yaml
+!solution/CanvasApps/*/Src/*/
+!solution/CanvasApps/*/Src/*/*.yaml
