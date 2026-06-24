@@ -1,0 +1,1023 @@
+# ************************************************************************************************
+# Warning: YAML source code for Canvas Apps should only be used to review changes made within Power Apps Studio and for minor edits (Preview).
+# Use the maker portal to create and edit your Power Apps.
+# 
+# The schema file for Canvas Apps is available at https://go.microsoft.com/fwlink/?linkid=2304907
+# 
+# For more information, visit https://go.microsoft.com/fwlink/?linkid=2292623
+# ************************************************************************************************
+Screens:
+  ReportsScreen:
+    Properties:
+      Fill: =RGBA(224, 224, 224, 1)
+      Height: =App.Height
+      LoadingSpinnerColor: =RGBA(56, 96, 178, 1)
+      OnVisible: |-
+        =IfError(
+            If(
+                IsEmpty(colReport),
+                UpdateContext({varSpinner: {generating: true}});
+                ClearCollect(
+                    colReport,
+                    ForAll(
+                        ParseJSON(
+                            GenerateReport.Run(
+                                Text(
+                                    Date(
+                                        Year(Today()),
+                                        Month(Today()),
+                                        1
+                                    ),
+                                    "yyyy-mm-dd"
+                                ),
+                                Text(
+                                    EOMonth(
+                                        Today(),
+                                        0
+                                    ),
+                                    "yyyy-mm-dd"
+                                ),
+                                gvarSelectedRole.Profile.Guid
+                            ).reportarray
+                        ),
+                        {
+                            Name: Text(ThisRecord.mda_name),
+                            Type: If(
+                                Value(ThisRecord.mda_type) = 0,
+                                3,
+                                Value(ThisRecord.mda_type)
+                            ),
+                            Index: Value(ThisRecord.mda_index),
+                            Depth: Value(ThisRecord.mda_depth),
+                            Color: Text(ThisRecord.mda_color),
+                            BudgetAmount: Value(ThisRecord.budgetAmount),
+                            TransactionAmount: Value(ThisRecord.transactionAmount),
+                            ActualMinBudgetAmount: Value(ThisRecord.transactionAmount) - Value(ThisRecord.budgetAmount)
+                        }
+                    )
+                )
+            ),
+            Back(ScreenTransition.Fade);
+            Notify(
+                "There was an error generating the report.",
+                NotificationType.Error
+            )
+        );
+        UpdateContext({varSpinner: Blank()})
+      Width: =App.Width
+    Children:
+      - ContainerRs:
+          Control: GroupContainer@1.5.0
+          Variant: ManualLayout
+          Properties:
+            BorderColor: =RGBA(0, 0, 0, 0)
+            BorderStyle: =BorderStyle.None
+            DropShadow: =DropShadow.None
+            Fill: =RGBA(255, 255, 255, 1)
+            Height: =App.Height
+            RadiusBottomLeft: =0
+            RadiusBottomRight: =0
+            RadiusTopLeft: =0
+            RadiusTopRight: =0
+            Width: |-
+              =Min(
+                  App.Width,
+                  1200
+              )
+            X: =Parent.Width/2 - Self.Width/2
+          Children:
+            - ActionContainerRs:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  DropShadow: =DropShadow.None
+                  Height: =Parent.Width / 4.75
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutGap: =Self.Height/4
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  PaddingBottom: =Self.Height/4
+                  PaddingLeft: =Self.Height/4
+                  PaddingRight: =Self.Height/4
+                  PaddingTop: =Self.Height/4
+                  RadiusBottomLeft: =20
+                  RadiusBottomRight: =20
+                  RadiusTopLeft: =20
+                  RadiusTopRight: =20
+                  Width: =Parent.Width
+                  Y: |-
+                    =Sum(
+                        Parent.Height,
+                        -Self.Height
+                    )
+                Children:
+                  - BackContainerRs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(123, 94, 87, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - BackIconRs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Height: =Parent.Height
+                              Image: =chevron_left_500dp_7B5E57_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: =Back(ScreenTransition.Fade)
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Back"
+                              Width: =Parent.Width
+                  - VisibleContainerRs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(74, 101, 114, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - VisibleIconRs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Height: =Parent.Height
+                              Image: =view_column_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =ClearCollect(
+                                    colReportDisplay,
+                                    {
+                                        NumColumns: If(
+                                            First(colReportDisplay).NumColumns = 1,
+                                            3,
+                                            First(colReportDisplay).NumColumns - 1
+                                        ),
+                                        ColumnOrder: First(colReportDisplay).ColumnOrder
+                                    }
+                                );
+                                SaveData(
+                                    colReportDisplay,
+                                    "colReportDisplay"
+                                )
+                              PaddingBottom: =Parent.Height/12
+                              PaddingLeft: =Parent.Height/12
+                              PaddingRight: =Parent.Height/12
+                              PaddingTop: =Parent.Height/12
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Columns"
+                              Width: =Parent.Width
+                  - ShuffleContainerRs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(74, 101, 114, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - ShuffleIconRs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Height: =Parent.Height
+                              Image: =shuffle_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =ClearCollect(
+                                    colReportDisplay,
+                                    {
+                                        NumColumns: First(colReportDisplay).NumColumns,
+                                        ColumnOrder: LookUp(
+                                            [
+                                                {
+                                                    Index: 1,
+                                                    Value: [
+                                                        "Budget",
+                                                        "Actual",
+                                                        "Act. - Bud."
+                                                    ]
+                                                },
+                                                {
+                                                    Index: 2,
+                                                    Value: [
+                                                        "Budget",
+                                                        "Act. - Bud.",
+                                                        "Actual"
+                                                    ]
+                                                },
+                                                {
+                                                    Index: 3,
+                                                    Value: [
+                                                        "Actual",
+                                                        "Act. - Bud.",
+                                                        "Budget"
+                                                    ]
+                                                },
+                                                {
+                                                    Index: 4,
+                                                    Value: [
+                                                        "Actual",
+                                                        "Budget",
+                                                        "Act. - Bud."
+                                                    ]
+                                                },
+                                                {
+                                                    Index: 5,
+                                                    Value: [
+                                                        "Act. - Bud.",
+                                                        "Budget",
+                                                        "Actual"
+                                                    ]
+                                                },
+                                                {
+                                                    Index: 6,
+                                                    Value: [
+                                                        "Act. - Bud.",
+                                                        "Actual",
+                                                        "Budget"
+                                                    ]
+                                                }
+                                            ] As Root,
+                                            Root.Index = If(
+                                                First(colReportDisplay).ColumnOrder.Index = 6,
+                                                1,
+                                                First(colReportDisplay).ColumnOrder.Index + 1
+                                            )
+                                        )
+                                    }
+                                );
+                                SaveData(
+                                    colReportDisplay,
+                                    "colReportDisplay"
+                                )
+                              PaddingBottom: =Parent.Height/12
+                              PaddingLeft: =Parent.Height/12
+                              PaddingRight: =Parent.Height/12
+                              PaddingTop: =Parent.Height/12
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Columns"
+                              Width: =Parent.Width
+                  - ExportContainerRs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        BorderColor: =RGBA(74, 101, 114, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        Fill: |-
+                          =RGBA(
+                              0,
+                              0,
+                              0,
+                              0
+                          )
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - ExportIconRs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Fill: |-
+                                =RGBA(
+                                    0,
+                                    0,
+                                    0,
+                                    0
+                                )
+                              Height: =Parent.Height
+                              Image: =output_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =IfError(
+                                    ExportReport.Run(
+                                        JSON(colReport),
+                                        gvarProfile.Guid,
+                                        {text_2: User().EntraObjectId}
+                                    ),
+                                    Notify(
+                                        "There was an error generating the export",
+                                        NotificationType.Error
+                                    ),
+                                    Notify(
+                                        "You'll get a notification when the export is ready.",
+                                        NotificationType.Success
+                                    )
+                                )
+                              PaddingBottom: =Parent.Height/9
+                              PaddingLeft: =Parent.Height/9
+                              PaddingRight: =Parent.Height/9
+                              PaddingTop: =Parent.Height/9
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Export"
+                              Width: =Parent.Width
+                  - RefreshContainerRs:
+                      Control: GroupContainer@1.5.0
+                      Variant: ManualLayout
+                      Properties:
+                        AlignInContainer: =AlignInContainer.SetByContainer
+                        BorderColor: =RGBA(74, 101, 114, 1)
+                        BorderThickness: =Self.Height/30
+                        DropShadow: =DropShadow.Semibold
+                        FillPortions: =0
+                        Height: =135
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        RadiusBottomLeft: =Self.Height/3
+                        RadiusBottomRight: =Self.Height/3
+                        RadiusTopLeft: =Self.Height/3
+                        RadiusTopRight: =Self.Height/3
+                        Width: =Self.Height
+                      Children:
+                        - RefreshIconRs:
+                            Control: Image@2.2.3
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              DisabledBorderColor: =RGBA(0, 0, 0, 0)
+                              DisabledFill: =RGBA(224, 224, 224, 1)
+                              Height: =Parent.Height
+                              Image: =refresh_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
+                              OnSelect: |-
+                                =UpdateContext({varSpinner: {generating: true}});
+                                IfError(
+                                    ClearCollect(
+                                        colReport,
+                                        ForAll(
+                                            ParseJSON(
+                                                GenerateReport.Run(
+                                                    Text(
+                                                        Min(
+                                                            DisplayBeginDateRs.SelectedDate,
+                                                            DisplayEndDateRs.SelectedDate
+                                                        ),
+                                                        "yyyy-mm-dd"
+                                                    ),
+                                                    Text(
+                                                        Max(
+                                                            DisplayBeginDateRs.SelectedDate,
+                                                            DisplayEndDateRs.SelectedDate
+                                                        ),
+                                                        "yyyy-mm-dd"
+                                                    ),
+                                                    gvarSelectedRole.Profile.Guid
+                                                ).reportarray
+                                            ),
+                                            {
+                                                Name: Text(ThisRecord.mda_name),
+                                                Type: If(
+                                                    Value(ThisRecord.mda_type) = 0,
+                                                    3,
+                                                    Value(ThisRecord.mda_type)
+                                                ),
+                                                Index: Value(ThisRecord.mda_index),
+                                                Depth: Value(ThisRecord.mda_depth),
+                                                Color: Text(ThisRecord.mda_color),
+                                                BudgetAmount: Value(ThisRecord.budgetAmount),
+                                                TransactionAmount: Value(ThisRecord.transactionAmount),
+                                                ActualMinBudgetAmount: Value(ThisRecord.transactionAmount) - Value(ThisRecord.budgetAmount)
+                                            }
+                                        )
+                                    ),
+                                    Notify(
+                                        "There was an error generating the report.",
+                                        NotificationType.Error
+                                    )
+                                );
+                                Concurrent(
+                                    Reset(DisplayBeginDateRs),
+                                    Reset(DisplayEndDateRs)
+                                );
+                                UpdateContext({varSpinner: Blank()})
+                              PaddingBottom: =Parent.Height/9
+                              PaddingLeft: =Parent.Height/9
+                              PaddingRight: =Parent.Height/9
+                              PaddingTop: =Parent.Height/9
+                              RadiusBottomLeft: =Parent.RadiusBottomLeft
+                              RadiusBottomRight: =Parent.RadiusBottomRight
+                              RadiusTopLeft: =Parent.RadiusTopLeft
+                              RadiusTopRight: =Parent.RadiusTopRight
+                              Tooltip: ="Refresh"
+                              Width: =Parent.Width
+            - DisplayContainerRs:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =RGBA(123, 94, 87, 1)
+                  BorderThickness: =Self.Height/45
+                  DropShadow: =DropShadow.Semibold
+                  Height: =Parent.Width / 4.75 / 2
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.Center
+                  PaddingLeft: =Self.Height/4
+                  PaddingRight: =Self.Height/4
+                  RadiusBottomLeft: =Self.Height/3
+                  RadiusBottomRight: =Self.Height/3
+                  RadiusTopLeft: =Self.Height/3
+                  RadiusTopRight: =Self.Height/3
+                  Width: |-
+                    =Min(
+                        Parent.Width - 100,
+                        Sum(
+                            DisplayBeginDateRs.Width,
+                            DisplayEndDateRs.Width,
+                            DashIconRs.Width,
+                            100
+                        )
+                    )
+                  X: =Parent.Width/2 - Self.Width/2
+                  Y: =ActionContainerRs.Y - Self.Height
+                Children:
+                  - DisplayBeginDateRs:
+                      Control: Classic/DatePicker@2.6.0
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        DefaultDate: |-
+                          =Coalesce(
+                              varBeginDate,
+                              Date(
+                                  Year(Today()),
+                                  Month(Today()),
+                                  1
+                              )
+                          )
+                        EndYear: |-
+                          =Sum(
+                              Year(Today()),
+                              5
+                          )
+                        FocusedBorderThickness: =Self.BorderThickness
+                        Font: =Font.'Open Sans'
+                        Format: ="m/d/yyyy"
+                        IconBackground: =RGBA(0,0,0,0)
+                        IconFill: =RGBA(123, 94, 87, 1)
+                        InputTextPlaceholder: =
+                        IsEditable: =true
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        OnChange: |-
+                          =UpdateContext(
+                              {
+                                  varEndDate: Max(
+                                      Self.SelectedDate,
+                                      DisplayEndDateRs.SelectedDate
+                                  ),
+                                  varBeginDate: Min(
+                                      Self.SelectedDate,
+                                      DisplayEndDateRs.SelectedDate
+                                  )
+                              }
+                          )
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        Reset: =
+                        Size: =Self.Height/3.75
+                        StartYear: =2025
+                        Width: =Self.Size * 8 + 50
+                  - DashIconRs:
+                      Control: Classic/Icon@2.5.0
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        Color: =RGBA(123, 94, 87, 1)
+                        DisplayMode: =DisplayMode.View
+                        FocusedBorderThickness: =0
+                        Icon: =Icon.HorizontalLine
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =16
+                        PaddingBottom: =Self.Height/3
+                        PaddingLeft: =Self.Height/3
+                        PaddingRight: =Self.Height/3
+                        PaddingTop: =Self.Height/3
+                        Width: =Self.Height
+                  - DisplayEndDateRs:
+                      Control: Classic/DatePicker@2.6.0
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        BorderThickness: =0
+                        DefaultDate: |-
+                          =Coalesce(
+                              varEndDate,
+                              EOMonth(
+                                  Today(),
+                                  0
+                              )
+                          )
+                        EndYear: |-
+                          =Sum(
+                              Year(Today()),
+                              5
+                          )
+                        FocusedBorderThickness: =Self.BorderThickness
+                        Font: =Font.'Open Sans'
+                        Format: ="m/d/yyyy"
+                        IconBackground: =RGBA(0,0,0,0)
+                        IconFill: =RGBA(123, 94, 87, 1)
+                        InputTextPlaceholder: =
+                        IsEditable: =true
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        OnChange: |-
+                          =UpdateContext(
+                              {
+                                  varEndDate: Max(
+                                      Self.SelectedDate,
+                                      DisplayBeginDateRs.SelectedDate
+                                  ),
+                                  varBeginDate: Min(
+                                      Self.SelectedDate,
+                                      DisplayBeginDateRs.SelectedDate
+                                  )
+                              }
+                          )
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        Reset: =
+                        Size: =Self.Height/3.75
+                        StartYear: =2025
+                        Width: =Self.Size * 8 + 50
+            - ReportsGalleryRs:
+                Control: Gallery@2.15.0
+                Variant: VariableHeight
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  Default: ={}
+                  Height: |-
+                    =Sum(
+                        Parent.Height,
+                        -Self.Y,
+                        -ActionContainerRs.Height,
+                        -HeaderContainerRs.Height/2,
+                        -DisplayContainerRs.Height
+                    )
+                  Items: |-
+                    =SortByColumns(
+                        colReport,
+                        "Type",
+                        SortOrder.Ascending,
+                        "Index",
+                        SortOrder.Ascending
+                    )
+                  LoadingSpinnerColor: =RGBA(123, 94, 87, 1)
+                  ShowScrollbar: =false
+                  TemplatePadding: =0
+                  Width: =Parent.Width
+                  Y: |-
+                    =Sum(
+                        ScreenHeaderRs.Height,
+                        HeaderContainerRs.Height
+                    )
+                Children:
+                  - ReportsContainerRs:
+                      Control: GroupContainer@1.5.0
+                      Variant: AutoLayout
+                      Properties:
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        DropShadow: =DropShadow.None
+                        Fill: |-
+                          =If(
+                              ThisItem.IsSelected,
+                              RGBA(
+                                  244,
+                                  240,
+                                  234,
+                                  1
+                              ),
+                              RGBA(
+                                  0,
+                                  0,
+                                  0,
+                                  0
+                              )
+                          )
+                        Height: =70
+                        LayoutAlignItems: =LayoutAlignItems.Stretch
+                        LayoutDirection: =LayoutDirection.Horizontal
+                        PaddingLeft: =50
+                        PaddingRight: =50
+                        RadiusBottomLeft: =0
+                        RadiusBottomRight: =0
+                        RadiusTopLeft: =0
+                        RadiusTopRight: =0
+                        Width: =Parent.Width
+                        Y: =If(ThisItem.Depth=0,25,0)
+                      Children:
+                        - CategoryLabelRs:
+                            Control: Label@2.5.1
+                            Properties:
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              FillPortions: =1.5
+                              Font: =Font.'Open Sans'
+                              FontWeight: |-
+                                =If(
+                                    ThisItem.Depth = 0,
+                                    FontWeight.Semibold,
+                                    FontWeight.Normal
+                                )
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =ThisItem.Depth*30
+                              PaddingRight: =0
+                              PaddingTop: =0
+                              Text: =ThisItem.Name
+                              Width: =0
+                              Wrap: =false
+                        - FirstValueRs:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Right
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              FillPortions: =1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =25
+                              PaddingRight: =25
+                              PaddingTop: =0
+                              Text: |-
+                                =Text(
+                                    Switch(
+                                        First(First(colReportDisplay).ColumnOrder.Value).Value,
+                                        "Budget",
+                                        ThisItem.BudgetAmount,
+                                        "Actual",
+                                        ThisItem.TransactionAmount,
+                                        ThisItem.ActualMinBudgetAmount
+                                    ),
+                                    "#,##0.00"
+                                )
+                              Visible: =First(colReportDisplay).NumColumns = 3
+                              Width: =0
+                              Wrap: =false
+                        - SecondValueRs:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Right
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              FillPortions: =1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =25
+                              PaddingRight: =25
+                              PaddingTop: =0
+                              Text: |-
+                                =Text(
+                                    Switch(
+                                        Last(
+                                            FirstN(
+                                                First(colReportDisplay).ColumnOrder.Value,
+                                                2
+                                            )
+                                        ).Value,
+                                        "Budget",
+                                        ThisItem.BudgetAmount,
+                                        "Actual",
+                                        ThisItem.TransactionAmount,
+                                        ThisItem.ActualMinBudgetAmount
+                                    ),
+                                    "#,##0.00"
+                                )
+                              Visible: =First(colReportDisplay).NumColumns >= 2
+                              Width: =0
+                              Wrap: =false
+                        - ThirdValueRs:
+                            Control: Label@2.5.1
+                            Properties:
+                              Align: =Align.Right
+                              BorderColor: =RGBA(0, 0, 0, 0)
+                              BorderStyle: =BorderStyle.None
+                              FillPortions: =1
+                              Font: =Font.'Open Sans'
+                              FontWeight: =FontWeight.Lighter
+                              LayoutMaxHeight: =
+                              LayoutMaxWidth: =
+                              LayoutMinHeight: =0
+                              LayoutMinWidth: =0
+                              PaddingBottom: =0
+                              PaddingLeft: =25
+                              PaddingRight: =25
+                              PaddingTop: =0
+                              Text: |-
+                                =Text(
+                                    Switch(
+                                        Last(First(colReportDisplay).ColumnOrder.Value).Value,
+                                        "Budget",
+                                        ThisItem.BudgetAmount,
+                                        "Actual",
+                                        ThisItem.TransactionAmount,
+                                        ThisItem.ActualMinBudgetAmount
+                                    ),
+                                    "#,##0.00"
+                                )
+                              Width: =0
+                              Wrap: =false
+                  - TypeLabelRs:
+                      Control: Classic/Button@2.2.0
+                      Properties:
+                        BorderColor: =RGBA(255, 255, 255, 1)
+                        Color: =RGBA(255, 255, 255, 1)
+                        DisabledBorderColor: =RGBA(166, 166, 166, 1)
+                        DisplayMode: =DisplayMode.View
+                        Fill: |-
+                          =Switch(
+                              ThisItem.Type,
+                              1,
+                              RGBA(
+                                  122,
+                                  139,
+                                  117,
+                                  1
+                              ),
+                              2,
+                              RGBA(
+                                  161,
+                                  78,
+                                  58,
+                                  1
+                              ),
+                              3,
+                              RGBA(
+                                  123,
+                                  94,
+                                  87,
+                                  1
+                              )
+                          )
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Lighter
+                        Height: =35
+                        HoverBorderColor: =ColorFade(Self.BorderColor, 20%)
+                        HoverColor: =RGBA(255, 255, 255, 1)
+                        HoverFill: =ColorFade(RGBA(56, 96, 178, 1), -20%)
+                        OnSelect: =Select(Parent)
+                        PaddingBottom: =0
+                        PaddingLeft: =0
+                        PaddingRight: =0
+                        PaddingTop: =0
+                        PressedBorderColor: =Self.Fill
+                        PressedColor: =Self.Fill
+                        PressedFill: =Self.Color
+                        RadiusBottomLeft: =20
+                        RadiusBottomRight: =20
+                        RadiusTopLeft: =20
+                        RadiusTopRight: =20
+                        Size: =15
+                        Text: |-
+                          =Switch(
+                              ThisItem.Type,
+                              3,
+                              "Transfer",
+                              1,
+                              "Money In",
+                              2,
+                              "Money Out"
+                          )
+                        Visible: =ThisItem.Depth=0
+                        Width: =150
+                        X: =25
+            - HeaderContainerRs:
+                Control: GroupContainer@1.5.0
+                Variant: AutoLayout
+                Properties:
+                  BorderColor: =RGBA(0, 0, 0, 0)
+                  BorderStyle: =BorderStyle.None
+                  DropShadow: =DropShadow.None
+                  Height: =70
+                  LayoutAlignItems: =LayoutAlignItems.Stretch
+                  LayoutDirection: =LayoutDirection.Horizontal
+                  LayoutJustifyContent: =LayoutJustifyContent.End
+                  PaddingLeft: =50
+                  PaddingRight: =50
+                  RadiusBottomLeft: =0
+                  RadiusBottomRight: =0
+                  RadiusTopLeft: =0
+                  RadiusTopRight: =0
+                  Width: =Parent.Width
+                  Y: =ScreenHeaderRs.Height
+                Children:
+                  - BlankLabelRs:
+                      Control: Label@2.5.1
+                      Properties:
+                        BorderColor: =RGBA(0, 18, 107, 1)
+                        DisplayMode: =DisplayMode.View
+                        FillPortions: =1.5
+                        Font: =Font.'Open Sans'
+                        LayoutMinHeight: =16
+                        LayoutMinWidth: =0
+                        Text: =
+                        Width: =0
+                  - FirstHeaderRs:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Right
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        FillPortions: =1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Lighter
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =25
+                        PaddingRight: =25
+                        PaddingTop: =0
+                        Text: =First(First(colReportDisplay).ColumnOrder.Value).Value
+                        Visible: =First(colReportDisplay).NumColumns = 3
+                        Width: =0
+                        Wrap: =false
+                  - SecondHeaderRs:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Right
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        FillPortions: =1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Lighter
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =25
+                        PaddingRight: =25
+                        PaddingTop: =0
+                        Text: |-
+                          =Last(
+                              FirstN(
+                                  First(colReportDisplay).ColumnOrder.Value,
+                                  2
+                              )
+                          ).Value
+                        Visible: =First(colReportDisplay).NumColumns >= 2
+                        Width: =0
+                        Wrap: =false
+                  - ThirdHeaderRs:
+                      Control: Label@2.5.1
+                      Properties:
+                        Align: =Align.Right
+                        BorderColor: =RGBA(0, 0, 0, 0)
+                        BorderStyle: =BorderStyle.None
+                        FillPortions: =1
+                        Font: =Font.'Open Sans'
+                        FontWeight: =FontWeight.Lighter
+                        LayoutMaxHeight: =
+                        LayoutMaxWidth: =
+                        LayoutMinHeight: =0
+                        LayoutMinWidth: =0
+                        PaddingBottom: =0
+                        PaddingLeft: =25
+                        PaddingRight: =25
+                        PaddingTop: =0
+                        Text: =Last(First(colReportDisplay).ColumnOrder.Value).Value
+                        Width: =0
+                        Wrap: =false
+            - ScreenHeaderRs:
+                Control: Label@2.5.1
+                Properties:
+                  Align: =Align.Center
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Color: =RGBA(255, 255, 255, 1)
+                  Fill: =RGBA(123, 94, 87, 1)
+                  Font: =Font.'Open Sans'
+                  FontWeight: =FontWeight.Semibold
+                  Height: |-
+                    =Min(
+                        Parent.Width / 8,
+                        100
+                    )
+                  PaddingBottom: =0
+                  PaddingLeft: =0
+                  PaddingRight: =0
+                  PaddingTop: =0
+                  Size: =Self.Height/3
+                  Text: ="Cash Flow"
+                  Width: =Parent.Width
+            - RiataLogoRs:
+                Control: Image@2.2.3
+                Properties:
+                  BorderColor: =RGBA(0, 18, 107, 1)
+                  Height: |-
+                    =Min(
+                        Parent.Width / 8,
+                        100
+                    )
+                  Image: ='Riata Hat'
+                  OnSelect: |-
+                    =Navigate(
+                        HomeScreen,
+                        ScreenTransition.Fade
+                    )
+                  Tooltip: ="Home"
+                  Width: =Self.Height*1.5
+            - SpinnerRs:
+                Control: Spinner@1.4.6
+                Properties:
+                  Appearance: ='Spinner.Appearance'.Inverted
+                  BasePaletteColor: =RGBA(123, 94, 87, 1)
+                  Height: =Parent.Height - Self.Y
+                  Label: |-
+                    =If(
+                        varSpinner.generating,
+                        "Generating Report"
+                    )
+                  SpinnerSize: ='Spinner.SpinnerSize'.Huge
+                  Visible: =Not(IsBlank(varSpinner))
+                  Width: =Parent.Width

@@ -429,6 +429,54 @@
                     ]
                   },
                   "type": "Scope"
+                },
+                "For_each_account_in_trans_sync": {
+                  "foreach": "@outputs('Transactions_Sync')?['body/accounts']",
+                  "actions": {
+                    "Account_is_not_in_array": {
+                      "actions": {
+                        "Add_account_to_array": {
+                          "type": "AppendToArrayVariable",
+                          "inputs": {
+                            "name": "Accounts",
+                            "value": "@item()"
+                          }
+                        }
+                      },
+                      "runAfter": {
+                        "Find_matching_account_in_Accounts_array": [
+                          "Succeeded"
+                        ]
+                      },
+                      "else": {
+                        "actions": {}
+                      },
+                      "expression": {
+                        "and": [
+                          {
+                            "equals": [
+                              "@empty(body('Find_matching_account_in_Accounts_array'))",
+                              "@true"
+                            ]
+                          }
+                        ]
+                      },
+                      "type": "If"
+                    },
+                    "Find_matching_account_in_Accounts_array": {
+                      "type": "Query",
+                      "inputs": {
+                        "from": "@variables('Accounts')",
+                        "where": "@equals(item()?['account_id'],items('For_each_account_in_trans_sync')?['account_id'])"
+                      }
+                    }
+                  },
+                  "runAfter": {
+                    "Transactions_Sync": [
+                      "Succeeded"
+                    ]
+                  },
+                  "type": "Foreach"
                 }
               },
               "runAfter": {
@@ -470,7 +518,7 @@
             },
             "DEBUG_BATCH_OBJECT_SYNC": {
               "runAfter": {
-                "Get_Transactions_Until": [
+                "For_each_account_with_transactions_synced": [
                   "Succeeded"
                 ]
               },
@@ -551,24 +599,6 @@
             },
             "Patch_Account_Data": {
               "actions": {
-                "For_each_new_account": {
-                  "foreach": "@outputs('Get_New_Account_Data')?['body/accounts']",
-                  "actions": {
-                    "Append_to_Batch_Patch_Body_accounts": {
-                      "type": "AppendToStringVariable",
-                      "inputs": {
-                        "name": "Batch Patch Body",
-                        "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPATCH /api/data/v9.2/mda_bankaccounts(mda_plaidaccountid='@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"mda_availablebalance\": @{coalesce(item()?['balances/available'],'null')},\n  \"mda_currencycode\": \"@{coalesce(item()?['balances/iso_currency_code'],item()?['balances/unofficial_currency_code'])}\",\n  \"mda_currentbalance\": @{coalesce(item()?['balances/current'],'null')},\n  \"mda_limit\": @{coalesce(item()?['balances/limit'],'null')},\n  \"mda_mask\": \"@{item()?['mask']}\",\n  \"mda_name\": \"@{item()?['name']}\",\n  \"mda_officialname\": \"@{item()?['official_name']}\",\n  \"mda_subtype\": \"@{item()?['subtype']}\",\n  \"mda_type\": \"@{item()?['type']}\"\n}"
-                      }
-                    }
-                  },
-                  "runAfter": {
-                    "Account_Data": [
-                      "Succeeded"
-                    ]
-                  },
-                  "type": "Foreach"
-                },
                 "Account_Data": {
                   "actions": {
                     "Get_Existing_Account_Data": {
@@ -657,7 +687,7 @@
                     }
                   },
                   "runAfter": {
-                    "For_each_new_account": [
+                    "Account_Data": [
                       "Succeeded"
                     ]
                   },
@@ -710,7 +740,7 @@
                     "or": [
                       {
                         "equals": [
-                          "@equals(\r\n  add(\r\n    sub(\r\n      sub(\r\n        coalesce(item()?['prior_current_balance'],0),\r\n        item()?['added_sum']\r\n      ),\r\n      sub(\r\n        item()?['new_modified_sum'],\r\n        item()?['prior_modified_sum']\r\n      )\r\n    ),\r\n    item()?['removed_sum']\r\n  ),\r\nitem()?['new_current_balance']\r\n)",
+                          "@equals(\r\n  decimal(add(\r\n    sub(\r\n      sub(\r\n        coalesce(item()?['prior_current_balance'],0),\r\n        item()?['added_sum']\r\n      ),\r\n      sub(\r\n        item()?['new_modified_sum'],\r\n        item()?['prior_modified_sum']\r\n      )\r\n    ),\r\n    item()?['removed_sum']\r\n  )),\r\nitem()?['new_current_balance']\r\n)",
                           "@true"
                         ]
                       },
@@ -746,6 +776,24 @@
                 "name": "Batch Patch Body",
                 "value": "@null"
               }
+            },
+            "For_each_account_with_transactions_synced": {
+              "foreach": "@variables('Accounts')",
+              "actions": {
+                "Append_to_Batch_Patch_Body_accounts": {
+                  "type": "AppendToStringVariable",
+                  "inputs": {
+                    "name": "Batch Patch Body",
+                    "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPATCH /api/data/v9.2/mda_bankaccounts(mda_plaidaccountid='@{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"mda_availablebalance\": @{coalesce(item()?['balances/available'],'null')},\n  \"mda_currencycode\": \"@{coalesce(item()?['balances/iso_currency_code'],item()?['balances/unofficial_currency_code'])}\",\n  \"mda_currentbalance\": @{coalesce(item()?['balances/current'],'null')},\n  \"mda_limit\": @{coalesce(item()?['balances/limit'],'null')},\n  \"mda_mask\": \"@{item()?['mask']}\",\n  \"mda_name\": \"@{item()?['name']}\",\n  \"mda_officialname\": \"@{item()?['official_name']}\",\n  \"mda_subtype\": \"@{item()?['subtype']}\",\n  \"mda_type\": \"@{item()?['type']}\"\n}"
+                  }
+                }
+              },
+              "runAfter": {
+                "Get_Transactions_Until": [
+                  "Succeeded"
+                ]
+              },
+              "type": "Foreach"
             }
           },
           "runAfter": {
@@ -1074,7 +1122,7 @@
                   "entityName": "mda_messages",
                   "x-ms-odata-metadata-full": false,
                   "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
-                  "item/mda_Profile@odata.bind": "/mda_profiles(@{first(outputs('Get_Profile_Guid')?['body/value'])?['_mda_profile_value']})",
+                  "item/mda_Profile@odata.bind": "/mda_profiles(@{first(outputs('Get_item_meta')?['body/value'])?['mda_Profile/mda_profileid']})",
                   "item/mda_title": "@{body('Flow_run_metadata')?['tags']?['flowDisplayName']} Error",
                   "item/mda_type": 0
                 },
@@ -1097,7 +1145,7 @@
         },
         "Get_item_meta": {
           "runAfter": {
-            "Get_Profile_Guid": [
+            "Async_Response": [
               "Succeeded"
             ]
           },
@@ -1106,8 +1154,9 @@
             "parameters": {
               "entityName": "mda_accesstokens",
               "$select": "mda_accesstokenid,mda_plaiditemid,mda_plaidtransactionscursor,mda_plaidaccesstoken",
-              "$filter": "_mda_profile_value eq '@{first(outputs('Get_Profile_Guid')?['body/value'])?['_mda_profile_value']}'",
-              "x-ms-odata-metadata-full": false
+              "$filter": "mda_plaiditemid eq '@{first(body('Parse_JSON')?['items'])?['mda_plaiditemid']}'",
+              "x-ms-odata-metadata-full": false,
+              "$expand": "mda_Profile($select=mda_profileid)"
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
@@ -1147,28 +1196,6 @@
                   }
                 }
               }
-            }
-          }
-        },
-        "Get_Profile_Guid": {
-          "runAfter": {
-            "Async_Response": [
-              "Succeeded"
-            ]
-          },
-          "type": "OpenApiConnection",
-          "inputs": {
-            "parameters": {
-              "entityName": "mda_accesstokens",
-              "$select": "_mda_profile_value",
-              "$filter": "mda_plaiditemid eq '@{first(body('Parse_JSON')?['items'])?['mda_plaiditemid']}'",
-              "$top": 1,
-              "x-ms-odata-metadata-full": true
-            },
-            "host": {
-              "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
-              "operationId": "ListRecords",
-              "connectionName": "shared_commondataserviceforapps-1"
             }
           }
         },
@@ -1216,7 +1243,7 @@
         },
         "Initialize_Index": {
           "runAfter": {
-            "Initialize_Transaction_Validation_Failure_Array": [
+            "Initialize_Accounts_array": [
               "Succeeded"
             ]
           },
@@ -1372,7 +1399,7 @@
                   "entityName": "mda_messages",
                   "x-ms-odata-metadata-full": true,
                   "item/mda_description": "<p class=\"editor-paragraph\">There has been a validation failure for a transaction sync run. The results are attached. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata_for_validation_errors')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
-                  "item/mda_Profile@odata.bind": "/mda_profiles(@{first(outputs('Get_Profile_Guid')?['body/value'])?['_mda_profile_value']})",
+                  "item/mda_Profile@odata.bind": "/mda_profiles(@{first(outputs('Get_item_meta')?['body/value'])?['mda_Profile/mda_profileid']})",
                   "item/mda_title": "Transaction Validation Failure",
                   "item/mda_type": 0
                 },
@@ -1437,6 +1464,22 @@
                 }
               }
             }
+          }
+        },
+        "Initialize_Accounts_array": {
+          "runAfter": {
+            "Initialize_Transaction_Validation_Failure_Array": [
+              "Succeeded"
+            ]
+          },
+          "type": "InitializeVariable",
+          "inputs": {
+            "variables": [
+              {
+                "name": "Accounts",
+                "type": "array"
+              }
+            ]
           }
         }
       }
