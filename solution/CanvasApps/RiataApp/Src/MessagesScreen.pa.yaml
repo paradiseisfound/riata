@@ -482,7 +482,15 @@ Screens:
                               Height: =Parent.Height
                               Image: =drafts_500dp_4A6572_FILL0_wght500_GRAD0_opsz48
                               OnSelect: |-
-                                =UpdateContext({varMessage: MessagesGallery.Selected})
+                                =UpdateContext({varMessage: MessagesGallery.Selected});
+                                If(
+                                    MessagesGallery.Selected.Status = 'Status (Messages)'.Active,
+                                    Patch(
+                                        Messages,
+                                        MessagesGallery.Selected,
+                                        {Status: 'Status (Messages)'.Inactive}
+                                    )
+                                )
                               PaddingBottom: =Parent.Height/9
                               PaddingLeft: =Parent.Height/9
                               PaddingRight: =Parent.Height/9

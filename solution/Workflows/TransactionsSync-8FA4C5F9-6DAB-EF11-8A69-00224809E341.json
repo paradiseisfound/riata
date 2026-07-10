@@ -118,8 +118,7 @@
                   },
                   "type": "SetVariable",
                   "inputs": {
-                    "name": "Next Cursor",
-                    "value": "@outputs('Transactions_Sync')?['body/next_cursor']"
+                    "name": "Next Cursor"
                   }
                 },
                 "For_Each_Add": {
@@ -222,7 +221,7 @@
                   }
                 },
                 "Validation_Loop": {
-                  "foreach": "@outputs('Get_New_Account_Data')?['body/accounts']",
+                  "foreach": "@outputs('Transactions_Sync')?['body/accounts']",
                   "actions": {
                     "Filter_Validation_Array": {
                       "type": "Query",
@@ -241,8 +240,7 @@
                           },
                           "type": "SetVariable",
                           "inputs": {
-                            "name": "AmountValidationArray",
-                            "value": "@outputs('replace_validation_record_in_array')"
+                            "name": "AmountValidationArray"
                           }
                         },
                         "replace_validation_record_in_array": {
@@ -658,7 +656,7 @@
                           "type": "AppendToStringVariable",
                           "inputs": {
                             "name": "Batch Patch Body",
-                            "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['account_id'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPATCH /api/data/v9.2/mda_bankaccounts(mda_bankaccountid='@{item()?['mda_bankaccountid']}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"statecode\": 1\n}"
+                            "value": "\n\n--changeset_body\nContent-Type: application/http\nContent-Transfer-Encoding: binary\nContent-ID: @{replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(replace(item()?['mda_bankaccountid'],'A','A-'),'B','B-'),'C','C-'),'D','D-'),'E','E-'),'F','F-'),'G','G-'),'H','H-'),'I','I-'),'J','J-'),'K','K-'),'L','L-'),'M','M-'),'N','N-'),'O','O-'),'P','P-'),'Q','Q-'),'R','R-'),'S','S-'),'T','T-'),'U','U-'),'V','V-'),'W','W-'),'X','X-'),'Y','Y-'),'Z','Z-')}\n\nPATCH /api/data/v9.2/mda_bankaccounts(mda_bankaccountid='@{item()?['mda_bankaccountid']}') HTTP/1.1\nContent-Type: application/json; type=entry\n\n{\n  \"statecode\": 1\n}"
                           }
                         }
                       },
@@ -704,7 +702,7 @@
             "Get_item_metadata": {
               "type": "Query",
               "inputs": {
-                "from": "@outputs('Get_item_meta')?['body/value']",
+                "from": "@outputs('Get_items_meta')?['body/value']",
                 "where": "@equals(item()?['mda_plaiditemid'],items('For_each_item_sync')?['mda_plaiditemid'])"
               }
             },
@@ -1084,7 +1082,7 @@
                       "payload/recipients": [
                         "@triggerBody()?['text_1']"
                       ],
-                      "payload/message": "Errror: Transaction sync failed",
+                      "payload/message": "Error: Transaction sync failed",
                       "payload/openApp": false
                     },
                     "host": {
@@ -1122,7 +1120,7 @@
                   "entityName": "mda_messages",
                   "x-ms-odata-metadata-full": false,
                   "item/mda_description": "<p class=\"editor-paragraph\">The @{body('Flow_run_metadata')?['tags']?['flowDisplayName']} flow failed. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
-                  "item/mda_Profile@odata.bind": "/mda_profiles(@{first(outputs('Get_item_meta')?['body/value'])?['mda_Profile/mda_profileid']})",
+                  "item/mda_Profile@odata.bind": "/mda_profiles(@{first(outputs('Get_items_meta')?['body/value'])?['mda_profileid']})",
                   "item/mda_title": "@{body('Flow_run_metadata')?['tags']?['flowDisplayName']} Error",
                   "item/mda_type": 0
                 },
@@ -1143,7 +1141,7 @@
           },
           "type": "Scope"
         },
-        "Get_item_meta": {
+        "Get_items_meta": {
           "runAfter": {
             "Async_Response": [
               "Succeeded"
@@ -1153,10 +1151,8 @@
           "inputs": {
             "parameters": {
               "entityName": "mda_accesstokens",
-              "$select": "mda_accesstokenid,mda_plaiditemid,mda_plaidtransactionscursor,mda_plaidaccesstoken",
-              "$filter": "mda_plaiditemid eq '@{first(body('Parse_JSON')?['items'])?['mda_plaiditemid']}'",
-              "x-ms-odata-metadata-full": false,
-              "$expand": "mda_Profile($select=mda_profileid)"
+              "fetchXml": "<fetch>\n  <entity name='mda_accesstoken'>\n    <attribute name='mda_accesstokenid' />\n    <attribute name='mda_plaiditemid' />\n    <attribute name='mda_plaidtransactionscursor' />\n    <attribute name='mda_plaidaccesstoken' />\n    <filter type='and'>\n      <condition attribute='mda_plaiditemid' operator='in'>\n      @{replace(\r\n  replace(\r\n  replace(\r\n    replace(\r\n      replace(\r\n        string(body('Parse_JSON')),\r\n        '[',\r\n        ''\r\n      ),\r\n      ']',\r\n      ''\r\n    ),\r\n    ',',\r\n    ''\r\n  ),\r\n  '{\"mda_plaiditemid\":\"',\r\n  '<value>'\r\n),\r\n'\"}',\r\n'</value>'\r\n)}\n      </condition>\n    </filter>\n    <link-entity name=\"mda_profile\"\n                 from=\"mda_profileid\"\n                 to=\"mda_profile\"\n                 link-type=\"inner\"\n                 alias=\"mda_profile\">\n      <attribute name=\"mda_profileid\"\n                 alias=\"mda_profile\"/>\n    </link-entity>\n  </entity>\n</fetch>",
+              "x-ms-odata-metadata-full": false
             },
             "host": {
               "apiId": "/providers/Microsoft.PowerApps/apis/shared_commondataserviceforapps",
@@ -1201,7 +1197,7 @@
         },
         "Get_Plaid_Secret_Key": {
           "runAfter": {
-            "Get_item_meta": [
+            "Get_items_meta": [
               "Succeeded"
             ]
           },
@@ -1399,7 +1395,7 @@
                   "entityName": "mda_messages",
                   "x-ms-odata-metadata-full": true,
                   "item/mda_description": "<p class=\"editor-paragraph\">There has been a validation failure for a transaction sync run. The results are attached. You can investigate <a href=\"https://make.powerautomate.com/environments/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['environmentName']}/flows/@{body('Flow_run_metadata_for_validation_errors')?['tags']?['logicAppName']}/runs/@{body('Flow_run_metadata_for_validation_errors')?['run']?['name']}\" class=\"editor-link\">here</a>.</p>",
-                  "item/mda_Profile@odata.bind": "/mda_profiles(@{first(outputs('Get_item_meta')?['body/value'])?['mda_Profile/mda_profileid']})",
+                  "item/mda_Profile@odata.bind": "/mda_profiles(@{first(outputs('Get_items_meta')?['body/value'])?['mda_Profile/mda_profileid']})",
                   "item/mda_title": "Transaction Validation Failure",
                   "item/mda_type": 0
                 },
